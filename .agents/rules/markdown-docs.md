@@ -19,7 +19,7 @@ Comments inside code samples still follow the English rules in `code-style.md`.
 
 ## Topic notes (`algorithm/structure/*/README.md`, `algorithm/special/*/README.md`)
 
-Fixed shape, modeled on `heap/` and `priorityQueue/`:
+For `algorithm/structure/`, use the following shape, modeled on `heap/` and `priorityQueue/`:
 
 - Title `# EnglishName（中文名）`, then a single blockquote line saying what the structure is (complexities as inline code).
 - Exactly four numbered sections:
@@ -34,4 +34,10 @@ Fixed shape, modeled on `heap/` and `priorityQueue/`:
 
 ## Exempt files
 
-Machine-facing control files (`AGENT.md`, the `CLAUDE.md` pointer to it, and everything under `.claude/`) are exempt and use whichever language best serves their audience.
+Machine-facing control files (`AGENTS.md`, the `CLAUDE.md` adapter, and guidance under `.agents/`) are exempt and use whichever language best serves their audience.
+
+## Browser notes
+
+Organize around causal relationships and observable behavior; the algorithm four-section template does not apply. Distinguish specification guarantees, implementation choices, and demo observations. Link related notes instead of repeating their full explanations. When renaming or moving a note, update links and run commands in the affected local index.
+
+Demos and walkthroughs follow [knowledge-demo](../skills/knowledge-demo/SKILL.md). Keep actual observations separate from predictions; include conditions when order or timing is not guaranteed.

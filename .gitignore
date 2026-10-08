@@ -1,19 +1,40 @@
-dist/
-
+# Dependencies
+# Installed npm packages.
 node_modules/
 
-.DS_Store
-Thumbs.db
+# Build output
+# Generated distribution files.
+dist/
 
+# Tool caches
+# Local caches and ESLint results.
+.cache/
+.eslintcache
+
+# Logs
+# Runtime log files and log directories.
 *.log
 logs/
 
+# Environment configuration
+# Local environment variables and machine-specific overrides.
 .env
 .env.local
 .env.*.local
 
-.cache/
-.eslintcache
+# Operating system metadata
+# Finder and Windows Explorer metadata.
+.DS_Store
+Thumbs.db
 
+# Personal study material
+# Local job records and interview questions.
 jobs/
 questions/
+# Reference material in any directory.
+__reference__/
+
+# Local agent configuration
+# Personal Claude Code settings and instructions.
+.claude/settings.local.json
+CLAUDE.local.md
