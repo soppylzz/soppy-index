@@ -2,6 +2,16 @@
 
 > Longest Increasing Subsequence：保序不连续的最长严格递增子序列。两条路线 —— DP `O(n^2)`，patience sorting（贪心 + 二分）`O(nlogn)`
 
+[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+
+在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+
+```bash
+node algorithm/special/lis/index.ts
+```
+
+对比 DP 与贪心二分的长度结果，并观察递增子序列重建。
+
 ## 1. 定义与性质
 
 - 子序列：保序可不连续；连续的叫子串 —— LIS 研究子序列

@@ -2,6 +2,16 @@
 
 > 两端都能入队、出队的队列（double-ended queue），四种端点操作都是 `O(1)`；滑动窗口类问题的标准载体
 
+[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+
+在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+
+```bash
+node algorithm/structure/deque/index.ts
+```
+
+观察两端操作、回文检查和滑动窗口最大值。
+
 ## 1. 定义与性质
 
 - Deque = double-ended queue：头尾两端都支持插入和删除，同时具备栈（同端进出）和队列（一端进另一端出）的能力

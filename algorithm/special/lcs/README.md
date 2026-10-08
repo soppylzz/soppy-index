@@ -2,6 +2,16 @@
 
 > Longest Common Subsequence：两个序列公共子序列的最长者。两条路线 —— DP `O(mn)`，Myers `O((N+M)D)`（diff 的底层算法）
 
+[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+
+在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+
+```bash
+node algorithm/special/lcs/index.ts
+```
+
+对比 DP 与 Myers 的长度结果，并观察公共子序列重建。
+
 ## 1. 定义与性质
 
 - 子序列不要求连续；要求连续的版本叫「最长公共子串」，转移与答案统计位置都不同

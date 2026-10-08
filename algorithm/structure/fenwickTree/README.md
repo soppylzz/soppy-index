@@ -2,6 +2,16 @@
 
 > Binary Indexed Tree：下标按二进制最低位分块管辖区间和，「单点更新 + 前缀查询」都 `O(logn)`，代码只要十几行
 
+[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+
+在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+
+```bash
+node algorithm/structure/fenwickTree/index.ts
+```
+
+观察前缀和、区间和、单点更新与逆序对计数。
+
 ## 1. 定义与性质
 
 - 定位：前缀和数组查 `O(1)` 改 `O(n)`，裸数组查 `O(n)` 改 `O(1)`；树状数组两者平衡成 `O(logn)`
