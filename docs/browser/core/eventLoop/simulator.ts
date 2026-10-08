@@ -1,6 +1,6 @@
 /**
  * Deterministic teaching model, not a browser implementation.
- * See ./index.md and ./simulator.md for guarantees and simplifications.
+ * See ./eventLoop.md and ./simulator.md for guarantees and simplifications.
  */
 
 /* ==================== virtual clock & log ==================== */

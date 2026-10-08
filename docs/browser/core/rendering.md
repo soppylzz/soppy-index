@@ -42,7 +42,7 @@ parser-inserted、没有 `async` 或 `defer` 的经典外部脚本通常会暂�
 
 > 图中的资源加载泳道只表示获取工作可与主解析解耦；脚本的实际获取、编译与执行还涉及更多组件。
 
-`async`、`defer` 与 module script 的差异详见 [Script Loading](./loading/index.md)。
+`async`、`defer` 与 module script 的差异详见 [Script Loading](./loading/scriptLoading.md)。
 
 ## 2. Style
 
@@ -313,7 +313,7 @@ items.forEach((item, index) => {
 
 渲染不是每轮 Event Loop 都必然发生，后台页面、没有视觉变化或主线程繁忙时都可能跳过或推迟。反过来，在 JavaScript 中读取必须反映最新几何状态的 API，又可能要求浏览器在当前 task 内同步更新样式或布局。
 
-任务、微任务、`requestAnimationFrame` 与渲染机会的具体关系见 [Browser Event Loop](./eventLoop/index.md)。
+任务、微任务、`requestAnimationFrame` 与渲染机会的具体关系见 [Browser Event Loop](./eventLoop/eventLoop.md)。
 
 ## 10. 面试回答框架
 

@@ -37,6 +37,8 @@ Follow [code-style](../../rules/code-style.md) for output language: all CLI text
 
 ## Walkthrough and validation
 
+Use README.md for navigation and a compact run entry, index.md for the walkthrough paired with index.ts, and a descriptive topic filename (such as crossContextCommunication.md) for knowledge notes. When a runnable script has another name, keep its walkthrough name aligned (for example simulator.ts and simulator.md). Include short, relevant demo excerpts next to the mechanisms they explain; link the complete implementation and identify omitted helpers, cleanup, and error handling rather than presenting excerpts as standalone programs.
+
 Put the start command, URL/port, stop instruction, and prerequisites in the local README. Map each experiment to operation, predicted observation, and mechanism. Link deeper theory and state important exclusions. Mark illustrative traces as illustrative; publish actual output only after observing it.
 
 Run a focused TypeScript check, ESLint, and Prettier as appropriate. Start the server and check its startup guide, relevant endpoints, response types, delays, and error paths. Confirm the displayed URLs match the active port, and that a bind failure reports the error without a success banner. Inspect actual stdout/stderr from startup and representative request/error paths for English output; a CLI-only simulator also needs its full trace checked. Validate the central behavior in a real browser when available: inspect execution/event logs and browser errors rather than only HTTP status. Temporary automation dependencies and profiles should stay outside the repository. If a browser is unavailable, report that limit and provide manual steps; never label predicted behavior as verified.

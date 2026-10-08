@@ -1,6 +1,6 @@
 # Resource Hint：提前准备资源
 
-script 属性决定执行模式，resource hint 影响资源准备。提前拿到文件，不会把 defer 改成 async，也不会自动执行一个尚未被消费的脚本。script 的完整流程见 [Script Loading](./index.md)。
+script 属性决定执行模式，resource hint 影响资源准备。提前拿到文件，不会把 defer 改成 async，也不会自动执行一个尚未被消费的脚本。script 的完整流程见 [Script Loading](./scriptLoading.md)。
 
 ## 1. 各种提示解决什么问题
 
@@ -50,4 +50,20 @@ modulepreload 默认 destination 是 script，并按模块的 CORS 获取规则�
 2. 有 hint 时，资源请求可以从 head 开始；入口代码仍要等消费标签对应的执行条件。
 3. 检查 Network 请求数量、Initiator 与时间线；modulepreload 是否同时提前请求依赖属于实现观察。
 
-这组实验验证发现与消费关系，没有模拟跨 origin 连接建立、未来导航缓存策略或真实拥塞，因此不据此推导 preconnect/prefetch 的生产收益。操作细节见 [demo 走查](./demo.md)。
+这组实验验证发现与消费关系，没有模拟跨 origin 连接建立、未来导航缓存策略或真实拥塞，因此不据此推导 preconnect/prefetch 的生产收益。操作细节见 [demo 走查](./index.md)。
+
+### 核心实现：先发送 hint，后发送消费者
+
+[index.ts](./index.ts) 的 `/hints` 路由先为本次导航生成一个带 run id 的资源 URL，再让 hint 与消费者复用它。下面展示 classic preload 的精简流程，省略页面框架与参数校验：
+
+```ts
+const asset = scriptUrl("hint", 800, `&cache=1&run=${randomUUID()}`)
+res.writeHead(200, {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "no-store",
+})
+res.write(`<link rel="preload" as="script" href="${escapeHtml(asset)}">`)
+streamTail(res, `<script defer src="${escapeHtml(asset)}"></script>`, 600)
+```
+
+无 hint 分支不发送 link；module 分支同时改为 modulepreload 和 `type="module"`。`streamTail` 延迟服务端 HTML 尾部，而非延迟脚本内部日志；hint 资源的 `cache=1` 分支允许复用，以免 no-store 干扰比较。

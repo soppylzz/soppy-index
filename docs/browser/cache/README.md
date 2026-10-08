@@ -5,7 +5,7 @@
 本目录聚焦 HTTP response 的存储、新鲜度判断与条件验证。
 
 - [HTTP Cache 笔记](./httpCache.md)：freshness、validator、Vary、请求 cache mode 与部署策略。
-- [实验走查](./demo.md)：五种策略、服务端改版、过期验证与证据判读。
+- [实验走查](./index.md)：五种策略、服务端改版、过期验证与证据判读。
 - [实验服务](./index.ts)：零依赖 HTTP 服务，真实浏览器执行请求。
 
 ## 运行
@@ -36,6 +36,6 @@ PORT=5007 node docs/browser/cache/index.ts
 | last-modified.svg | no-cache + Last-Modified         | 检查 If-Modified-Since                       |
 | no-store.svg      | no-store，无验证器               | default 重复请求，观察每次完整响应           |
 
-CLI 的 HTTP 日志表示真正到达本地服务器的请求。页面和浏览器 Console 输出带时间戳的探测结果；fetch 可能把网络 304 合并为可读的 200，Resource Timing 的 bodySize 也不是“本次在线传输的 body 大小”。详细判断方法见 [demo.md](./demo.md)。
+CLI 的 HTTP 日志表示真正到达本地服务器的请求。页面和浏览器 Console 输出带时间戳的探测结果；fetch 可能把网络 304 合并为可读的 200，Resource Timing 的 bodySize 也不是“本次在线传输的 body 大小”。详细判断方法见 [index.md](./index.md)。
 
 本实验覆盖浏览器私有 HTTP 缓存，不模拟 CDN、共享缓存、Vary 分区、断网回退或生产部署。

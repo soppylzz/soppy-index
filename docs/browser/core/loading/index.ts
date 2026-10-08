@@ -379,5 +379,5 @@ notes:
   - execution and lifecycle logs appear in the page and browser Console
   - regular experiments use no-store; hint assets allow reuse within a navigation
   - timing and racing order are observations, not fixed guarantees
-  - walkthrough: docs/browser/core/loading/demo.md`)
+  - walkthrough: docs/browser/core/loading/index.md`)
 })

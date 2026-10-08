@@ -1,12 +1,12 @@
 # 页面生命周期
 
-[返回浏览器核心目录](../README.md) · [资源加载](../loading/README.md) · [BFCache](./bfcache.md)
+[返回浏览器核心目录](../README.md) · [资源加载](../loading/README.md) · [BFCache](./bfcache.md) · [跨上下文通信](../../communication/README.md)
 
 本目录承接资源加载中的页面事件，重点讨论页面何时可见、何时暂停、离开后是否保留，以及如何保存和恢复应用状态。
 
-- [生命周期笔记](./index.md)：加载状态、页面事件、后台运行、BFCache、冻结与丢弃、离页保存和上报。
+- [生命周期笔记](./pageLifecycle.md)：加载状态、页面事件、后台运行、BFCache、冻结与丢弃、离页保存和上报。
 - [BFCache 专题](./bfcache.md)：页面快照、恢复资格、诊断与 HTTP 缓存的区别。
-- [实验走查](./demo.md)：操作步骤、判断依据、实际观测与复现边界。
+- [实验走查](./index.md)：操作步骤、判断依据、实际观测与复现边界。
 - [实验服务](./index.ts)：零依赖 HTTP 服务，使用浏览器原生事件。
 
 ## 运行
@@ -38,4 +38,4 @@ PORT=5007 node docs/browser/core/lifeCycle/index.ts
 
 HTML 响应使用 `Cache-Control: no-cache`；API 使用 `no-store`。HTTP 缓存与 BFCache 是不同机制，响应头不能保证后退命中 BFCache。接收记录仅保存在服务进程内，最多 100 条，停止服务后消失；页面日志最多 100 条。
 
-本实验不模拟系统杀进程，不保证获得后台节流的固定频率，也不把浏览器扩展事件当作跨浏览器承诺。对照步骤与验证范围见 [demo.md](./demo.md)。
+本实验不模拟系统杀进程，不保证获得后台节流的固定频率，也不把浏览器扩展事件当作跨浏览器承诺。对照步骤与验证范围见 [index.md](./index.md)。

@@ -163,7 +163,7 @@ const response = await fetch("/api/profile", {
 
 ## 9. 可运行 Demo
 
-运行方式见 [README](./README.md)，逐步操作与证据判读见 [demo.md](./demo.md)。实验保留五种资源策略，使用固定 URL 与明确的 fetch cache mode 对照：
+运行方式见 [README](./README.md)，逐步操作与证据判读见 [index.md](./index.md)。实验保留五种资源策略，使用固定 URL 与明确的 fetch cache mode 对照：
 
 | 资源              | 响应策略                         | 重点观察                                        |
 | ----------------- | -------------------------------- | ----------------------------------------------- |
@@ -174,6 +174,45 @@ const response = await fetch("/api/profile", {
 | no-store.svg      | no-store                         | 不保存响应，重复请求仍完整下载                  |
 
 刷新策略受浏览器和 DevTools 设置影响，因此不把“普通刷新一定直接复用 fresh 资源”作为结论。页面展示 Resource Timing 的最终响应状态与体积；fetch 验证后可以收到合并为 200 的缓存正文，bodySize 非零也不排除网络 304。实际网络状态码要与终端和 Network 交叉检查，定义见 [Resource Timing](https://www.w3.org/TR/resource-timing/#dom-performanceresourcetiming-transfersize)。
+
+核心服务端分支来自 [index.ts](./index.ts) 的 `serveAsset`；`clientHasCurrentValidator` 先判断 If-None-Match，有该头时不再回退到日期条件：
+
+```ts
+function serveAsset(req: IncomingMessage, res: ServerResponse, asset: Asset): void {
+  const etag = etagOf(asset)
+  const lastModified = lastModifiedOf(asset)
+  const headers: Record<string, string> = {
+    "Cache-Control": asset.policy,
+    "Content-Type": "image/svg+xml",
+  }
+  if (asset.etag) headers["ETag"] = etag
+  if (asset.lastModified) headers["Last-Modified"] = lastModified
+
+  if (
+    clientHasCurrentValidator(
+      req,
+      asset.etag ? etag : undefined,
+      asset.lastModified ? lastModified : undefined
+    )
+  ) {
+    res.writeHead(304, headers)
+    res.end()
+    return
+  }
+  res.writeHead(200, headers)
+  res.end(req.method === "HEAD" ? undefined : assetSvg(asset))
+}
+```
+
+`asset`、`etag` 和 `lastModified` 来自当前实验资源与内存版本。浏览器端 probe 的核心是保持资源 URL 不变，只切换 cache mode：
+
+```js
+const response = await fetch("/assets/no-cache.svg", { cache: "no-cache" })
+const body = await response.text()
+console.log(response.status, body)
+```
+
+该片段展示调用方式；完整 probe 还筛选本次 Resource Timing 并更新日志。304 由浏览器与缓存合并，不能把上面的 `response.status` 单独当成网络状态码。
 
 ## 10. 部署策略
 

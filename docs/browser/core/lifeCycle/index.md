@@ -1,89 +1,79 @@
-# 页面生命周期：加载、后台、离开与恢复
+# 页面生命周期实验走查
 
-[实验入口](./README.md) · [实验走查](./demo.md)
+[运行方式](./README.md) · [知识笔记](./pageLifecycle.md) · [实现](./index.ts)
 
-页面完成加载之后，还可能隐藏、冻结、进入 BFCache，或被浏览器丢弃。理解生命周期的目的，是在能运行时保存必要状态，在恢复时重新判断数据是否仍然有效。
+先在仓库根目录运行 `node docs/browser/core/lifeCycle/index.ts`，打开终端打印的实验页，默认 <http://localhost:5006/>。页面事件同步输出到 Console，终端只显示 HTTP 请求/响应。日志按发生顺序追加，最多保留 100 条，并用执行 ID 前缀区分文档。历史日志来自 sessionStorage，不代表旧文档仍然存活。
 
-## 加载完成只描述文档准备程度
+## 1. 初次加载与刷新
 
-`document.readyState` 与页面是否可见、是否仍保留在内存中是不同维度。
+清空日志后刷新，观察 `script start → readystatechange(interactive) → DOMContentLoaded → readystatechange(complete) → load → pageshow(persisted=false)`。这是本实验简单页面的预期序列；focus 等事件可能穿插，精确时间不固定。
 
-| readyState    | 含义                                 | 常见观察点                                                                       |
-| ------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
-| `loading`     | HTML 仍在解析                        | 前部同步脚本可能还访问不到后部 DOM                                               |
-| `interactive` | HTML 解析结束                        | defer / 默认 module 可能仍在准备或执行，不能只靠该值认定 DOMContentLoaded 已触发 |
-| `complete`    | 文档及会延迟 load 的资源完成加载阶段 | 随后触发 window 的 load；失败资源也可能结束等待                                  |
+刷新后 executionId 改变，内存计数重建；之前输入的草稿可以从本标签 sessionStorage 恢复。不要用“草稿还在”判断 BFCache。需要放慢网络对比 DOMContentLoaded 与 load 时，使用 [loading 实验](../loading/index.md)，此处不重复脚本解析实验。
 
-`readystatechange` 通知 readyState 变化；`DOMContentLoaded` 关注 DOM 解析及相关延迟脚本；`load` 还等待会阻塞它的资源。懒加载资源、后续 fetch、定时器及业务初始化不在“所有工作完成”的保证内。顶层 await 还需区分模块开始执行与异步求值完成，详见 [script 加载笔记](../loading/index.md)。这些阶段由 [HTML 文档解析与加载算法](https://html.spec.whatwg.org/multipage/parsing.html#the-end) 定义。
+## 2. 切换标签与恢复可见
 
-`complete` 的页面切到后台仍然可以保持 `complete`；从 BFCache 恢复也不会为了展示而重新触发 DOMContentLoaded 和 load。SPA 的路由切换通常不创建新 Document，应另外跟踪应用路由状态。
+输入草稿，打开另一个标签并切换过去，等几秒再返回。查看 `visibilitychange(hidden)`、`checkpoint`、`应用轮询：暂停`，返回时查看 visible、轮询重启及获取服务端时间的日志。
 
-## 展示与离开：pageshow / pagehide
+“应用轮询”计数由代码主动暂停；timer 和 rAF 用于观察浏览器实际调度。前后台的计数速度可能不同，但不要求固定比例。用墙钟经过时间与计数对比，解释为什么定时器回调次数不能充当准确计时。
 
-| 事件                      | 对象   | 关键含义                                                          |
-| ------------------------- | ------ | ----------------------------------------------------------------- |
-| `pageshow`                | window | 文档初次展示或历史记录恢复；初次通常在 load 后，`persisted=false` |
-| `pagehide`                | window | 离开当前文档，包括可能被保存进 BFCache 的离开                     |
-| `pageshow.persisted=true` | window | 实际从 BFCache 恢复                                               |
-| `pagehide.persisted=true` | window | 浏览器打算保留文档；后续仍可能淘汰，不能据此保证能恢复            |
+hidden 默认触发小型 Beacon；返回后点击“查询服务端接收记录”，用 report ID 关联客户端与服务端记录。切换只是一次可能的上报时机，不能表示用户永久离开。
 
-BFCache 保留页面的 DOM 和 JavaScript 堆等状态，恢复时接着使用原文档。HTTP 缓存复用的是资源响应，即使资源全来自缓存，新文档也需要重新执行初始化。更完整的对比见 [BFCache](./bfcache.md)；事件语义见 [HTML PageTransitionEvent](https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-pagetransitionevent-interface)。
+## 3. BFCache 与新文档对照
 
-实验用三个证据共同判断：`pageshow.persisted`、本次执行生成的 `executionId`、没有持久化的计数。草稿恢复本身不能证明 BFCache 命中，因为新文档也能从 sessionStorage 读取它。
+先取消离开提醒，输入草稿，记下 executionId 和计数。点击“前往中转页”，再点击“通过历史记录后退”。
 
-恢复后要重新核对时间、身份与业务数据：缓存期间会话可能过期，库存可能变化，连接也可能失效。实验在 pageshow 时获取新的服务端时间；业务中应按有效期刷新数据，并用幂等初始化避免重复注册监听或创建轮询。
+| 结果                                                   | 判断                                    |
+| ------------------------------------------------------ | --------------------------------------- |
+| pageshow.persisted=true，ID 相同，计数延续             | 实际从 BFCache 恢复；旧堆和监听继续使用 |
+| pageshow.persisted=false，出现新 script start，ID 改变 | 新文档初始化，草稿可能依靠存储恢复      |
+| 离开时 pagehide.persisted=true                         | 浏览器计划保留，不能保证后面一定恢复    |
 
-## 可见性与焦点：什么时候主动减少工作
+从中转页点击普通链接返回作为对照，通常产生新文档。BFCache 恢复时不会重新发生本轮 DOMContentLoaded/load，页面仍会在 pageshow 刷新服务端状态。
 
-`document.visibilityState` 通常为 `visible` 或 `hidden`，变化通过 document 上的 `visibilitychange` 通知。切换标签、最小化等可能让文档隐藏。`document.hasFocus()` 和 window 的 focus / blur 描述焦点：页面可见但没有焦点时，不等于隐藏。可见性由浏览器判断，不能用它证明用户真的阅读了内容。定义见 [HTML Page Visibility](https://html.spec.whatwg.org/multipage/interaction.html#page-visibility)。
+如果未命中，查看 Chromium DevTools 的 Application → Back/forward cache 诊断，或新文档 `PerformanceNavigationTiming.notRestoredReasons`（需浏览器支持）。关闭 DevTools、扩展或额外监听后重试；浏览器可以基于自身策略拒绝缓存，不能仅凭请求数量下结论。
 
-hidden 是尽早保存小型检查点和统计的实用时机，也适合暂停轮询、动画等非必要工作；返回 visible 时再恢复并更新数据。它不是“会话永久结束”的信号：用户可能很快返回。事件也无法覆盖突然断电或进程直接终止，因此持续编辑应提前保存，不能把全部数据留到离开那一刻。
+## 4. 条件注册 beforeunload
 
-浏览器可能在后台节流 timer，通常会暂停后台页面的 requestAnimationFrame；具体频率受浏览器、可听音频、资源预算等条件影响。应用自己停止轮询与浏览器节流是两件事。实验分别展示原生 timer/rAF 计数及应用主动暂停的轮询计数。倒计时应根据目标时间与当前时间的差值重算，不能假设每次 setInterval 回调都准确代表一秒。
+勾选提醒但不编辑，查看监听仍为 false。输入内容后变为 true，再点击中转链接。具备用户交互等条件时，浏览器可能显示自己的离开确认框；取消离开，点击“保存并确认本地草稿”，确认监听移除，再次离开。
 
-## 冻结、丢弃与终止
+草稿输入时已备份；dirty 表示当前文档尚未经过显式确认，不等于本地完全没有副本。自动检查点不清除 dirty。显式确认仅保存本地，不提交服务端业务。该标记刷新后重置，是这个小实验的简化条件。
 
-下面采用 Chromium 文档中的状态模型，帮助理解运行机会；它不是所有浏览器统一提供的状态枚举。
+不要为观测而注册 unload。beforeunload 是否提示、是否影响 BFCache 都不能用单个浏览器推成跨浏览器结论。
 
-| 状态       | 页面还能做什么                         | 恢复时如何判断                                     |
-| ---------- | -------------------------------------- | -------------------------------------------------- |
-| hidden     | 仍可能运行，但受后台策略限制           | visibilitychange 到 visible                        |
-| frozen     | 可冻结任务暂停，不能依赖定时器继续执行 | 支持的 Chromium 可观察 document 的 freeze / resume |
-| discarded  | 原文档被释放，没有机会执行“丢弃回调”   | 新文档加载；支持时查看 document.wasDiscarded       |
-| terminated | 文档被终止，不能继续安排可靠工作       | 再访问一般需要新文档                               |
+## 5. 入队与接收对照
 
-不是每次隐藏都会冻结，也不是每次冻结都会丢弃。BFCache 与冻结有关，但收到 freeze 不等于命中 BFCache；恢复身份仍看 pageshow.persisted。应检测扩展属性，缺失时提供常规恢复路径。Chromium 的实现说明及调试方法见 [Page Lifecycle API](https://developer.chrome.com/docs/web-platform/page-lifecycle-api)。
+分别点击发送 Beacon 和 keepalive fetch，再查询服务端记录。
 
-丢弃后的恢复需要依靠已保存的状态。实验把草稿备份进本标签 sessionStorage，重建后可读回，但该存储可能被限制，标签关闭等也不属于持久业务保证。重要草稿可结合 [IndexedDB](../../storage/indexedDB/README.md) 与服务端同步，明确“已备份”“待同步”“已确认”的边界。
+- Beacon 日志中的 `accepted=true` 是客户端入队结果。
+- keepalive 在当前页仍可执行时记录收到的 HTTP 204。
+- `/api/reports` 列出服务进程实际接收的 report ID、接收时间与元数据；列表包括其他实验标签，最多 100 条。
 
-## 离开提示不是保存机制
+切后台后返回再查询，能检查 hidden 上报是否到达本地服务。这只验证当前网络与进程正常时的实验路径，没有验证系统杀进程、断网重试或必达。页面故意不发送大包；请求过大和非法 JSON 是本地接口的错误路径，不是浏览器配额实验。
 
-`beforeunload` 用于有未保存修改时请求浏览器提示用户。仅当 dirty 状态需要保护时注册，保存后立即移除。对话框通常需要先发生用户交互，提示文字由浏览器控制；触发、展示及 BFCache 影响有实现差异。
+## 6. Chromium 的冻结与丢弃
 
-`unload` 在移动端、后台杀进程等情况下不可靠，监听还可能影响 BFCache，不能作为关键保存或上报入口。`pagehide` 同样不是进程终止必达通知。相关约束见 [HTML 文档卸载算法](https://html.spec.whatwg.org/multipage/browsing-the-web.html#unloading-documents)。
+保留实验标签，打开 `chrome://discards`，让实验页成为后台标签。按当前版本提供的 Freeze / Discard 操作测试；界面和可用操作由版本与策略决定。
 
-实验默认不注册 beforeunload，也不注册 unload。勾选提醒并编辑后才增加 beforeunload，确认本地草稿后移除。输入时持续备份、hidden/pagehide 时再写检查点，与离开提醒分开。实验的 dirty 标记仅在当前文档内保存，刷新后重置，真实业务应持久化版本与同步状态。
+冻结前后观察 freeze/resume、计数暂停、墙钟增长和恢复日志。丢弃后重新激活实验标签，观察新 executionId、重新加载、草稿恢复；支持时 `document.wasDiscarded=true`。discard 没有原页面内的“最后通知”。普通刷新不能证明丢弃恢复，手动派发同名事件也不能证明真实冻结。
 
-## 离页上报：入队、送达与业务确认
+自动化也可用 Chromium DevTools Protocol 的 `Page.setWebLifecycleState` 控制 frozen/active，验证受控冻结路径；它不证明浏览器在自然内存压力下会按同样时机冻结或丢弃。
 
-| 方式                                   | 适用场景                         | 能观察什么                                             |
-| -------------------------------------- | -------------------------------- | ------------------------------------------------------ |
-| `navigator.sendBeacon(url, body)`      | 小型统计，POST，不需要读取响应   | 返回 boolean 表示是否入队，没有响应回调                |
-| `fetch(url, { keepalive: true, ... })` | 需要自定义请求方法、头或读取响应 | 页面仍能执行时可处理 Promise；离开后不能依赖原页面回调 |
+## 验证记录
 
-两者允许请求在页面离开后继续处理，但都不是离线重试队列，更不是业务必达承诺。Beacon 返回 true 不能证明服务器已接收，依据是 [Beacon 的返回值与处理模型](https://w3c.github.io/beacon/#return-value)。
+2026-10-08，Node v22.23.2、macOS、Headless Chrome 153.0.8010.48，独立临时浏览器配置，通过 DevTools Protocol 验证。测试脚本与配置留在仓库外。
 
-keepalive 请求存在大小和在途配额限制，Beacon 也使用相关机制；不能把多个小请求无限累加。Fetch 标准的相关在途 body 总量检查使用 64 KiB，适用的 fetch group 与请求完成情况也影响能否提交，见 [Fetch HTTP-network-or-cache fetch](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)。本实验只发少量元数据，本地接口另设 8 KiB 的请求体上限，与浏览器配额不是同一个限制。
+| 验证项       | 实际结果                                                                            |
+| ------------ | ----------------------------------------------------------------------------------- |
+| 初次加载     | 观察到 loading → interactive → DOMContentLoaded → complete → load → pageshow(false) |
+| 提醒监听     | 仅勾选不注册；编辑后注册；确认后移除                                                |
+| 真实标签切换 | 观察到 hidden/visible 与应用轮询暂停/恢复                                           |
+| 受控冻结     | Page.setWebLifecycleState 触发真实 freeze/resume；不代表自然内存压力策略            |
+| 历史记录后退 | pageshow.persisted=true，executionId 与草稿保持；没有重新初始化文档                 |
+| 刷新对照     | executionId 改变，草稿从 sessionStorage 恢复                                        |
+| 上报         | Beacon 与 keepalive 的元数据均出现在服务端接收列表                                  |
+| 服务边界     | GET/HEAD、404/405、非法 JSON 400、超过 8 KiB 的请求体 413、端口冲突提示均通过       |
+| 浏览器异常   | 未捕获到 Runtime.exceptionThrown                                                    |
 
-实验分别记录客户端 accepted、HTTP 请求响应和服务端接收列表。生产业务若要求可靠提交，还需要持久化、确认、重试与幂等；不能靠阻塞卸载来获得可靠性。
+本次 BFCache 恢复日志中出现 resume → pageshow(persisted=true)，恢复时页面仍为 hidden，说明 pageshow 不等于“当前标签一定可见”。应用轮询仍应依据 visibilityState 决定是否启动。
 
-## 面试时如何组织回答
-
-| 问题                                           | 回答重点                                                 |
-| ---------------------------------------------- | -------------------------------------------------------- |
-| load 后页面生命周期结束了吗？                  | 只是加载阶段结束，仍有可见性、隐藏、恢复和终止           |
-| 页面返回为什么没触发 load？                    | 可能从 BFCache 恢复；用 pageshow.persisted 判断          |
-| pagehide.persisted=true 能保证后退快速恢复吗？ | 不能，页面可能被淘汰                                     |
-| 切后台要保存什么？                             | 提前保存可恢复的小型状态，暂停非必要工作，恢复时核验时效 |
-| 能在 discard / unload 时做最后保存吗？         | discard 没有原页面回调；unload 也不能保证触发            |
-| Beacon true 是上报成功吗？                     | 仅入队，需要服务端记录或业务确认才能判断后续结果         |
+事件的精确毫秒和跨任务源插入顺序不属于保证。未自动验证离开对话框的实际展示、chrome://discards 的丢弃恢复、移动端杀进程与跨浏览器策略，需按上述步骤在目标环境继续观察。

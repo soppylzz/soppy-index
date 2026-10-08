@@ -4,9 +4,9 @@
 
 本目录聚焦不同 script 的 HTML 解析、资源准备和执行流程，承接 [Browser Rendering](../rendering.md) 的 Parse 部分。
 
-- [Script Loading](./index.md)：classic、async、defer、module、TLA、动态脚本与页面事件。
+- [Script Loading](./scriptLoading.md)：classic、async、defer、module、TLA、动态脚本与页面事件。
 - [Resource Hint](./resourceHints.md)：preload、modulepreload、prefetch、连接提示与优先级。
-- [实验走查](./demo.md)：操作、观察方法和实际日志。
+- [实验走查](./index.md)：操作、观察方法和实际日志。
 - [实验服务](./index.ts)：零依赖 HTTP 服务，执行逻辑由真实浏览器完成。
 
 ## 运行
@@ -39,4 +39,4 @@ PORT=5005 node docs/browser/core/loading/index.ts
 
 时间参数限制在 0～5000ms；非法值使用默认值。TLA 模式另有固定 1400ms 异步等待。每个普通实验还有一张响应延迟 1600ms 的非懒加载图片，用来比较 DOMContentLoaded 与 load；该延迟从图片请求开始计。
 
-服务日志显示请求和响应，页面日志显示执行与事件。毫秒值、竞争顺序与首帧时间不是固定承诺；实验边界与复现步骤见 [demo.md](./demo.md)。
+服务日志显示请求和响应，页面日志显示执行与事件。毫秒值、竞争顺序与首帧时间不是固定承诺；实验边界与复现步骤见 [index.md](./index.md)。

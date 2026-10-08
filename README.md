@@ -4,14 +4,15 @@ Personal interview preparation: Chinese study notes paired with runnable example
 
 ## Browse
 
-| Area                | Entry                                                                            | Contents                                                          |
-| ------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Browser core        | [Rendering, scheduling, and loading](docs/browser/core/README.md)                | Rendering, event loop, script loading, page lifecycle and BFCache |
-| Browser storage     | [Storage labs](docs/browser/storage/README.md)                                   | Cookies, Web Storage, IndexedDB, storage management               |
-| Browser cache       | [Cache labs](docs/browser/cache/README.md)                                       | HTTP response caching, freshness, and validation                  |
-| Algorithms          | [Data structures](algorithm/structure/) and [special topics](algorithm/special/) | A README and runnable `index.ts` for each topic; links below      |
-| Interview practice  | [Hot 100](algorithm/hot100/)                                                     | Solutions grouped by problem type                                 |
-| TypeScript practice | [Type challenges](handwrite/type-challenges/)                                    | Compile-time exercises                                            |
+| Area                  | Entry                                                                            | Contents                                                                     |
+| --------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Browser core          | [Rendering, scheduling, and loading](docs/browser/core/README.md)                | Rendering, event loop, script loading, page lifecycle and BFCache            |
+| Browser storage       | [Storage labs](docs/browser/storage/README.md)                                   | Cookies, Web Storage, IndexedDB, storage management                          |
+| Browser cache         | [Cache labs](docs/browser/cache/README.md)                                       | HTTP response caching, freshness, and validation                             |
+| Browser communication | [Communication labs](docs/browser/communication/README.md)                       | BroadcastChannel, storage events, SharedWorker, window and channel messaging |
+| Algorithms            | [Data structures](algorithm/structure/) and [special topics](algorithm/special/) | A README and runnable `index.ts` for each topic; links below                 |
+| Interview practice    | [Hot 100](algorithm/hot100/)                                                     | Solutions grouped by problem type                                            |
+| TypeScript practice   | [Type challenges](handwrite/type-challenges/)                                    | Compile-time exercises                                                       |
 
 Material in `__reference__/` is source material rather than the maintained learning entrypoint.
 
@@ -23,6 +24,7 @@ Use Node >= 22.18 (`.nvmrc` selects Node 22) for native execution of erasable Ty
 node algorithm/structure/heap/index.ts
 node docs/browser/core/eventLoop/simulator.ts
 node docs/browser/core/loading/index.ts
+node docs/browser/communication/index.ts
 ```
 
 The loading lab opens at <http://localhost:5004>. Browser labs start HTTP servers; use their README for the URL, experiments, and browser requirements, and stop them with `Ctrl+C`. Self-contained algorithm demos print results and exit. Hot 100 files with extensionless imports may require a separate runtime setup even if type checking passes.

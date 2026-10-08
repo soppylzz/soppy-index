@@ -438,7 +438,7 @@ conditions:
   - normal reload, hard reload, and DevTools settings may change cache behavior
   - use the same origin, remove interfering Service Workers, and start with clean site data if needed
   - stopping the server resets versions but does not clear browser HTTP cache
-  - walkthrough: docs/browser/cache/demo.md`)
+  - walkthrough: docs/browser/cache/index.md`)
 })
 
 export {}

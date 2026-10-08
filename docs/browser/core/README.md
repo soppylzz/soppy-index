@@ -1,10 +1,10 @@
 # 渲染、调度、资源加载与生命周期
 
-[返回仓库首页](../../../README.md) · [存储实验](../storage/README.md) · [缓存实验](../cache/README.md)
+[返回仓库首页](../../../README.md) · [存储实验](../storage/README.md) · [缓存实验](../cache/README.md) · [跨上下文通信](../communication/README.md)
 
 - [Browser Rendering](./rendering.md)：解析、样式、布局、绘制与合成，图示在同目录 `assets/`。
 - [Browser Scheduling](./scheduling.md)：浏览器任务调度。
-- [Browser Event Loop](./eventLoop/index.md)：事件循环笔记。
+- [Browser Event Loop](./eventLoop/eventLoop.md)：事件循环笔记。
 - [Page Lifecycle](./lifeCycle/README.md)：页面可见性、BFCache、冻结恢复与离页保存实验。
 - [Script Loading](./loading/README.md)：不同 script 的解析与执行流程，以及 resource hint 对照实验。
 

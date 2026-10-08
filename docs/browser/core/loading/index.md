@@ -1,197 +1,140 @@
-# Script Loading：解析、加载与执行
+# Script Loading 实验走查
 
-[渲染流水线](../rendering.md) 已说明 HTML parser、CSS 与普通脚本的基本关系。本文进一步追踪：一个 script 被发现后，资源何时就绪、何时允许执行，以及它如何影响后续 DOM 和页面事件。实验入口见 [README](./README.md)，资源提示见 [Resource Hint](./resourceHints.md)。
+本实验让真实浏览器负责 HTML 解析、模块加载与脚本执行；Node 服务只提供 HTML、资源和可控响应延迟。运行方式见 [README](./README.md)，理论见 [Script Loading](./scriptLoading.md)。
 
-## 1. 先分清三个过程
+## 1. 如何读日志
 
-这里的 parser 主要指 **HTML parser**：它根据输入构建 DOM。JavaScript 引擎也会解析、编译代码，但那是另一层工作，不能用“async 不阻塞 parser”推导出“async 不占用主线程”。
-
-| 过程       | 做什么                                                  | 与其他过程的关系                                                             |
-| ---------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| 发现与获取 | 从标签、预扫描、hint 或动态代码找到 URL，获取资源       | 可与 HTML 解析重叠；网络完成不等于脚本已执行                                 |
-| 准备脚本   | classic 准备脚本；module 还需加载、解析与链接静态依赖图 | 具体编译策略由引擎决定；不能画成所有引擎固定的线程流水线                     |
-| 执行与求值 | 在允许的时机运行代码                                    | 同一 Window 主线程上的同步 JS 会占用 HTML 解析、事件处理与渲染所需的执行时间 |
-
-主 parser 因 classic 暂停时，preload scanner 仍可能提前发现后面的外部脚本。因此 Network 中 B 比 A 早开始、甚至早下载完，都不能单独证明 B 先执行。动态拼出的 URL 也不一定能被预扫描提前发现。
+先查看启动时的 CLI 引导，选择实验入口并按提示操作。终端随后打印 HTTP 请求、响应状态和脚本响应延迟；页面与浏览器 Console 记录 JS 执行、DOM 标记和生命周期事件。请求到达服务端不代表脚本已经执行。
 
 ```text
-发现 URL → 获取资源 → 脚本/模块图就绪 → 满足该模式的执行条件 → 执行
-                                  ↑
-                      解析状态、顺序、样式表、依赖关系
+  906.2ms | interactive | after=true | DOMContentLoaded
 ```
 
-“下载并行”只表示工作可以重叠，不保证请求同时开始，也不保证网络有无限并发。缓存、连接、服务端响应、优先级和主线程忙碌都会改变实际时间。
+- 时间来自 `performance.now()`，相对当前文档的时间原点，不是服务端请求计时。
+- `readyState` 是该行记录时的文档状态。
+- `after` 表示 parser 是否已创建脚本标签后方的 `#after` 节点。
+- `after marker observed` 由 head 中注册的 MutationObserver 记录；表示观察回调已看到标记，不是 HTML EOF 或首次 Paint 的精确时间。
 
-## 2. parser-inserted script 对照
+早期日志先存入数组，DOM 出现后写入页面，同时始终写入 Console。观察代码安装在实验 CSS 与脚本之前；普通实验尾部没有额外内联日志脚本，避免它等待 CSS、反过来改变被测流程。
 
-以下讨论 HTML 中正常声明、由 parser 插入的脚本；动态插入另见第 5 节。
+## 2. 实验清单
 
-| 写法                 | 获取期间 HTML parser   | 执行时机                       | 标签间顺序                             | 与 DOMContentLoaded 的关系                |
-| -------------------- | ---------------------- | ------------------------------ | -------------------------------------- | ----------------------------------------- |
-| 内联 classic         | 无外部获取             | 解析遇到时执行                 | 按解析位置                             | 执行结束才能继续解析                      |
-| 外部 classic         | 在脚本处等待就绪和执行 | 脚本就绪且满足样式表等条件后   | 按解析位置                             | 阻塞解析，因而推迟事件                    |
-| 外部 classic `async` | 继续解析               | 就绪后尽快获得执行机会         | 不保证                                 | 不作为该事件的等待项                      |
-| 外部 classic `defer` | 继续解析               | 文档解析结束后执行             | 按文档顺序                             | 事件在这组脚本执行之后                    |
-| 默认 module          | 继续解析，获取模块图   | 解析结束、模块图就绪后发起求值 | 入口按文档顺序发起；异步求值需另看依赖 | 等待相应执行步骤；不等于等待所有 TLA 续体 |
-| module `async`       | 继续解析，获取模块图   | 图就绪后尽快发起求值           | 不保证入口顺序                         | 不作为该事件的等待项                      |
+默认 A 响应延迟 900ms，B 为 100ms，HTML 尾部在 500ms 后发送；各延迟从对应请求或文档响应开始计。module 的 A/B 参数控制静态依赖响应。实验使用 HTTP `no-store`，预扫描仍可能提前发起后方资源的请求。
 
-这是 [HTML script processing model](https://html.spec.whatwg.org/multipage/scripting.html#script-processing-model) 的可观察行为摘要；“尽快”不表示能抢占正在运行的同步 JavaScript。
+| mode              | 操作                                   | 默认参数下应重点观察                                                     |
+| ----------------- | -------------------------------------- | ------------------------------------------------------------------------ |
+| `classic`         | 比较 A/B 与后方标记                    | A、B 顺序执行，执行时 `after=false`；下载完成顺序不能决定执行顺序        |
+| `inline`          | 看内联 A、B                            | 无外部下载；内联 classic 的 async/defer 不改变遇到即执行                 |
+| `async`           | 对比 B、A、DOMContentLoaded            | B 通常在 `loading` 阶段先执行；A 通常在 DOMContentLoaded 后执行          |
+| `defer`           | 查看 Network 中 B 先完成，再看执行日志 | A、B 在 `interactive` 阶段按文档顺序执行，随后 DOMContentLoaded          |
+| `module`          | 查看入口与 dependency 请求/日志        | 模块图准备好后，依赖先求值、入口后执行；入口按文档顺序发起               |
+| `async-module`    | 比较两张模块图的就绪时间               | B 图更早就绪，通常先执行；模块图就绪不是仅入口文件下载完                 |
+| `tla`             | 留意 load 之后是否仍追加日志           | A 依赖 await 挂起，B 与 DOMContentLoaded 继续；A 入口在依赖恢复后执行    |
+| `dynamic`         | 查看 append 时打印的 async 值          | 默认 `async=true`；B 通常先执行                                          |
+| `dynamic-ordered` | 与上一组比较                           | `async=false`，A、B 按插入顺序执行，DOMContentLoaded 可以先触发          |
+| `innerhtml`       | 比较插入前、插入后和脚本日志           | innerHTML 中脚本不执行；动态内联 classic 在 append 前后两条日志之间执行  |
+| `css-only`        | Network 看 CSS 尚未完成时的日志        | 标记、interactive 与 DOMContentLoaded 可先出现，CSS 不直接阻塞 HTML 解析 |
+| `css`             | 看脚本下载完成与执行开始之间的空档     | classic 等前方 CSS，parser 又等 classic，后方标记迟到                    |
+| `css-defer`       | 与 css 比较后方标记时间                | DOM 可先解析；defer 等 CSS，DOMContentLoaded 随后触发                    |
 
-属性的几个边界：
+每个普通页面包含一张延迟 1600ms 响应的图片。图片请求并不从文档导航的 0ms 同时开始，因此 load 不能简单读成“必然在第 1600ms”。
 
-- 内联 classic 上的 `async`、`defer` 不会改变执行时机。
-- 外部 classic 同时声明 `async defer` 时，支持这些属性的现代浏览器走 async 行为。
-- module 上 `defer` 没有效果；module 自身已有解析结束后的默认执行模式。
-- 内联 module 也走模块处理，可能包含外部 `import`；它不是内联 classic。内联 module 可以使用 `async`。
-- `async="false"` 仍然是存在的布尔属性。动态代码要使用 `script.async = false`。
+## 3. 调整参数验证因果
 
-### 普通 classic：parser 等待的是执行完成
+### 就绪时间与解析时间
 
-```html
-<script src="/a.js"></script>
-<div id="after"></div>
+访问 `/experiment?mode=async&a=100&b=900&tail=1500`：两份脚本可以在 HTML 尾部到达前执行，`after=false`。再把 `tail` 改成 0，观察 DOM 是否更早可用。竞争顺序受本次调度影响，结论应建立在条件变化上。
+
+访问 `/experiment?mode=defer&a=900&b=100&tail=1500`：即使两个文件都已到达，仍要等 HTML 解析结束。把 tail 改回 500，等待项又主要变成 A 的响应。
+
+### 获取不阻塞，不代表执行不占用主线程
+
+访问 `/experiment?mode=async&a=100&b=200&tail=500&work=700`，同时录制 Performance。每个 classic 在 start/end 之间同步忙循环 700ms；B 即使响应已到，也不能抢占 A 当前的同步执行，HTML 尾部解析和事件分发也可能推迟。
+
+不要把 `work` 当网络延迟：它发生在浏览器执行阶段；`a/b` 发生在服务端响应阶段。忙循环只用于展示执行成本，不作为业务代码示例。
+
+### CSS 的直接与间接影响
+
+分别打开 `css-only`、`css`、`css-defer`，保持 `css=1300&tail=500`：
+
+1. css-only 的标记和 DOMContentLoaded 约在尾部到达后出现，CSS 此时仍在下载。
+2. css 的 classic 等 CSS 后才执行，执行时标记还不存在。
+3. css-defer 的标记先出现，脚本和 DOMContentLoaded 等到 CSS 就绪。
+
+这些日志说明 DOM 构建与脚本时机，不能当作首帧测量。要观察 CSS 对首次渲染的影响，需另看 Performance 的截图和绘制记录。
+
+## 4. Chrome 实际观察
+
+以下片段来自 2026-10-08 本机 Chrome 153.0.8010.48 的 headless 验证，均使用默认参数。它们是一次运行的记录，省略部分行，毫秒数不构成规范保证。Firefox、Safari 尚未执行本次自动化验证。
+
+### defer：B 先下载，仍按 A、B 执行
+
+```text
+    3.3ms | loading     | after=false | head bootstrap
+  504.0ms | loading     | after=true | after marker observed
+  905.8ms | interactive | after=true | classic A: start
+  905.9ms | interactive | after=true | classic A: end
+  906.0ms | interactive | after=true | classic B: start
+  906.1ms | interactive | after=true | classic B: end
+  906.2ms | interactive | after=true | DOMContentLoaded
+ 2110.3ms | complete    | after=true | window.load
 ```
 
-A 可以检查它前面的 DOM，但执行时 `#after` 尚未由 parser 创建。即使 A 已被缓存，仍然需要执行完才能继续解析；把下载变快不能消除同步执行成本。
+HTML 尾部的标记先出现，说明没有等待 A 下载才继续构建 DOM；A、B 执行时为 interactive，随后才触发 DOMContentLoaded。图片继续推迟 load。
 
-如果 A 前方有阻塞脚本的样式表，A 还要等样式表就绪。因此看似“HTML 被 CSS 卡住”，实际可能是 `CSS → classic 执行等待 → parser 暂停` 的间接链条。
+### async：B 与 A 分别落在 DOMContentLoaded 两侧
 
-### async：资源就绪决定资格，主线程决定机会
-
-```html
-<script async src="/a.js"></script>
-<script async src="/b.js"></script>
+```text
+    7.9ms | loading     | after=false | head bootstrap
+  110.5ms | loading     | after=false | classic B: start
+  110.6ms | loading     | after=false | classic B: end
+  504.8ms | loading     | after=true | after marker observed
+  506.6ms | interactive | after=true | DOMContentLoaded
+  910.4ms | interactive | after=true | classic A: start
+  910.4ms | interactive | after=true | classic A: end
+ 2107.3ms | complete    | after=true | window.load
 ```
 
-获取时 parser 可以继续，B 若先就绪便可能先执行。执行开始后，同步 JS 仍会占用主线程；它不能插进另一个脚本正在执行的函数中间。
+B 执行时后方节点不存在，A 执行时已存在。async 不提供统一的 DOM 就绪条件。
 
-执行时后方 DOM 可能存在，也可能不存在。不要靠标签位置判断 async 可以访问哪些节点，更不能用 async 为两个有先后依赖的全局脚本提供顺序保证。
+### 顶层 await：DOMContentLoaded、load 均早于 A 入口完成
 
-### defer：下载可以乱序，执行保持文档顺序
-
-```html
-<script defer src="/a.js"></script>
-<script defer src="/b.js"></script>
+```text
+    5.5ms | loading     | after=false | head bootstrap
+  505.4ms | loading     | after=true | after marker observed
+  910.2ms | interactive | after=true | dependency A: start
+  910.3ms | interactive | after=true | dependency B: start
+  910.4ms | interactive | after=true | module entry B
+  910.4ms | interactive | after=true | DOMContentLoaded
+ 2110.6ms | complete    | after=true | window.load
+ 2311.5ms | complete    | after=true | dependency A: resumed after await
+ 2311.8ms | complete    | after=true | module entry A
 ```
 
-B 先下载完成也要等 A。两者执行时，HTML 已解析完成，`document.readyState` 通常为 `interactive`。若 A 同步执行很久，B 与 DOMContentLoaded 都会跟着推迟。
+这里 B 是独立入口，能在 A 依赖挂起时执行；A 入口必须等依赖恢复。load 已触发后页面仍有新的日志，所以不能用它替代应用就绪协议。
 
-这保证的是这组脚本的执行顺序，不包含它们启动的 `fetch`、定时器或 Promise 所代表的业务完成顺序。
+### 慢 CSS 对照
 
-## 3. module：等待的是模块图，而非单个文件
+| 模式      | 首次看到后方标记 | DOMContentLoaded |
+| --------- | ---------------- | ---------------- |
+| css-only  | 504.4ms          | 505.0ms          |
+| css       | 1311.1ms         | 1313.9ms         |
+| css-defer | 503.3ms          | 1311.6ms         |
 
-```html
-<script type="module" src="/entry.js"></script>
-```
+css-only 的 DOMContentLoaded 明显早于 CSS 的 1300ms 响应延迟；css-defer 的 DOM 虽先出现，DOMContentLoaded 却随脚本一起等待。
 
-```js
-// entry.js
-import { config } from "./config.js"
-console.log(config)
-```
+## 5. preload / modulepreload 对照
 
-浏览器获取入口，解析静态 import，再继续获取依赖，直到相关模块图准备好；发现更深一层依赖可能需要先收到上一层文件，因此“模块图并行加载”不表示所有节点在一开始同时请求。
+首页提供两组链接，每组都比较 `hint=none` 与匹配 hint。实验分两块发送 HTML：head 立即发送，消费 script 所在的尾部 600ms 后发送。这使请求发现时机成为明确变量。
 
-求值沿依赖关系展开：上例中 config 模块先求值，入口才能使用其导出。循环依赖还涉及 linking 和 live bindings，不能简单套成一条文件队列。
+在 Network 中取消 Disable cache，检查入口请求的开始时间、Initiator 和数量。每次导航的入口 URL 唯一；同次导航的 hint 与 script URL 相同，入口响应允许缓存复用。
 
-模块的其他必要边界：模块自动使用严格模式，顶层绑定不会像 classic 全局 `var` 那样成为 `window` 属性；跨 origin 获取模块需要 CORS，响应也需要正确的 JavaScript MIME。实验应通过 HTTP 打开，避免 `file://` 导致的加载差异。
+本次 Chrome 观察中，classic 入口请求从无 hint 的约 605ms 提前到有 preload 的约 6ms；module 入口也从约 605ms 提前到 modulepreload 的约 7ms。同次导航中每个入口均只出现一次网络请求。精确结果以当次 Network 为准。
 
-这些获取、链接与执行步骤见 [HTML：script processing model](https://html.spec.whatwg.org/multipage/scripting.html#script-processing-model) 和 [模块执行](https://html.spec.whatwg.org/multipage/webappapis.html#run-a-module-script)。
+hint 不直接执行代码：实际入口日志仍由后方 script 消费产生。modulepreload 是否提前获取依赖以及 Initiator 显示名称属于实现观察，不能要求所有浏览器都使用同一种面板标签。
 
-### 顶层 await：入口顺序不等于异步完成顺序
+## 6. 验证范围
 
-```js
-// config.js
-export const config = await fetch("/config.json").then((response) => response.json())
-```
+本次检查覆盖 13 种 script/CSS 模式和 4 个 hint 对照页面：页面正常 load，无脚本错误或未处理拒绝；检查了 classic/defer 顺序、DOM 可用状态、async 反序、动态排序、innerHTML 不执行，以及 TLA 依赖恢复与入口执行关系。提示页检查了匹配入口没有重复网络请求。
 
-`await` 挂起 config 的求值，依赖它的 entry 必须等待，独立的另一个模块入口却可以继续。主线程也可以处理其他工作。
-
-这里需要修正“DOMContentLoaded 等所有 module 执行完成”的简写：HTML 的结束解析流程等待默认模块脚本进入相应执行步骤，但模块求值可以返回一个尚未兑现的 Promise；该流程不会把所有顶层 await 的异步完成都当成 DOMContentLoaded 的前置条件。具体关系见 [结束解析](https://html.spec.whatwg.org/multipage/parsing.html#the-end) 和 [运行模块脚本](https://html.spec.whatwg.org/multipage/webappapis.html#run-a-module-script)。
-
-因此，依赖中的 TLA 可能让入口正文在 DOMContentLoaded 之后才运行；不能保证每个默认模块入口正文都已在该事件前执行完。`load` 同样不能代表异步应用初始化完成。需要业务就绪保证时，应显式共享 Promise 或等待 `import()` 返回的 Promise：
-
-```js
-async function initialize() {
-  const { config } = await import("./config.js")
-  startApplication(config)
-}
-```
-
-`import()` 是运行时触发的模块加载和求值，不会因为写在 defer 脚本里，就自动把它返回的 Promise 加入 DOMContentLoaded 等待条件。
-
-## 4. CSS、DOMContentLoaded 与 load
-
-| 信号或条件                              | 表达什么                                            | 不代表什么                                           |
-| --------------------------------------- | --------------------------------------------------- | ---------------------------------------------------- |
-| `readyState = loading`                  | HTML 仍在解析                                       | 所有脚本都没执行                                     |
-| `readyState = interactive`              | HTML 解析完成                                       | defer/module 已全部处理，或业务已就绪                |
-| `DOMContentLoaded`                      | HTML 解析及相关 defer/default module 执行步骤已处理 | 所有图片、async、TLA 续体和业务请求都已完成          |
-| `readyState = complete` / `window.load` | 文档及会延迟 load 的依赖资源已完成相应处理          | 懒加载图片、之后发起的请求和所有应用异步工作都已完成 |
-
-DOMContentLoaded 不直接等待普通图片或所有样式表。不过 defer 脚本可能等待阻塞脚本的样式表，事件又等待 defer，于是 CSS 可以间接推迟它。没有受阻脚本时，慢 CSS 可以仍在下载，而 DOMContentLoaded 已触发。
-
-普通、非懒加载图片会延迟 load；async 外部脚本不进入 DOMContentLoaded 的等待列表，但仍可能延迟 load。注册 load 之后才创建的资源，不能倒过来让已触发的 load 再等待一次。生命周期算法见 [HTML：结束解析](https://html.spec.whatwg.org/multipage/parsing.html#the-end)。
-
-async、动态模块或 `await` 之后再注册 DOMContentLoaded 监听时，事件可能已经过去：
-
-```js
-function setup() {
-  // Initialize DOM-dependent behavior.
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", setup, { once: true })
-} else {
-  setup()
-}
-```
-
-这段代码用于“DOM 已可访问就初始化”，并非证明其他 defer 脚本或业务初始化完成；若存在业务依赖，应使用显式的依赖协议。
-
-## 5. 动态 script 必须区分创建方式
-
-### createElement 创建的外部 classic
-
-```js
-for (const url of ["/a.js", "/b.js"]) {
-  const script = document.createElement("script")
-  script.async = false
-  script.src = url
-  document.head.append(script)
-}
-```
-
-这类外部 classic 默认有 force-async 行为，即使没写 async 属性。插入前设置 `.async = false`，可以让它们并行获取、按插入顺序执行；仅仅 `removeAttribute("async")` 不等价于清除内部 force-async 状态。
-
-它们不是 parser-inserted defer，不会加入解析结束后的 defer 等待列表，也不保证 DOMContentLoaded 之前执行。不要把这条外部 classic 的排序技巧扩展为“所有动态模块异步求值都会依次完成”。相关状态定义见 [HTML：script processing model](https://html.spec.whatwg.org/multipage/scripting.html#script-processing-model)。
-
-### 动态内联 classic 与 innerHTML
-
-```js
-const script = document.createElement("script")
-script.textContent = "console.log('runs during insertion')"
-document.head.append(script)
-
-const container = document.createElement("div")
-document.body.append(container)
-container.innerHTML = "<script>console.log('does not run')<" + "/script>"
-```
-
-前者在插入时执行内联 classic，后者不会执行其中的 script。这解释了为什么“动态脚本都 async”不成立。`document.write` 又可能参与正在进行的 HTML 解析，不应与 DOM API 插入混为一谈。
-
-## 6. 面试回答与验证方法
-
-回答加载顺序时，按四个问题推导：由谁插入？classic 还是 module？是否有 async/defer？执行还要等哪些条件？再讨论 DOMContentLoaded/load，而不是背一张脱离条件的时间线。
-
-| 追问                                      | 回答要点                                                     | 对应实验                       |
-| ----------------------------------------- | ------------------------------------------------------------ | ------------------------------ |
-| async 不阻塞解析，为什么页面还会卡？      | 获取不阻塞，不代表同步执行不占用主线程                       | async + `work`                 |
-| B 已下载完为什么没执行？                  | 可能等待 classic 解析位置、defer 顺序、样式表或模块依赖      | classic / defer / css / module |
-| defer 一定比 async 晚吗？                 | 不存在跨模式固定顺序；看解析结束和各自就绪时间               | 调整 A/B/tail                  |
-| module 是否就是 defer？                   | 默认时机相似，但还有模块图、模块作用域和异步求值             | module / tla                   |
-| DOMContentLoaded 是否代表模块初始化完成？ | TLA、动态 import 和业务异步任务需要显式等待                  | tla                            |
-| 动态脚本怎么保持先后？                    | 外部 classic 插入前 `.async = false`；模块依赖用 import 表达 | dynamic-ordered                |
-| preload 是否提前执行 JS？                 | 它提前获取资源；执行仍由消费端决定                           | hints 对照                     |
-
-Network 用于看请求发现、响应与缓存；Console/页面日志用于看执行和事件；Performance 用于看主线程执行成本和渲染。不同面板的证据不能互相替代。完整操作与实际观察见 [实验说明](./demo.md)。
+HTTP、格式和类型检查用于验证服务和文件基本正确；执行顺序来自真实 Chrome，而非 Node 模拟。实验未覆盖跨 origin CORS、失败重试、循环依赖、所有资源优先级策略与跨浏览器兼容性。这些条件不应从当前演示自动外推。

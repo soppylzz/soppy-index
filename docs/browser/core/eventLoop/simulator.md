@@ -1,6 +1,6 @@
 # Event Loop 综合示例（模拟）
 
-> 本文是 [Browser Event Loop](./index.md) 的配套示例，用一个可运行的 TypeScript 模拟器把 task、microtask、渲染更新和空闲期串成一条完整时间线，回答三个常见追问。渲染流水线对应 [Browser Rendering](../rendering.md) 的简化模型。
+> 本文是 [Browser Event Loop](./eventLoop.md) 的配套示例，用一个可运行的 TypeScript 模拟器把 task、microtask、渲染更新和空闲期串成一条完整时间线，回答三个常见追问。渲染流水线对应 [Browser Rendering](../rendering.md) 的简化模型。
 
 [返回核心目录](../README.md) · [查看模拟器](./simulator.ts)
 
@@ -146,6 +146,6 @@ trace:
 ## 6. 模拟器没有覆盖的内容
 
 - 多个 task queue 与 Blink 的动态优先级，见 [Browser Scheduling](../scheduling.md)。
-- 计时器 4ms 钳制、后台节流与系统调度，见 [Browser Event Loop](./index.md) 第 6 节。
+- 计时器 4ms 钳制、后台节流与系统调度，见 [Browser Event Loop](./eventLoop.md) 第 6 节。
 - raster / composite 的线程与进程分工，见 [Browser Rendering](../rendering.md) 第 6 节。
 - Worker 拥有独立 event loop；这里只模拟一个 Window event loop。

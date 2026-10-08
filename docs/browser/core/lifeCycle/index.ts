@@ -355,6 +355,6 @@ conditions:
   - keep the same host and port; BFCache, background throttling, and freezing depend on browser policy
   - this demo does not register unload; DevTools or extensions may affect BFCache, so retry without them
   - press Ctrl+C to stop; use PORT=5007 to choose another port
-  - walkthrough: docs/browser/core/lifeCycle/demo.md
+  - walkthrough: docs/browser/core/lifeCycle/index.md
 `)
 })

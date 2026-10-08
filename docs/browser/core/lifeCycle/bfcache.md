@@ -1,6 +1,6 @@
 # Back/Forward Cache（BFCache）
 
-[生命周期目录](./README.md) · [生命周期笔记](./index.md) · [实验走查](./demo.md#3-bfcache-与新文档对照)
+[生命周期目录](./README.md) · [生命周期笔记](./pageLifecycle.md) · [实验走查](./index.md#3-bfcache-与新文档对照)
 
 BFCache 在用户离开页面时，尝试保存完整页面及其 JavaScript heap、DOM 和运行状态；用户通过浏览器前进或后退返回时，可以直接恢复快照。它优化的是历史导航，不是普通刷新，也不是 HTTP response 的缓存。
 
@@ -35,7 +35,7 @@ window.addEventListener("pagehide", (event) => {
 
 BFCache 恢复后，内存中的数据可能已经过时。例如库存、登录状态和协作数据都可能在页面冻结期间改变。应在 `pageshow` 的 BFCache 分支中重新验证时效性强的数据，而不是无条件重建整个应用。
 
-更完整的页面状态转换见 [页面生命周期](./index.md)。
+更完整的页面状态转换见 [页面生命周期](./pageLifecycle.md)。
 
 ## 3. 不要依赖 unload
 
@@ -99,7 +99,7 @@ node docs/browser/core/lifeCycle/index.ts
 3. 再刷新或通过中转页的普通链接返回，对比执行 ID 改变、初始化重新发生。草稿仍可能从 sessionStorage 读回，因此草稿保留本身不能证明命中。
 4. 恢复后实验会请求新的服务端时间，网络仍可能出现请求；不能用“终端零请求”定义 BFCache 命中。
 
-本实验不注册 unload；离开提醒使用仅在待确认修改时注册的 beforeunload。DevTools 与浏览器策略可能影响资格，应结合诊断工具复核，完整步骤和实际验证见 [demo.md](./demo.md)。
+本实验不注册 unload；离开提醒使用仅在待确认修改时注册的 beforeunload。DevTools 与浏览器策略可能影响资格，应结合诊断工具复核，完整步骤和实际验证见 [index.md](./index.md)。
 
 ## 7. 兼容性
 

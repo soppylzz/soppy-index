@@ -252,6 +252,28 @@ image.src = "/hero.png"
 
 各 API 应用于动画、低优先级工作或主动让步时的选型见 [Browser Scheduling](../scheduling.md#3-web-调度-api-如何选)。
 
+### 配套模拟器如何表达队列
+
+[simulator.ts](./simulator.ts) 用虚拟时钟和独立队列表达以上阶段；这段摘录只说明实现方式，不能拿来证明真实浏览器的调度策略：
+
+```ts
+interface MicrotaskItem {
+  label: string
+  run: () => void
+}
+const microtaskQueue: MicrotaskItem[] = []
+function performMicrotaskCheckpoint(): void {
+  for (;;) {
+    const item = microtaskQueue.shift()
+    if (!item) break
+    log("MICRO", item.label)
+    item.run()
+  }
+}
+```
+
+task 队列另记录 source、dueTime 与回调，循环在执行 task 后清空 microtaskQueue，再判断渲染机会。运行命令、三个场景与简化条件见 [simulator.md](./simulator.md)；上文的浏览器代码示例用于理解实际 API，模拟器则用于逐步走查。
+
 ## 8. 面试回答框架
 
 先给出 30 秒回答，再根据追问展开正文细节：
