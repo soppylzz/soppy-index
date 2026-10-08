@@ -9,22 +9,52 @@ const reports: { receivedAt: string; payload: Record<string, unknown> }[] = []
 
 /* ==================== browser lab ==================== */
 
-const page = `<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>页面生命周期实验</title>
-<style>
+const experiments = {
+  loading: {
+    title: "加载与重建",
+    hint: "刷新比较 readyState、加载事件与 executionId；此页不启动计数器或自动上报。",
+  },
+  visibility: {
+    title: "可见性与工作暂停",
+    hint: "编辑草稿后切换真实标签，比较 timer/rAF 与应用主动暂停的轮询。",
+  },
+  bfcache: {
+    title: "BFCache 与历史恢复",
+    hint: "前往中转页后后退，对比 persisted、执行 ID 与计数；普通链接返回作为新文档对照。",
+  },
+  leave: {
+    title: "离开提醒与草稿",
+    hint: "勾选提醒并编辑后尝试离开；本地确认成功后移除 beforeunload。",
+  },
+  report: {
+    title: "离页上报与接收",
+    hint: "比较入队、HTTP 响应与服务端记录；自动 hidden 上报仅在此页启用。",
+  },
+  freeze: {
+    title: "冻结、恢复与丢弃",
+    hint: "使用 Chromium 调试工具控制真实冻结；不把普通刷新当成丢弃。",
+  },
+  history: {
+    title: "同文档 History 与 hash",
+    hint: "比较 pushState、replaceState、hashchange 与 popstate；看 URL、state 和同一个执行 ID。",
+  },
+  navigation: {
+    title: "Location 文档导航",
+    hint: "assign 增加记录，replace 替换当前记录，reload 重建文档；同 URL 的 hash 导航另见 History 页。",
+  },
+} as const
+type Mode = keyof typeof experiments
+const styles = `
 body{font:15px/1.7 system-ui,sans-serif;background:#f4f6f8;color:#243047;margin:0}
 main{max-width:1000px;margin:36px auto;padding:0 20px}section{background:white;padding:20px;margin:18px 0;border:1px solid #dce2e9;border-radius:10px}
-h1,h2{line-height:1.3}h2{font-size:19px}button,a.control{display:inline-block;padding:7px 12px;margin:5px 6px 5px 0;border:1px solid #aab9cc;border-radius:5px;background:#eef4fc;color:#174d91;cursor:pointer;font:inherit}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #dce2e9;padding:8px;text-align:left}h1,h2{line-height:1.3}h2{font-size:19px}button,a.control{display:inline-block;padding:7px 12px;margin:5px 6px 5px 0;border:1px solid #aab9cc;border-radius:5px;background:#eef4fc;color:#174d91;cursor:pointer;font:inherit}
 textarea{box-sizing:border-box;width:100%;min-height:90px;font:inherit}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fa;padding:12px}label{display:block;margin:8px 0}.hint{color:#57657a}#log{max-height:420px;overflow:auto;font:13px/1.7 ui-monospace,monospace}output{font-variant-numeric:tabular-nums}
-</style>
-<script>
+`
+const browserScript = `
 const executionId = crypto.randomUUID();
-const journalKey = "lifecycle-lab-journal";
-const draftKey = "lifecycle-lab-draft";
+const mode = MODE_TOKEN;
+const journalKey = "lifecycle-lab-journal:" + mode;
+const draftKey = "lifecycle-lab-draft:" + mode;
 let entries = [];
 let storageAvailable = true;
 let dirty = false;
@@ -94,7 +124,7 @@ function checkpoint(reason) {
   record("checkpoint", reason + (saved ? "：已写入本标签 sessionStorage" : "：写入失败"));
 }
 function syncPolling() {
-  const shouldPoll = !frozen && document.visibilityState === "visible";
+  const shouldPoll = ["visibility", "freeze"].includes(mode) && !frozen && document.visibilityState === "visible";
   if (shouldPoll && pollingTimer === null) {
     pollingTimer = setInterval(() => { pollingTicks++; }, 1000);
     record("应用轮询", "启动");
@@ -105,6 +135,7 @@ function syncPolling() {
   }
 }
 async function refreshServerTime(reason) {
+  if (!document.getElementById("server-time")) return;
   try {
     const response = await fetch("/api/state", { cache: "no-store" });
     if (!response.ok) throw new Error("HTTP " + response.status);
@@ -145,36 +176,33 @@ record("script start", "新文档开始执行；跨文档历史日志保留前�
 document.addEventListener("readystatechange", () => { record("readystatechange"); renderState(); });
 document.addEventListener("DOMContentLoaded", () => {
   const draft = document.getElementById("draft");
-  draft.value = readStored(draftKey, "");
-  draft.addEventListener("input", () => {
-    dirty = true;
-    store(draftKey, draft.value);
-    syncWarning();
-    renderState();
-  });
-  document.getElementById("save").addEventListener("click", () => {
+  if (draft) {
+    draft.value = readStored(draftKey, "");
+    draft.addEventListener("input", () => {
+      dirty = true; store(draftKey, draft.value); syncWarning(); renderState();
+    });
+  }
+  document.getElementById("save")?.addEventListener("click", () => {
     if (store(draftKey, draft.value)) {
-      dirty = false;
-      record("确认草稿", "本地确认完成；没有提交业务数据到服务器");
-      syncWarning();
-    } else { record("确认草稿失败", "sessionStorage 不可用"); }
+      dirty = false; record("确认草稿", "本地确认完成；没有提交业务数据到服务器"); syncWarning();
+    } else record("确认草稿失败", "sessionStorage 不可用");
     renderState();
   });
-  document.getElementById("warning").addEventListener("change", event => {
+  document.getElementById("warning")?.addEventListener("change", event => {
     warningEnabled = event.target.checked; syncWarning(); renderState();
   });
-  document.getElementById("beacon").addEventListener("click", () => sendBeaconReport("manual-beacon"));
-  document.getElementById("keepalive").addEventListener("click", sendKeepaliveReport);
-  document.getElementById("query-reports").addEventListener("click", showReports);
+  document.getElementById("beacon")?.addEventListener("click", () => sendBeaconReport("manual-beacon"));
+  document.getElementById("keepalive")?.addEventListener("click", sendKeepaliveReport);
+  document.getElementById("query-reports")?.addEventListener("click", showReports);
   document.getElementById("clear-log").addEventListener("click", () => { entries = []; record("清空日志"); });
-  record("DOMContentLoaded", "恢复本标签草稿，未重新确认的编辑状态仅保存在当前堆中");
-  renderState();
-  syncPolling();
+  if (mode === "history") setupHistory();
+  record("DOMContentLoaded", "当前实验=" + mode);
+  renderState(); syncPolling();
 });
 window.addEventListener("load", () => record("load"));
 window.addEventListener("pageshow", event => {
   record("pageshow", "persisted=" + event.persisted);
-  warningEnabled = document.getElementById("warning").checked;
+  warningEnabled = document.getElementById("warning")?.checked ?? false;
   syncWarning();
   frozen = false;
   syncPolling();
@@ -202,55 +230,112 @@ document.addEventListener("resume", () => {
   frozen = false; record("resume"); syncPolling(); renderState();
 });
 for (const name of ["focus", "blur"]) window.addEventListener(name, () => { record(name); renderState(); });
-setInterval(() => { timerTicks++; renderState(); }, 1000);
-function countFrame() { animationFrames++; requestAnimationFrame(countFrame); }
-requestAnimationFrame(countFrame);
-</script>
-</head>
-<body><main>
-<h1>页面生命周期实验</h1>
-<p class="hint">依次观察加载 → 切换标签 → 前进后退 → 冻结/恢复。日志来自真实事件；页面不注册 unload。</p>
-<section><h2>1. 页面状态与执行身份</h2><pre id="state"></pre>
-<p>最近获取的服务端时间：<output id="server-time">等待 pageshow</output></p>
-<p class="hint">timer/rAF 是原生回调计数；应用轮询在 hidden/freeze 主动暂停。用墙钟比较经过时间，不能用回调次数计时。</p>
-<a class="control" href="/between">前往中转页，再用后退返回</a>
-<button type="button" onclick="location.reload()">刷新并比较 executionId</button>
-</section>
-<section><h2>2. 本标签草稿与离开提醒</h2>
-<label for="draft">草稿（最多 2000 字；输入即备份到 sessionStorage）</label>
-<textarea id="draft" maxlength="2000" placeholder="输入后切换标签、后退或刷新"></textarea>
-<label><input id="warning" type="checkbox">有待确认修改时注册 beforeunload，尝试提示离开</label>
-<button id="save" type="button">保存并确认本地草稿</button>
-<p class="hint">自动备份不清除当前文档的待确认标记。确认后移除提醒。刷新会重建该标记；真实业务应持久化版本与同步状态。本地备份不等于服务端保存。</p>
-</section>
-<section><h2>3. 小数据上报与服务端接收</h2>
-<label><input id="auto-beacon" type="checkbox" checked>hidden 时自动 sendBeacon（只发送事件元数据，不含草稿）</label>
-<button id="beacon" type="button">发送 Beacon</button><button id="keepalive" type="button">发送 keepalive fetch</button>
-<button id="query-reports" type="button">查询服务端接收记录</button>
-<pre id="reports">点击查询；仅显示本次服务进程最近 100 条记录，包含其他实验标签。</pre>
-<p class="hint">accepted=true 仅表示进入队列。终端 POST /api/report 与接收记录才说明服务器已接收；进程被杀、离线等仍可能丢失。</p>
-</section>
-<section><h2>4. 事件日志</h2><button id="clear-log" type="button">清空日志</button>
-<p class="hint">最近 100 条日志跨同标签导航保留于 sessionStorage；ID 前缀区分新旧文档，Console 同步输出。可在 Chromium 的 chrome://discards 中手动冻结/丢弃后台实验标签；不支持时不会伪造事件。</p>
-<pre id="log" role="log" aria-live="polite" aria-label="页面生命周期事件"></pre></section>
-</main><script>renderLog(); renderState();</script></body></html>`
-
-const betweenPage = `<!doctype html><html lang="zh-CN"><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>生命周期中转页</title>
-<body style="font:16px/1.8 system-ui;max-width:760px;margin:60px auto;padding:20px">
-<h1>已离开实验页</h1><p>点击后退，比较 pageshow.persisted、executionId 和计数是否保留。</p>
-<button type="button" onclick="history.back()">通过历史记录后退</button>
-<p><a href="/">通过普通链接打开新文档（与后退对照）</a></p>
-<p>BFCache 由浏览器决定，不能强制命中。若未命中，检查浏览器的 BFCache 诊断与新文档日志。</p>
-</body></html>`
+if (["visibility", "freeze", "bfcache"].includes(mode)) {
+  let timerId;
+  let frameId;
+  function countFrame() { animationFrames++; frameId = requestAnimationFrame(countFrame); }
+  function startCounters() {
+    if (timerId !== undefined) return;
+    timerId = setInterval(() => { timerTicks++; renderState(); }, 1000);
+    frameId = requestAnimationFrame(countFrame);
+  }
+  function stopCounters() {
+    clearInterval(timerId); cancelAnimationFrame(frameId); timerId = undefined;
+  }
+  window.addEventListener("pagehide", stopCounters);
+  window.addEventListener("pageshow", startCounters);
+  startCounters();
+}
+function setupHistory() {
+  let pushes = 0, replacements = 0, pops = 0, hashes = 0, sequence = 0;
+  function renderRoute() {
+    const view = location.hash.slice(1) || (location.pathname.startsWith("/history/view/") ? location.pathname.split("/").pop() : "home");
+    document.getElementById("route-view").textContent = "当前视图：" + view;
+    document.getElementById("history-state").textContent = "URL: " + location.href + "\\nstate: " + JSON.stringify(history.state) +
+      "\\nlength=" + history.length + " | push=" + pushes + " replace=" + replacements + " popstate=" + pops + " hashchange=" + hashes;
+  }
+  if (history.state === null) history.replaceState({ view: "initial" }, "", location.href);
+  const actions = {
+    push: () => { history.pushState({ view: "a", step: ++sequence }, "", "/history/view/a"); pushes++; renderRoute(); },
+    replace: () => { history.replaceState({ view: "b", step: ++sequence }, "", "/history/view/b"); replacements++; renderRoute(); },
+    "push-hash": () => { history.pushState({ view: "state-hash", step: ++sequence }, "", "#state-hash-" + sequence); pushes++; renderRoute(); },
+    hash: () => { location.hash = "hash-" + (++sequence) + "-" + crypto.randomUUID().slice(0, 8); },
+    "same-hash": () => { location.hash = location.hash; },
+    back: () => history.back(), forward: () => history.forward(),
+    "bad-origin": () => { const url = new URL(location.href); url.hostname = location.hostname === "localhost" ? "127.0.0.1" : "localhost"; history.pushState({}, "", url); },
+    "bad-state": () => history.pushState({ bad: () => {} }, "", "/history/view/a")
+  };
+  for (const [id, action] of Object.entries(actions)) document.getElementById(id).addEventListener("click", () => {
+    try { action(); record("History 调用返回", id + "；调用本身不等于事件回调"); }
+    catch (error) { record("History 拒绝", id + " " + error.name); }
+    renderRoute();
+  });
+  window.addEventListener("popstate", event => { pops++; record("popstate", "state=" + JSON.stringify(event.state)); renderRoute(); });
+  window.addEventListener("hashchange", event => { hashes++; record("hashchange", event.oldURL + " → " + event.newURL); renderRoute(); });
+  window.addEventListener("pageshow", renderRoute);
+  renderRoute();
+}
+`
+const navigation = `<nav><a class="control" href="/">实验目录</a>${Object.entries(experiments)
+  .map(([mode, info]) => `<a class="control" href="/${mode}">${info.title}</a>`)
+  .join("")}</nav>`
+function shell(title: string, body: string, script = ""): string {
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title><style>${styles}</style>${script ? `<script>${script}</script>` : ""}</head><body><main><h1>${title}</h1>${navigation}${body}</main></body></html>`
+}
+const directory = shell(
+  "生命周期与历史导航实验",
+  `<p>每条路由只提供一个主题的操作。HTTP 日志不代表浏览器已执行；页面使用真实事件与执行身份记录。</p><section><table><tr><th>入口</th><th>观察重点</th></tr>${Object.entries(
+    experiments
+  )
+    .map(
+      ([mode, info]) =>
+        `<tr><td><a href="/${mode}">${info.title}</a></td><td>${info.hint}</td></tr>`
+    )
+    .join("")}</table></section>`
+)
+function page(mode: Mode, target = false): string {
+  const draft = ["visibility", "bfcache", "leave", "freeze"].includes(mode)
+    ? `<section><h2>本标签草稿</h2><label for="draft">输入即备份到 sessionStorage，最多 2000 字</label><textarea id="draft" maxlength="2000"></textarea>${mode === "leave" ? '<label><input id="warning" type="checkbox">有待确认修改时注册 beforeunload</label>' : ""}<button id="save">保存并确认本地草稿</button><p class="hint">dirty 仅存于当前文档，本地备份不等于服务端提交。不同实验的草稿独立。</p></section>`
+    : ""
+  const transit = ["bfcache", "leave"].includes(mode)
+    ? `<a id="transit" class="control" href="/between?from=/${mode}">前往中转页，再用后退返回</a>`
+    : ""
+  const serverTime = ["bfcache", "visibility", "freeze"].includes(mode)
+    ? '<p>最近获取的服务端时间：<output id="server-time"></output></p>'
+    : ""
+  const reporting =
+    mode === "report"
+      ? `<section><h2>上报与服务端接收</h2><label><input id="auto-beacon" type="checkbox" checked>hidden 时自动 sendBeacon</label><button id="beacon">发送 Beacon</button><button id="keepalive">发送 keepalive fetch</button><button id="query-reports">查询服务端接收记录</button><pre id="reports">点击查询；进程内最多 100 条，包含其他实验标签。</pre><p>accepted=true 只说明入队，不保证送达。上报仅含事件元数据。</p></section>`
+      : ""
+  const historyControls =
+    mode === "history"
+      ? `<section><h2>同文档路由</h2><p id="route-view"></p><pre id="history-state"></pre><button id="push">pushState → /history/view/a</button><button id="replace">replaceState → /history/view/b</button><button id="push-hash">pushState 修改 hash</button><button id="hash">location.hash 新值</button><button id="same-hash">重复当前 hash</button><button id="back">back()</button><button id="forward">forward()</button><button id="bad-origin">拒绝跨源 URL</button><button id="bad-state">拒绝函数 state</button><p>push/replace 后 UI 由应用主动更新；popstate/hashchange 日志只在真实事件回调里追加。刷新子路径需要服务端 fallback。本实验仅对 /history/view/a 和 /history/view/b 提供入口。</p></section>`
+      : ""
+  const locationControls =
+    mode === "navigation"
+      ? `<section><h2>${target ? "已到达新文档目标" : "文档导航操作"}</h2>${target ? '<p>用 back 返回；assign 与 replace 的历史目标可能不同。</p><button id="nav-back" onclick="history.back()">back()</button><a href="/navigation">普通链接回到操作页</a>' : '<button id="assign" onclick="location.assign(&quot;/navigation/target?via=assign&quot;)">location.assign</button><button id="location-replace" onclick="location.replace(&quot;/navigation/target?via=replace&quot;)">location.replace</button>'}<button id="reload" onclick="location.reload()">location.reload()</button><button id="go-zero" onclick="history.go(0)">history.go(0)</button><p>目标 URL 的 via 标记用于观察操作来源；应结合实际 back 目标判断记录是否被替换。</p></section>`
+      : ""
+  return shell(
+    experiments[mode].title,
+    `<p class="hint">${experiments[mode].hint}</p><section><h2>状态与执行身份</h2><pre id="state"></pre>${serverTime}${transit}<button onclick="location.reload()">刷新并比较 executionId</button></section>${draft}${reporting}${historyControls}${locationControls}<section><h2>事件日志</h2><button id="clear-log">清空日志</button><p>每个实验在本标签独立保存最近 100 条日志，刷新后保留旧记录并追加新执行 ID；Console 同步输出。</p><pre id="log" role="log" aria-live="polite"></pre></section><script>renderLog(); renderState();</script>`,
+    browserScript.replace("MODE_TOKEN", JSON.stringify(mode))
+  )
+}
+function betweenPage(from: Mode): string {
+  return shell(
+    "已离开实验页",
+    `<section><p>后退时比较 pageshow.persisted、executionId 和计数；BFCache 由浏览器决定。</p><button onclick="history.back()">通过历史记录后退</button><p><a id="new-document" href="/${from}">通过普通链接打开新文档</a></p></section>`
+  )
+}
 
 /* ==================== local server ==================== */
 
 const server = createServer(async (request, response) => {
-  const path = new URL(request.url ?? "/", "http://localhost").pathname
+  const url = new URL(request.url ?? "/", "http://localhost")
+  const path = url.pathname
   response.on("finish", () => {
     console.log(
-      `[HTTP ${new Date().toISOString()}] ${request.method} ${path} -> ${response.statusCode}`
+      `[HTTP ${new Date().toISOString()}] ${request.method} ${encodeURI(path)} -> ${response.statusCode}`
     )
   })
   const send = (status: number, type: string, body: string, cache = "no-store") => {
@@ -304,8 +389,17 @@ const server = createServer(async (request, response) => {
       send(405, "text/plain; charset=utf-8", "Method Not Allowed")
       return
     }
-    if (path === "/" || path === "/between") {
-      send(200, "text/html; charset=utf-8", path === "/" ? page : betweenPage, "no-cache")
+    if (path === "/") {
+      send(200, "text/html; charset=utf-8", directory, "no-cache")
+    } else if (path === "/between") {
+      const from = url.searchParams.get("from") === "/leave" ? "leave" : "bfcache"
+      send(200, "text/html; charset=utf-8", betweenPage(from), "no-cache")
+    } else if (Object.hasOwn(experiments, path.slice(1))) {
+      send(200, "text/html; charset=utf-8", page(path.slice(1) as Mode), "no-cache")
+    } else if (path === "/history/view/a" || path === "/history/view/b") {
+      send(200, "text/html; charset=utf-8", page("history"), "no-cache")
+    } else if (path === "/navigation/target") {
+      send(200, "text/html; charset=utf-8", page("navigation", true), "no-cache")
     } else if (path === "/api/state") {
       json({ now: new Date().toISOString() })
     } else if (path === "/api/reports") {
@@ -337,16 +431,18 @@ server.listen(port, "127.0.0.1", () => {
   const base = `http://localhost:${address.port}`
   console.log(`
 page lifecycle demo started
-  lab:     ${base}/
-  transit: ${base}/between
+  directory: ${base}/
+${Object.keys(experiments)
+  .map((mode) => `  ${mode}: ${base}/${mode}`)
+  .join("\n")}
   reports: ${base}/api/reports
 
 steps:
-  1. Observe readyState, DOMContentLoaded, load, and pageshow; reload and compare executionId.
-  2. Edit the draft, switch tabs, and inspect hidden checkpoints, paused polling, and refreshed state.
-  3. Visit the transit page and go back; compare persisted, executionId, counters, and the draft.
-  4. Enable the leave warning and edit; confirm the draft to compare beforeunload registration/removal.
-  5. Compare Beacon queue acceptance with server receipt; Chromium can also test freeze/discard manually.
+  1. Choose loading, visibility, freeze, leave, or report for one focused lifecycle experiment.
+  2. Open bfcache, visit its transit page, and go back; compare persisted and executionId.
+  3. Open history: compare pushState/replaceState with real popstate/hashchange callbacks.
+  4. Reload /history/view/a to verify the explicit document fallback route.
+  5. Open navigation: compare assign, replace, reload, and history.go(0).
 
 observations:
   - the page and browser Console show browser events; the terminal only shows HTTP requests/responses

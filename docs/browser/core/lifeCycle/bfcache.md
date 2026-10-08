@@ -1,6 +1,6 @@
 # Back/Forward Cache（BFCache）
 
-[生命周期目录](./README.md) · [生命周期笔记](./pageLifecycle.md) · [实验走查](./index.md#3-bfcache-与新文档对照)
+[生命周期目录](./README.md) · [生命周期笔记](./pageLifecycle.md) · [History 与导航](./history.md) · [实验走查](./index.md#3-bfcache-与新文档对照)
 
 BFCache 在用户离开页面时，尝试保存完整页面及其 JavaScript heap、DOM 和运行状态；用户通过浏览器前进或后退返回时，可以直接恢复快照。它优化的是历史导航，不是普通刷新，也不是 HTTP response 的缓存。
 
@@ -92,9 +92,9 @@ if (navigationEntry?.type === "back_forward") {
 node docs/browser/core/lifeCycle/index.ts
 ```
 
-打开默认 <http://localhost:5006/>，观察执行 ID、内存计数、草稿与真实事件：
+打开默认 <http://localhost:5006/bfcache>，观察执行 ID、内存计数、草稿与真实事件：
 
-1. 输入草稿，记下 executionId 和计数，从主页面前往 `/between`，再通过历史记录后退。
+1. 输入草稿，记下 executionId 和计数，从 BFCache 页前往 `/between?from=/bfcache`，再通过历史记录后退。
 2. `pageshow.persisted=true` 且执行 ID 保持，说明原文档恢复；本轮不会重新触发 DOMContentLoaded/load。
 3. 再刷新或通过中转页的普通链接返回，对比执行 ID 改变、初始化重新发生。草稿仍可能从 sessionStorage 读回，因此草稿保留本身不能证明命中。
 4. 恢复后实验会请求新的服务端时间，网络仍可能出现请求；不能用“终端零请求”定义 BFCache 命中。

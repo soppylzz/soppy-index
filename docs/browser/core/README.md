@@ -1,11 +1,14 @@
 # 渲染、调度、资源加载与生命周期
 
-[返回仓库首页](../../../README.md) · [存储实验](../storage/README.md) · [缓存实验](../cache/README.md) · [跨上下文通信](../communication/README.md)
+[返回仓库首页](../../../README.md) · [存储实验](../storage/README.md) · [缓存实验](../cache/README.md) · [跨上下文通信](../communication/README.md) · [Observer](../observer/README.md) · [Web API](../api/README.md) · [DOM](../dom/README.md)
 
+- [DOM 与事件](../dom/README.md)：节点、表单状态、布局读写与事件传播。
+- [Web API](../api/README.md)：取消、克隆、文件、Web Components 与 iframe。
 - [Browser Rendering](./rendering.md)：解析、样式、布局、绘制与合成，图示在同目录 `assets/`。
+- [Observer API](../observer/README.md)：DOM 变更、几何交叉、布局盒尺寸与异步通知实验。
 - [Browser Scheduling](./scheduling.md)：浏览器任务调度。
 - [Browser Event Loop](./eventLoop/eventLoop.md)：事件循环笔记。
-- [Page Lifecycle](./lifeCycle/README.md)：页面可见性、BFCache、冻结恢复与离页保存实验。
+- [Page Lifecycle](./lifeCycle/README.md)：页面可见性、History/Location 导航、BFCache、冻结恢复与离页保存实验。
 - [Script Loading](./loading/README.md)：不同 script 的解析与执行流程，以及 resource hint 对照实验。
 
 ## Event Loop 模拟器
@@ -36,4 +39,4 @@ node docs/browser/core/loading/index.ts
 node docs/browser/core/lifeCycle/index.ts
 ```
 
-打开 <http://localhost:5006/>，观察加载事件、前后台切换、历史记录恢复、条件离开提醒与本地上报。按 `Ctrl+C` 停止；完整条件见 [lifeCycle/README.md](./lifeCycle/README.md)。
+打开 <http://localhost:5006/>，选择独立路由，观察加载事件、History/hash、Location 导航、BFCache、前后台切换、离开提醒与本地上报。按 `Ctrl+C` 停止；完整条件见 [lifeCycle/README.md](./lifeCycle/README.md)。

@@ -1,41 +1,47 @@
-# 页面生命周期
+# 页面生命周期与历史导航
 
-[返回浏览器核心目录](../README.md) · [资源加载](../loading/README.md) · [BFCache](./bfcache.md) · [跨上下文通信](../../communication/README.md)
+[返回浏览器核心目录](../README.md) · [资源加载](../loading/README.md) · [跨上下文通信](../../communication/README.md)
 
-本目录承接资源加载中的页面事件，重点讨论页面何时可见、何时暂停、离开后是否保留，以及如何保存和恢复应用状态。
+本目录把文档加载、后台活动、历史记录和页面恢复放在一起理解，每个实验使用独立路由。
 
-- [生命周期笔记](./pageLifecycle.md)：加载状态、页面事件、后台运行、BFCache、冻结与丢弃、离页保存和上报。
-- [BFCache 专题](./bfcache.md)：页面快照、恢复资格、诊断与 HTTP 缓存的区别。
-- [实验走查](./index.md)：操作步骤、判断依据、实际观测与复现边界。
-- [实验服务](./index.ts)：零依赖 HTTP 服务，使用浏览器原生事件。
+- [页面生命周期](./pageLifecycle.md)：加载、可见性、冻结丢弃、离开提醒和上报，含核心代码。
+- [History 与导航](./history.md)：Location、pushState/replaceState、popstate/hashchange、同文档路由和 fallback。
+- [BFCache](./bfcache.md)：原文档恢复、诊断和 HTTP 缓存的区别。
+- [实验走查](./index.md)：分路由操作、预期、实际验证与限制。
+- [实验服务](./index.ts)：Node 原生 HTTP 服务，无新增依赖或构建步骤。
 
 ## 运行
 
-需要 Node >= 22.18 和现代浏览器。在仓库根目录运行：
+需要 Node >= 22.18 和现代浏览器，在仓库根目录执行：
 
 ```bash
 node docs/browser/core/lifeCycle/index.ts
 ```
 
-打开 <http://localhost:5006/>。启动成功后，CLI 会输出入口、操作步骤、观察位置和运行条件；按 `Ctrl+C` 停止。端口冲突时可切换：
+打开 <http://localhost:5006/> 目录页，选择一个主题。成功监听后 CLI 列出全部入口、步骤和观察位置；按 `Ctrl+C` 停止。端口占用时：
 
 ```bash
 PORT=5007 node docs/browser/core/lifeCycle/index.ts
 ```
 
-服务只监听本机 `127.0.0.1`，不要通过 `file://` 运行。草稿与历史日志存在当前标签的 `sessionStorage`，实验期间保持主机、端口和标签一致；`localhost` 与 `127.0.0.1` 属于不同源。上报只发往本地服务，不包含草稿正文。
+仅监听本机 `127.0.0.1`；不要通过 file:// 打开。保持相同 host、端口和标签，localhost 与 127.0.0.1 不同源。PORT 可为 0，由系统分配空闲端口，以 CLI 实际地址为准。
 
-## 实验入口
+## 独立路由
 
-| 实验             | 操作                                                    | 观察                                                      |
-| ---------------- | ------------------------------------------------------- | --------------------------------------------------------- |
-| 加载与重建       | 首次打开、刷新                                          | readyState、DOMContentLoaded、load、pageshow、executionId |
-| 可见性与工作暂停 | 输入草稿后切换标签再返回                                | visibilitychange、草稿检查点、应用轮询暂停与重启          |
-| BFCache          | 从 `/` 到 `/between`，再通过历史记录后退                | pageshow.persisted、executionId、内存计数和草稿           |
-| 离开提醒         | 勾选提醒、编辑、离开；取消离开后确认草稿                | beforeunload 仅在有待确认修改时注册                       |
-| 小数据上报       | 发送 Beacon / keepalive，再查询接收记录                 | 浏览器入队或响应日志与 `/api/reports`                     |
-| 冻结与丢弃       | Chromium 的 `chrome://discards`，按浏览器提供的操作测试 | freeze/resume、wasDiscarded 与新旧执行身份                |
+| 路由          | 主题             | 主要操作与证据                                               |
+| ------------- | ---------------- | ------------------------------------------------------------ |
+| `/`           | 实验目录         | 不安装实验计时器或自动上报                                   |
+| `/loading`    | 加载与重建       | readyState、DOMContentLoaded、load、pageshow，刷新后 ID 改变 |
+| `/visibility` | 前后台与主动暂停 | 草稿检查点、timer/rAF 与应用轮询                             |
+| `/freeze`     | 冻结、恢复与丢弃 | Chromium 工具、freeze/resume、wasDiscarded                   |
+| `/leave`      | 离开提醒         | 编辑后条件注册 beforeunload，确认后移除                      |
+| `/report`     | 离页上报         | Beacon、keepalive、hidden 自动上报及服务端记录               |
+| `/bfcache`    | 历史恢复         | 中转后后退，对比 persisted、ID 与内存计数                    |
+| `/history`    | 同文档历史       | push/replace、hash、前进后退、真实事件与拒绝路径             |
+| `/navigation` | 文档导航         | assign/replace、reload/go(0) 与实际后退目标                  |
 
-HTML 响应使用 `Cache-Control: no-cache`；API 使用 `no-store`。HTTP 缓存与 BFCache 是不同机制，响应头不能保证后退命中 BFCache。接收记录仅保存在服务进程内，最多 100 条，停止服务后消失；页面日志最多 100 条。
+`/history/view/a`、`/history/view/b` 是明确的 History fallback；`/navigation/target` 是导航目标；`/between?from=/bfcache` 或 `/between?from=/leave` 提供安全的中转对照，未知 from 回到 BFCache 实验。`/api/state`、`/api/report`、`/api/reports` 保留原接口。
 
-本实验不模拟系统杀进程，不保证获得后台节流的固定频率，也不把浏览器扩展事件当作跨浏览器承诺。对照步骤与验证范围见 [index.md](./index.md)。
+每个实验有独立的 sessionStorage 日志和草稿 key，页面日志最多 100 条；刷新可读取旧日志，但执行 ID 会区分新旧文档。计时器仅在 visibility/freeze/bfcache 页运行，应用轮询仅在 visibility/freeze 页运行，自动 Beacon 仅在 report 页启用。pagehide 清理计数器，pageshow 恢复，BFCache 命中与否仍由浏览器决定。
+
+HTML 使用 `no-cache`，API 使用 `no-store`。服务器上报列表仅存进程内，最多 100 条，跨标签共享；停止服务不清理浏览器存储。新版本按主题使用独立 key，旧版合并实验的 `lifecycle-lab-journal` / `lifecycle-lab-draft` 不自动迁移或删除。

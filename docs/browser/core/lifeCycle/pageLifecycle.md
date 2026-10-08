@@ -1,6 +1,6 @@
 # 页面生命周期：加载、后台、离开与恢复
 
-[实验入口](./README.md) · [实验走查](./index.md)
+[实验入口](./README.md) · [实验走查](./index.md) · [History 与导航](./history.md)
 
 页面完成加载之后，还可能隐藏、冻结、进入 BFCache，或被浏览器丢弃。理解生命周期的目的，是在能运行时保存必要状态，在恢复时重新判断数据是否仍然有效。
 
@@ -18,7 +18,7 @@
 
 `readystatechange` 通知 readyState 变化；`DOMContentLoaded` 关注 DOM 解析及相关延迟脚本；`load` 还等待会阻塞它的资源。懒加载资源、后续 fetch、定时器及业务初始化不在“所有工作完成”的保证内。顶层 await 还需区分模块开始执行与异步求值完成，详见 [script 加载笔记](../loading/scriptLoading.md)。这些阶段由 [HTML 文档解析与加载算法](https://html.spec.whatwg.org/multipage/parsing.html#the-end) 定义。
 
-`complete` 的页面切到后台仍然可以保持 `complete`；从 BFCache 恢复也不会为了展示而重新触发 DOMContentLoaded 和 load。SPA 的路由切换通常不创建新 Document，应另外跟踪应用路由状态。
+`complete` 的页面切到后台仍然可以保持 `complete`；从 BFCache 恢复也不会为了展示而重新触发 DOMContentLoaded 和 load。SPA 的路由切换通常不创建新 Document，应另外跟踪应用路由状态；pushState、hash 与文档导航的对照见 [History](./history.md)。
 
 demo 在页面前部安装监听，并用执行身份区分新文档：
 
@@ -45,7 +45,7 @@ BFCache 保留页面的 DOM 和 JavaScript 堆等状态，恢复时接着使用�
 
 实验用三个证据共同判断：`pageshow.persisted`、本次执行生成的 `executionId`、没有持久化的计数。草稿恢复本身不能证明 BFCache 命中，因为新文档也能从 sessionStorage 读取它。
 
-恢复后要重新核对时间、身份与业务数据：缓存期间会话可能过期，库存可能变化，连接也可能失效。实验在 pageshow 时获取新的服务端时间；业务中应按有效期刷新数据，并用幂等初始化避免重复注册监听或创建轮询。
+恢复后要重新核对时间、身份与业务数据：缓存期间会话可能过期，库存可能变化，连接也可能失效。BFCache、可见性和冻结实验在 pageshow 时获取新的服务端时间；业务中应按有效期刷新数据，并用幂等初始化避免重复注册监听或创建轮询。
 
 对应 demo 的恢复与离开分支：
 
@@ -80,7 +80,8 @@ hidden 是尽早保存小型检查点和统计的实用时机，也适合暂停�
 
 ```js
 function syncPolling() {
-  const shouldPoll = document.visibilityState === "visible" && !frozen
+  const shouldPoll =
+    ["visibility", "freeze"].includes(mode) && document.visibilityState === "visible" && !frozen
   if (shouldPoll && pollingTimer === null) {
     pollingTimer = setInterval(() => {
       pollingTicks++
@@ -97,7 +98,7 @@ document.addEventListener("visibilitychange", () => {
 })
 ```
 
-这里的 `frozen`、`pollingTimer` 和 `pollingTicks` 是页面内状态；timer/rAF 对照计数另行记录。
+这里的 `mode` 是当前实验主题，`frozen`、`pollingTimer` 和 `pollingTicks` 是页面内状态；timer/rAF 对照计数另行记录；这些工作只在对应主题路由中启用。
 
 ## 冻结、丢弃与终止
 
