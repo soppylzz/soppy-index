@@ -1,6 +1,6 @@
 # HTML 资源加载与 Script 实验
 
-[返回浏览器核心目录](../README.md) · [仓库首页](../../../../README.md)
+[返回浏览器核心目录](../README.md) · [仓库首页](../../../../README.md) · [公共样式与工具](../../../demo/README.md)
 
 本目录聚焦不同 script 的 HTML 解析、资源准备和执行流程，承接 [Browser Rendering](../rendering.md) 的 Parse 部分。
 

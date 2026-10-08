@@ -2,6 +2,8 @@
 
 [运行方式](./README.md) · [生命周期](./pageLifecycle.md) · [History](./history.md) · [BFCache](./bfcache.md) · [实现](./index.ts)
 
+公共模块迁移后的知识 / demo 对应复核与实际运行记录见[集中验证](../../../demo/validation.md)；下方早期记录保留各自的环境与覆盖边界。
+
 先在仓库根目录运行 `node docs/browser/core/lifeCycle/index.ts`，打开默认 <http://localhost:5006/> 实验目录，选择独立主题路由。页面事件同步输出到 Console，终端只显示 HTTP 请求/响应。日志按发生顺序追加，最多保留 100 条，并用执行 ID 前缀区分文档。每个实验的历史日志与草稿独立保存在 sessionStorage；读取旧日志不代表旧文档仍然存活。
 
 ## 1. 初次加载与刷新
@@ -90,14 +92,14 @@
 
 所有 HTML 路由支持 GET/HEAD，采用 no-cache；History fallback 仅允许两个已知子路径。`/history/view/missing`、未知脚本与未知 API 仍应为 404，POST 文档为 405。终端请求日志、浏览器事件和 UI 操作结果需要分别判读。
 
-## 本轮验证记录
+## 实际验证记录
 
-2026-10-08（Asia/Shanghai），macOS、Node v22.23.2、Chrome 153.0.8010.48。Playwright 使用独立临时上下文验证按钮与路由；另启动原生 Headless Chrome，通过 CDP 验证真实可见性、受控冻结和 BFCache。临时脚本、输出及配置均位于仓库外 `/tmp/lifecycle-validation`，无新增项目依赖。
+以下保留 2026-10-08 路由拆分后的实测结果；本次文档整理未重新执行实验。环境为 macOS、Node v22.23.2、Chrome 153.0.8010.48（Asia/Shanghai）。Playwright 使用独立临时上下文验证按钮与路由；另启动原生 Headless Chrome，通过 CDP 验证真实可见性、受控冻结和 BFCache。临时脚本、输出及配置均位于仓库外 `/tmp/lifecycle-validation`，无新增项目依赖。
 
-| 验证项         | 本轮实际结果                                                                                                                     |
+| 验证项         | 当次实际结果                                                                                                                     |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | 路由分离       | 八条主题路由均加载，无未捕获脚本异常；草稿、提醒、上报控件只在相应页面出现                                                       |
-| push / replace | URL 与 UI 同步改变，executionId 不变；本轮 length 从 11 到 12，replace 后仍为 12，按钮操作没有文档请求                           |
+| push / replace | URL 与 UI 同步改变，executionId 不变；当次 length 从 11 到 12，replace 后仍为 12，按钮操作没有文档请求                           |
 | History 遍历   | 后退回 `/history`、前进到 B，真实 popstate 更新计数，ID 保持                                                                     |
 | hash 对照      | pushState 改 hash 不增加 hashchange；location.hash 新值产生真实事件；重复当前值后 150ms 内事件计数不变                           |
 | 拒绝路径       | 实际捕获跨源 URL 的 SecurityError、函数 state 的 DataCloneError                                                                  |
@@ -118,24 +120,4 @@ Playwright 默认环境中标签切换仍返回 visible，且 CDP 冻结命令�
 
 上面的无事件短时观察仅描述本次样本；pushState 的事件规则同时依据标准，不从等待 150ms 推出普遍结论。Firefox/Safari、移动端、真实离开对话框展示、chrome://discards 自然丢弃、滚动恢复、系统杀进程与断网重试未验证，按对应路由手动复核。
 
-## 旧版合并页面验证记录
-
-以下保留拆分前的记录作对照；当前实现以“本轮验证记录”为准。
-
-2026-10-08，Node v22.23.2、macOS、Headless Chrome 153.0.8010.48，独立临时浏览器配置，通过 DevTools Protocol 验证。测试脚本与配置留在仓库外。
-
-| 验证项       | 实际结果                                                                            |
-| ------------ | ----------------------------------------------------------------------------------- |
-| 初次加载     | 观察到 loading → interactive → DOMContentLoaded → complete → load → pageshow(false) |
-| 提醒监听     | 仅勾选不注册；编辑后注册；确认后移除                                                |
-| 真实标签切换 | 观察到 hidden/visible 与应用轮询暂停/恢复                                           |
-| 受控冻结     | Page.setWebLifecycleState 触发真实 freeze/resume；不代表自然内存压力策略            |
-| 历史记录后退 | pageshow.persisted=true，executionId 与草稿保持；没有重新初始化文档                 |
-| 刷新对照     | executionId 改变，草稿从 sessionStorage 恢复                                        |
-| 上报         | Beacon 与 keepalive 的元数据均出现在服务端接收列表                                  |
-| 服务边界     | GET/HEAD、404/405、非法 JSON 400、超过 8 KiB 的请求体 413、端口冲突提示均通过       |
-| 浏览器异常   | 未捕获到 Runtime.exceptionThrown                                                    |
-
-本次 BFCache 恢复日志中出现 resume → pageshow(persisted=true)，恢复时页面仍为 hidden，说明 pageshow 不等于“当前标签一定可见”。应用轮询仍应依据 visibilityState 决定是否启动。
-
-事件的精确毫秒和跨任务源插入顺序不属于保证。未自动验证离开对话框的实际展示、chrome://discards 的丢弃恢复、移动端杀进程与跨浏览器策略，需按上述步骤在目标环境继续观察。
+另有拆分前同日合并页面的有效观察：BFCache 恢复日志出现 resume → pageshow(persisted=true)，恢复时页面仍为 hidden。这条历史记录说明 pageshow 不等于当前标签可见，不作为当前所有路由的重新实测；应用轮询仍应依据 visibilityState 决定是否启动。

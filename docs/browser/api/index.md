@@ -2,6 +2,8 @@
 
 [运行与导航](./README.md) · [常用 API](./webApi.md) · [Web Components](./webComponents.md) · [iframe](./iframe.md)
 
+公共模块迁移后的知识 / demo 对应复核与实际运行记录见[集中验证](../../demo/validation.md)；下方早期记录保留各自的环境与覆盖边界。
+
 ## 1. 启动与观察
 
 需要 Node >= 22.18、现代浏览器，在仓库根目录执行：

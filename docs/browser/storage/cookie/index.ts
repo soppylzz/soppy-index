@@ -1,18 +1,21 @@
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http"
+import {
+  demoHead,
+  readPort,
+  assertDistinctPorts,
+  serveDemoAsset,
+  listenOnLoopback,
+  closeServers,
+  logHttpRequest,
+  ascii,
+} from "../../../demo/server.ts"
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http"
 import { randomUUID } from "node:crypto"
 
 /* ==================== config ==================== */
 
-function readPort(name: string, fallback: number): number {
-  const port = Number(process.env[name] ?? fallback)
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error(`${name} must be an integer from 1 to 65535`)
-  }
-  return port
-}
-
 const BANK_PORT = readPort("BANK_PORT", 3000)
 const EVIL_PORT = readPort("EVIL_PORT", 3001)
+assertDistinctPorts(BANK_PORT, EVIL_PORT)
 const BANK = `http://localhost:${BANK_PORT}`
 const EVIL = `http://127.0.0.1:${EVIL_PORT}`
 
@@ -65,22 +68,14 @@ function page(title: string, body: string): string {
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
-<style>
-  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; line-height: 1.7; color: #343a40; }
-  .card { border: 1px solid #dee2e6; border-radius: 8px; padding: 14px 20px; margin: 16px 0; }
-  .good { background: #ebfbee; border-color: #2b8a3e; }
-  .bad { background: #fff0f6; border-color: #c2255c; }
-  .muted { color: #868e96; font-size: 14px; }
-  code { background: #f1f3f5; padding: 1px 5px; border-radius: 4px; }
-  pre { background: #f1f3f5; padding: 12px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
-</style>
+${demoHead}
 </head>
-<body>
+<body class="demo-page"><main>
 <h1>${esc(title)}</h1>
 ${body}
-</body>
+</main></body>
 </html>`
 }
 
@@ -94,12 +89,15 @@ function sendRedirect(res: ServerResponse, location: string): void {
   res.end()
 }
 
-function logRequest(name: string, req: IncomingMessage, res: ServerResponse, path: string): void {
+function logRequest(name: string, req: IncomingMessage, res: ServerResponse): void {
   const sid = parseCookies(req.headers.cookie).get("sid")
   res.setHeader("Cache-Control", "no-store")
   res.on("finish", () => {
-    console.log(
-      `[${name}] ${req.method} ${path} -> ${res.statusCode} cookie=${sid ?? "absent"} origin=${req.headers.origin ?? "-"}`
+    logHttpRequest(
+      req,
+      res.statusCode,
+      name,
+      `cookie=${sid ?? "absent"} origin=${req.headers.origin ?? "-"}`
     )
   })
 }
@@ -118,8 +116,9 @@ function sessionBadge(session: { variant: Variant; id: string } | null): string 
 /* ==================== bank (victim) ==================== */
 
 const bank = createServer(async (req, res) => {
+  if (serveDemoAsset(req, res)) return
   const url = new URL(req.url ?? "/", BANK)
-  logRequest("bank", req, res, url.pathname)
+  logRequest("bank", req, res)
 
   if (url.pathname === "/login") {
     const variant: Variant = url.searchParams.get("variant") === "legacy" ? "legacy" : "hardened"
@@ -238,7 +237,7 @@ const bank = createServer(async (req, res) => {
       <div class="card">
         <p>余额：<strong>¥ 8,848.00</strong></p>
         <p class="muted">如果这个页面是点击 evil 站点上的链接跳转而来的：跨站顶级 GET 导航即使
-        hardened（SameSite=Lax）也携带 Cookie——Lax 只拦跨站 POST 和子资源请求。</p>
+        hardened（SameSite=Lax）通常也可携带 Cookie——Lax 通常不随跨站子资源或非安全方法请求发送，但允许顶层安全导航；结果仍受浏览器策略影响。</p>
       </div>
       <p><a href="/">返回银行</a></p>
     `
@@ -252,7 +251,7 @@ const bank = createServer(async (req, res) => {
     const session = sessionOf(req)
     if (session) {
       console.log(
-        `[bank] !!! GET /gift executed with ${session.variant} session — ¥188 sent to ${to}`
+        `[bank] !!! GET /gift executed with ${session.variant} session; CNY 188 sent to ${ascii(to)}`
       )
     }
     if (req.headers["sec-fetch-dest"] === "image") {
@@ -313,8 +312,9 @@ const bank = createServer(async (req, res) => {
 /* ==================== evil (attacker) ==================== */
 
 const evil = createServer((req, res) => {
+  if (serveDemoAsset(req, res)) return
   const url = new URL(req.url ?? "/", EVIL)
-  logRequest("evil", req, res, url.pathname)
+  logRequest("evil", req, res)
 
   if (url.pathname === "/") {
     sendHtml(
@@ -433,22 +433,6 @@ const evil = createServer((req, res) => {
 
 /* ==================== demo ==================== */
 
-let listeningServers = 0
-
-function listen(server: Server, port: number, name: string): void {
-  server.on("error", (error) => {
-    console.error(
-      `[${name}] failed to listen on :${port}; choose another port with BANK_PORT/EVIL_PORT`,
-      error
-    )
-    process.exit(1)
-  })
-  server.listen(port, "127.0.0.1", () => {
-    listeningServers++
-    if (listeningServers === 2) printDemoGuide()
-  })
-}
-
 function printDemoGuide(): void {
   console.log(`cookie demo
   bank   (victim)   ${BANK}
@@ -471,7 +455,24 @@ notes:
   - walkthrough: docs/browser/storage/cookie/README.md`)
 }
 
-listen(bank, BANK_PORT, "bank")
-listen(evil, EVIL_PORT, "evil")
+try {
+  await listenOnLoopback(bank, BANK_PORT)
+  await listenOnLoopback(evil, EVIL_PORT)
+  for (const server of [bank, evil])
+    server.on("error", (error) => {
+      console.error(`Cookie server failed: ${ascii(error.message)}`)
+      process.exitCode = 1
+      closeServers(bank, evil)
+    })
+  process.once("SIGINT", () => closeServers(bank, evil))
+  process.once("SIGTERM", () => closeServers(bank, evil))
+  printDemoGuide()
+} catch (error) {
+  console.error(
+    `Cookie startup failed: ${ascii((error as Error).message)}. Choose free BANK_PORT/EVIL_PORT values.`
+  )
+  process.exitCode = 1
+  closeServers(bank, evil)
+}
 
 export {}

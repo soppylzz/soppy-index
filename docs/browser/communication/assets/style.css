@@ -1,64 +1,6 @@
-body {
-  font:
-    15px/1.7 system-ui,
-    sans-serif;
-  background: #f4f6f8;
-  color: #243047;
-  margin: 0;
-}
-main {
-  max-width: 1000px;
-  margin: 28px auto;
-  padding: 0 20px;
-}
-section {
-  background: white;
-  border: 1px solid #dce2e9;
-  border-radius: 10px;
-  padding: 18px;
-  margin: 18px 0;
-}
-h1,
-h2 {
-  line-height: 1.3;
-}
-h2 {
-  font-size: 19px;
-}
-button {
-  padding: 7px 12px;
-  margin: 4px;
-  border: 1px solid #aab9cc;
-  border-radius: 5px;
-  background: #eef4fc;
-  color: #174d91;
-  cursor: pointer;
-}
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-td,
-th {
-  border: 1px solid #dce2e9;
-  padding: 8px;
-  text-align: left;
-}
 iframe {
   width: 100%;
   height: 260px;
-  border: 1px solid #dce2e9;
+  border: 1px solid #ccd6e5;
   margin-top: 12px;
-}
-.hint,
-#status {
-  color: #57657a;
-}
-#log {
-  max-height: 380px;
-  overflow: auto;
-  overflow-wrap: anywhere;
-  font:
-    13px/1.7 ui-monospace,
-    monospace;
 }

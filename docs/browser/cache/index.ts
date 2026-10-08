@@ -1,11 +1,15 @@
+import {
+  demoHead,
+  readPort,
+  serveDemoAsset,
+  startServer,
+  logHttpRequest,
+} from "../../demo/server.ts"
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http"
 
 /* ==================== config ==================== */
 
-const PORT = Number(process.env.PORT ?? 5003)
-if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
-  throw new Error("PORT must be an integer between 0 and 65535")
-}
+const PORT = readPort("PORT", 5003, true)
 
 /* ==================== cache-controlled assets ==================== */
 
@@ -58,7 +62,7 @@ function assetSvg(asset: Asset): string {
 /* ==================== conditional request handling ==================== */
 
 function logRequest(req: IncomingMessage, status: number, note: string): void {
-  console.log(`[cache-lab] ${req.method} ${req.url} -> ${status} ${note}`)
+  logHttpRequest(req, status, "cache-lab", note)
 }
 
 function validatorNote(req: IncomingMessage): string {
@@ -150,22 +154,6 @@ function sendJson(res: ServerResponse, data: unknown, status = 200): void {
 /* ==================== pages ==================== */
 
 // client-side logic only; no template literals inside so the TS file needs no escaping
-const STYLES = `
-  body { font-family: system-ui, sans-serif; max-width: 860px; margin: 32px auto; padding: 0 16px; line-height: 1.7; color: #343a40; }
-  .card { border: 1px solid #dee2e6; border-radius: 8px; padding: 14px 20px; margin: 16px 0; }
-  .muted { color: #868e96; font-size: 14px; }
-  code { background: #f1f3f5; padding: 1px 5px; border-radius: 4px; }
-  button { margin: 2px 4px 2px 0; padding: 4px 10px; cursor: pointer; }
-  .table-wrap { overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: 14px; }
-  th, td { border: 1px solid #dee2e6; padding: 6px 10px; text-align: left; vertical-align: middle; }
-  th { background: #f8f9fa; }
-  img { vertical-align: middle; }
-  ul, ol { padding-left: 20px; }
-  #probe-log { margin: 8px 0 0; padding-left: 20px; font-size: 14px; }
-  #probe-log li { margin: 2px 0; }
-  a { color: #1971c2; }
-`
 
 const LAB_PAGE = `<!doctype html>
 <html lang="zh-CN">
@@ -173,9 +161,9 @@ const LAB_PAGE = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HTTP Cache Demo — 复用情况观察</title>
-<style>${STYLES}</style>
+${demoHead}
 </head>
-<body>
+<body class="demo-page"><main>
 <h1>HTTP Cache Lab</h1>
 <p class="muted">本页是一个按真实部署策略缩小的站点：文档本身用 <code>no-cache</code>（每次复用前都重新验证），
 下方五张图片各持一种缓存策略。终端会打印每一个真正到达服务器的请求；
@@ -241,7 +229,7 @@ const LAB_PAGE = `<!doctype html>
   </p>
   <p class="muted">推荐玩法：先修改 <code>fresh.svg</code> 的服务器版本，再依次点 force-cache（无网络请求、返回旧版本）和
   no-cache（条件请求拿到新版本 200），对比「强制用缓存」与「强制验证」。</p>
-  <ul id="probe-log" role="log" aria-live="polite" aria-label="HTTP 缓存实验日志"></ul>
+  <ul class="demo-log" id="probe-log" role="log" aria-live="polite" aria-label="HTTP 缓存实验日志"></ul>
 </div>
 
 <script>
@@ -250,14 +238,7 @@ const LAB_PAGE = `<!doctype html>
   let probeRunning = false
   performance.setResourceTimingBufferSize(1000)
 
-  function logProbe(message) {
-    const row = "[" + new Date().toISOString() + "] " + message
-    const item = document.createElement("li")
-    item.textContent = row
-    probeLog.appendChild(item)
-    while (probeLog.children.length > 50) probeLog.removeChild(probeLog.firstElementChild)
-    console.log(row)
-  }
+  const logProbe = globalThis.Demo.createLogger(probeLog, { limit: 50, clock: "utc", console: true })
 
   function latestEntry(name, since = 0, initiatorType = "") {
     const url = new URL("/assets/" + name, location.href).href
@@ -330,12 +311,13 @@ const LAB_PAGE = `<!doctype html>
   refreshTable()
   void refreshVersions()
 </script>
-</body>
+</main></body>
 </html>`
 
 /* ==================== demo ==================== */
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+  if (serveDemoAsset(req, res)) return
   const url = new URL(req.url ?? "/", "http://localhost")
   const pathname = url.pathname
   res.on("finish", () => {
@@ -405,16 +387,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
   sendError(404, "Not Found")
 })
 
-server.on("error", (error: NodeJS.ErrnoException) => {
-  console.error(
-    error.code === "EADDRINUSE"
-      ? "[cache-lab] port " + PORT + " is in use. Try PORT=5007 node docs/browser/cache/index.ts"
-      : "[cache-lab] failed to listen: " + error.message
-  )
-  process.exitCode = 1
-})
-
-server.listen(PORT, "127.0.0.1", () => {
+startServer(server, PORT, () => {
   const address = server.address()
   if (!address || typeof address === "string") return
   console.log(`http cache demo

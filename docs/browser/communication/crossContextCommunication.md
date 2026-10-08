@@ -213,7 +213,7 @@ port.postMessage({ v: 1, type: "port-ready", sender: identity })
 | storage                            | 应用自己编码字符串             | JSON 不保留 Date、Map、循环引用等语义 |
 | Window / MessagePort / worker.port | 结构化克隆，可传 transfer list | 普通对象复制；转移资源从原持有方分离  |
 
-结构化克隆支持循环引用和许多内建类型，但不是任意对象的完整复制；函数、DOM 节点不可克隆，属性描述符、原型链等也不会按原样复制，见 [克隆算法说明](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm)。发送端序列化失败与接收端反序列化导致的 `messageerror` 要区分；demo 的函数实验只验证前者。
+可克隆类型、循环引用与原型等通用语义见 [常用 Web API](../api/webApi.md#2-url-与结构化克隆)。通信还要区分失败发生在哪一端：发送端序列化失败可能同步抛错，接收端反序列化失败可触发 messageerror；demo 的函数实验只验证前者。即使值可被 structuredClone 复制，也仍需符合具体通信接口的参数及接收条件。
 
 ArrayBuffer 转移后发送端 `byteLength=0`，接收端仍读到 8 字节和首字节 42。typed array 本身不是 transferable，可转移其底层 buffer。transfer list 指定资源的交付方式，不会自动把资源放入消息；本实验把 buffer 放在 `data.buffer`，port2 通过 `event.ports` 取出。MessagePort 转移后旧持有方不能再使用它；BroadcastChannel 对象不是可转移端口。参见 [Transferable objects](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects)。本模块不演示 SharedArrayBuffer / 跨源隔离。
 
@@ -244,11 +244,23 @@ request(
 | 匹配 request id 的 ack      | 接收方按约定报告处理结果 | 整个分布式系统的 exactly-once 或持久提交 |
 | 超时                        | 期限内未见匹配 ack       | 失败发生在哪层、业务一定未执行           |
 
-本实验 `v=1` 标记协议版本，用 UUID request id 关联 ack，用 scope 区分传输路径；pending 最多 30 条，1800ms 后移除定时器和记录。ack 有 `ok` / `error` 两种状态。端口 silent 操作记录真实接收而不执行、不 ack，用来与业务 error ack 对照。重连、端口重建和页面离开会取消相应等待。
+本实验 v=1 标记协议版本，用 UUID request id 关联 ack，用 scope 区分传输路径。顺着 [main.js](./assets/main.js) 的 `request()` 与 `receive()` 阅读，可以把一次请求串成以下过程：
+
+```text
+request -> 创建 envelope -> 登记 pending -> send
+                                            |
+接收端 -> 校验来源及 schema -> 处理请求 -> 返回 ack
+                                            |
+发送端 receive -> 校验 schema / scope -> 匹配 pending -> 清理并显示结果
+```
+
+来源检查由具体窗口或端口入口负责；receive 的通用校验不能代替 origin / source 检查。pending 最多 30 条，发送前登记 id、scope 与 1800ms 定时器，便于匹配后续确认。发送调用返回只记录本地调用结果；同步抛错则在 request 的 catch 中立即清理该等待。
+
+接收端校验通过后才进入操作分支。主页面 receive 对可回应的 request 回 ack；iframe 的 fail 返回 error ack，端口 silent 只记录接收，不执行业务处理也不 ack。发送端收到合法 ack 后还要匹配 pending 的 id 与 scope；匹配成功才取消定时器、删除记录并显示 ok / error。迟到或重复 ack 会被忽略，不能将“收到一条 ack 日志”直接当作当前请求成功。
 
 1800ms 和容量上限是应用策略；后台节流会改变实际等待时长。业务要重试时应复用业务幂等键，并由接收方去重；不能简单换 id 重发就声称只执行一次。本实验不自动重试、不提供持久化和身份签名。origin / source 验证也不防止允许源里的恶意脚本。
 
-对应 [main.js](./assets/main.js) 的 pending 核心步骤如下，省略容量检查、发送失败及断开取消分支：
+对应上述发送与确认阶段的 pending 核心步骤如下，省略容量检查、发送失败及断开取消分支：
 
 ```js
 const timer = setTimeout(() => {
@@ -267,7 +279,7 @@ if (item && item.scope === reply.scope) {
 }
 ```
 
-这是发送端与接收回调中的两个片段，`data`、`send` 和 `reply` 分别来自 request 包装器及已验证的 ack。iframe 的 `fail` 分支回 `ack(data, "实验业务拒绝", "error")`；`silent` 分支只记录接收并 return。超时只清理等待，不能撤销已执行的远端业务。
+这是发送端 request 与发送端接收 ack 时的两个片段，并不是接收方的完整处理器；data、send 和 reply 分别来自 request 包装器及已验证的 ack。正常确认、同步发送失败、超时、主动取消都需要移除对应 pending，确认 / 失败 / 主动取消还清除其定时器；重连、端口重建和 pagehide 通过 cancel 清理相应等待。超时只结束本地等待，不能撤销已执行的远端业务。
 
 ## 5. 关闭、冻结与恢复
 

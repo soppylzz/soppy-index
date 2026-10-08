@@ -38,7 +38,16 @@ iframe 的 allow 用于配置 Permissions Policy，与 sandbox 的职责不同�
 
 ## 3. load、脚本就绪与业务 ack
 
-iframe load 是容器加载相关事件，不能证明应用监听已注册，更不能证明请求已处理。本实验子文档先报告 ready；父页注册晚于子页时，会用精确来源发送 hello 让已运行的子页再次报告就绪。重载后清理旧 request id 和超时，等待新文档 ready。
+iframe load 是容器加载相关事件，不能证明应用监听已注册，更不能证明请求已处理。本节关注父页如何确认子文档已准备好；消息校验、确认与超时的通用设计见 [通信笔记](../communication/crossContextCommunication.md#4-接收业务确认与可靠性)。
+
+对应 [lab.js](./assets/lab.js) 的 `frames()` 与 [frame.js](./assets/frame.js)，握手由以下步骤组成：
+
+1. 子页 connect 先注册 message 监听，再发送 ready。
+2. 父页根据 contentWindow 与预期 origin 识别子页，校验 ready 的 kind / role 后记录就绪；crossReady 只表示跨源实验子页已报告就绪。
+3. 若初始 ready 早于父页监听，父页在初始化和 iframe load 时向同源、跨源子页发送精确 targetOrigin 的 hello，子页再次发送 ready。不透明子页不参与这个可信握手。
+4. 请求只有收到匹配 id 的 ack 才完成确认；重载跨源页时重置就绪并清理旧等待，新的 load 本身不会置 crossReady 为 true。
+
+ready 是本实验的应用协议，不是浏览器提供的持续在线保证。源码用 load 重置跨源状态，说明连接状态需要随文档变化重新建立。
 
 跨源子文档只接受可信父窗口、精确 origin 和合法 probe；以下摘取 [frame.js](./assets/frame.js) 的处理分支，省略 hello、日志、监听清理和完整字段约束：
 
@@ -53,7 +62,7 @@ window.addEventListener("message", (event) => {
 })
 ```
 
-完整实现限制 id 长度，父页也按 iframe 的 contentWindow、预期 origin、role、kind、id、ok 校验。合法消息由子页处理后回 ack；非法 id 数字由子页拒绝并记录，父页在 1500ms 后报告未收到确认。超时是应用策略，不证明子页未收到。[postMessage 官方文档](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage)
+片段对应子页 probe 分支，完整子页还限制 id 长度；父页则校验来源、角色、消息结构，并用 pending 匹配 ack。合法请求由子页处理后回 ack，非法数字 id 在子页被拒绝，父页随后超时。1500ms 是本实验策略，操作与观察位置见 [走查](./index.md#5-iframe访问拒绝与处理确认)；更完整的拒绝路径、transferable 与端口协议见 [通信笔记](../communication/crossContextCommunication.md)。[postMessage 官方文档](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage)
 
 子页使用外置 defer classic script，便于 allow-scripts 的不透明上下文直接加载；它不依赖 module 的 CORS 获取。这里没有放宽消息来源检查。其他窗口伪造 origin/source、transferable、端口和完整可靠性机制见 [通信笔记](../communication/crossContextCommunication.md)。
 

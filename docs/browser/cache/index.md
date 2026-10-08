@@ -2,6 +2,8 @@
 
 [运行方式](./README.md) · [知识笔记](./httpCache.md) · [实现](./index.ts)
 
+公共模块迁移后的知识 / demo 对应复核与实际运行记录见[集中验证](../../demo/validation.md)；下方早期记录保留各自的环境与覆盖边界。
+
 运行 `node docs/browser/cache/index.ts`，打开默认 <http://localhost:5003/>。取消 DevTools 的 Disable cache；需要重新开始时清除该源缓存并移除干扰的 Service Worker，或使用独立浏览器配置。不要修改资源 URL 来“刷新缓存”，否则比较的是另一个缓存 key。
 
 ## 1. 三种结果与观察位置

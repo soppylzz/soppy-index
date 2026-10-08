@@ -45,7 +45,7 @@ target.append(child)
 
 这三次同步修改先完成，回调才有机会运行；同一批可能包含多条 record。不要把回调次数等同于修改次数，也不要认为批量通知会把所有变更合并成一个最终值。`record.type` 区分三种变化，`addedNodes` / `removedNodes` 是节点列表，`oldValue` 只在相应选项开启时提供。record 不携带通用 newValue；回调中读取 target 属性得到的是那一刻的当前状态，并非每条 record 的历史新值。
 
-`textNode.data = ...` 改变字符数据；给元素设置 `textContent` 通常替换其子节点，观察到的类型可能是 childList。DOM 结构不变而 CSS 改变布局时，应使用 ResizeObserver。[MutationObserver 官方说明](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)
+`textNode.data = ...` 改变字符数据；给元素设置 `textContent` 通常替换其子节点，观察到的类型可能是 childList。若要观察布局盒尺寸是否变化，应使用 ResizeObserver；它也不能替代对位置或交叉状态的判断。[MutationObserver 官方说明](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)
 
 ### 读取队列与断开
 
@@ -142,6 +142,27 @@ observer.observe(target)
 ## 5. 生命周期、能力与结论边界
 
 完整脚本在 pagehide 断开 observer、取消 rAF 和观察期监听；pageshow.persisted 按此前状态恢复。手动断开后恢复仍保持断开。页面关闭后不再依赖该文档继续处理通知，也不要把自动垃圾回收当作组件卸载时的清理方案。相关保证与浏览器 BFCache 策略见 [生命周期笔记](../core/lifeCycle/pageLifecycle.md)和 [BFCache](../core/lifeCycle/bfcache.md)。
+
+[lab.js](./assets/lab.js) 的 `stop()` 与 `connect()` 分别管理资源和本次连接的身份：
+
+| 源码步骤                                | 作用                                                 |
+| --------------------------------------- | ---------------------------------------------------- |
+| stop 先递增 generation                  | 使旧连接捕获的 token 失效                            |
+| disconnect、abort、cancelAnimationFrame | 分别停止观察、移除观察期事件监听、取消已登记的反馈帧 |
+| connect 捕获当前 generation 为 token    | 为本次注册建立身份，而不是只看一个 connected 布尔值  |
+| 回调与反馈写入检查 active()             | 只有 connected 且 token === generation 才继续处理    |
+
+例如连接 A 断开后建立 B，connected 又变成 true；如果只检查布尔值，就无法识别旧 A 的任务。源码闭包里的 token 仍属于 A，因此代次检查能将它拒绝。下面摘出这一控制关系，省略 observer 注册与其他清理：
+
+```js
+// In stop().
+generation++
+// In connect(), after stopping the previous connection.
+const token = generation
+const active = () => connected && token === generation
+```
+
+资源清理用于停止后续工作，代次校验用于过滤旧连接的工作，二者职责不同。它不表示所有 observer 在 disconnect 后都必然继续回调：MutationObserver 会丢弃待交付记录，IntersectionObserver 的队列语义不同，ResizeObserver 也没有 takeRecords；应分别按前文处理。ResizeObserver 的反馈帧在写入前再次检查 active，避免只在排帧时检查、执行时却已重连。
 
 能力检测用 `"ResizeObserver" in window` 等判断；构造、observe 仍捕获异常。尺寸字段不存在时页面标注“不可用”，不伪造设备像素数据。无原生 API 时可以针对业务选择降级；scroll / resize 监听不能完全替代这三种信号。
 

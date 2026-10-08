@@ -2,6 +2,8 @@
 
 [运行与导航](./README.md) · [DOM / CSSOM 笔记](./dom.md) · [事件笔记](./domEvent.md) · [浏览器实现](./assets/lab.js)
 
+公共模块迁移后的知识 / demo 对应复核与实际运行记录见[集中验证](../../demo/validation.md)；下方早期记录保留各自的环境与覆盖边界。
+
 ## 1. 准备
 
 Node >= 22.18，在仓库根目录运行：
@@ -99,6 +101,6 @@ node docs/browser/dom/index.ts
 
 未覆盖 Firefox、Safari、移动端、不同滚动条策略、SVG / 多分片 / 复杂 transform、真实触屏与滚轮滚动性能、布局 Performance trace 的逐次事件统计。布局耗时不是跨设备结论；可按第 3 节在目标环境录制并补充记录。
 
-未在该路由验证 Shadow DOM、iframe 与 closed root 的事件路径；分别由 [Web Components](../api/index.md)和 [iframe](../api/iframe.md)讨论，其中 open root 与 iframe 的核心路径在 API demo 本次实际验证。原生文件拖放、表单提交默认行为与框架 synthetic event 不在此实验范围。
+未在该路由验证 Shadow DOM、iframe 与 closed root 的事件路径；分别由 [Web Components](../api/index.md)和 [iframe](../api/iframe.md)讨论，其中 open root 与 iframe 的核心路径在 API demo 本次实际验证。原生文件拖放、表单提交默认行为与框架 synthetic event 不在此实验范围。[事件笔记](./domEvent.md#vue-3一个原生监听如何执行多个处理函数)另有 Vue 3.5.22 源码分析及行为推导；本页实验未加载 Vue，不将它计入上述 demo 实测表。
 
 BFCache 的断开状态恢复、tree / layout 页恢复尚未单独实测。关闭浏览器进程不保证 pagehide 到达，不能用本地清理日志推断所有关闭场景。

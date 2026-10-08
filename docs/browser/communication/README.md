@@ -1,6 +1,6 @@
 # 跨上下文通信
 
-[仓库首页](../../../README.md) · [浏览器核心](../core/README.md) · [Web Storage](../storage/webStorage/README.md) · [页面生命周期](../core/lifeCycle/README.md)
+[仓库首页](../../../README.md) · [浏览器核心](../core/README.md) · [Web Storage](../storage/webStorage/README.md) · [页面生命周期](../core/lifeCycle/README.md) · [公共样式与工具](../../demo/README.md)
 
 本模块讨论标签页、iframe 和 worker 之间如何找到接收方、传递数据，以及判断消息是否被处理。
 

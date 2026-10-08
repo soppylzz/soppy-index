@@ -82,15 +82,17 @@ Cache Storage 不自动按 Cache-Control 的 max-age 到期，也不在 match �
 
 一次所谓“后台网络更新”仍可能获得 HTTP cache 中的响应，未必真正访问源站。需要 revalidation 时选择合理的 fetch cache mode 与服务端标头，结合 Network 和服务器证据判断，详见 [HTTP Cache](../cache/httpCache.md)。
 
-| 策略                   | 返回路径                            | 更新与失败责任                                    |
-| ---------------------- | ----------------------------------- | ------------------------------------------------- |
-| cache first            | 命中缓存即返回，否则 fetch          | 内容版本、未命中回退、过时淘汰                    |
-| network first          | 先 fetch，失败 / 超时按规则回退缓存 | 区分网络失败、HTTP 错误、业务错误                 |
-| stale-while-revalidate | 命中时先返回，同时更新              | 在 worker 中延长更新事件寿命，处理失败与竞态      |
-| network only           | 不使用 Cache Storage                | fetch 仍可能使用 HTTP cache                       |
-| cache only             | 仅查询本地                          | 未命中需明确响应，不返回 undefined 给 respondWith |
+下表集中比较应用如何读取、更新和淘汰响应副本。示例场景只是选型起点，最终取决于业务可接受的新鲜度及失败反馈：
 
-这里的 stale-while-revalidate 是应用算法，与 HTTP Cache-Control 的同名扩展属于不同层，不能混为浏览器自动执行的同一流程。
+| 策略                   | 返回路径                            | 可考虑的场景                         | 更新与失败责任                                                    |
+| ---------------------- | ----------------------------------- | ------------------------------------ | ----------------------------------------------------------------- |
+| cache first            | 命中缓存即返回，否则 fetch          | 带内容哈希的静态资源                 | 版本与淘汰；未命中处理，旧页面仍需旧资源                          |
+| network first          | 先 fetch，失败 / 超时按规则回退缓存 | 希望优先获取新内容的页面导航         | 区分网络、HTTP、业务错误，预备合适的离线文档                      |
+| stale-while-revalidate | 命中时先返回，同时更新              | 可容忍短时旧值的数据                 | 处理更新失败与并发覆盖；在 worker 中登记后台工作寿命              |
+| network only           | 不使用 Cache Storage                | 强实时数据，或明确排除持久副本的请求 | fetch 仍可能使用 HTTP cache，需另定请求缓存模式；离线时明确不可用 |
+| cache only             | 仅查询本地                          | 已明确准备好的离线资源               | 未命中需明确响应，不返回 undefined 给 respondWith                 |
+
+Cache API 只提供副本操作，不会替应用选择表中算法。由 Service Worker 承载策略时，响应如何登记、后台更新如何纳入事件生命周期见 [waitUntil 与 respondWith](./serviceWorker.md#4-waituntil-与-respondwith-的职责)。这里的 stale-while-revalidate 是应用算法，与 HTTP Cache-Control 的同名扩展属于不同层，不能混为浏览器自动执行的同一流程。
 
 ## 6. 版本、新鲜度与账号隔离
 

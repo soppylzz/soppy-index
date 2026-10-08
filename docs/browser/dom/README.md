@@ -1,9 +1,9 @@
 # DOM 与事件
 
-[仓库首页](../../../README.md) · [浏览器核心](../core/README.md) · [Web API](../api/README.md) · [Observer](../observer/README.md)
+[仓库首页](../../../README.md) · [浏览器核心](../core/README.md) · [Web API](../api/README.md) · [Observer](../observer/README.md) · [公共样式与工具](../../demo/README.md)
 
 - [DOM 与 CSSOM](./dom.md)：节点、集合、表单状态、内容 API、盒尺寸与布局读写。
-- [DOM 事件](./domEvent.md)：捕获 / 目标 / 冒泡、默认行为、委托、监听选项与可信输入。
+- [DOM 事件](./domEvent.md)：捕获 / 目标 / 冒泡、默认行为、委托、监听选项、可信输入与 Vue 3 invoker 源码分析。
 - [实验走查](./index.md) · [HTTP 服务](./index.ts) · [浏览器实现](./assets/lab.js)。
 
 ## 运行

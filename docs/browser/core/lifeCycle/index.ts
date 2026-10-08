@@ -1,9 +1,14 @@
+import {
+  ascii,
+  demoStyles,
+  readPort,
+  serveDemoAsset,
+  startServer,
+  logHttpRequest,
+} from "../../../demo/server.ts"
 import { createServer } from "node:http"
 
-const port = Number(process.env.PORT ?? 5006)
-if (!Number.isInteger(port) || port < 0 || port > 65535) {
-  throw new Error("PORT must be an integer between 0 and 65535")
-}
+const port = readPort("PORT", 5006, true)
 
 const reports: { receivedAt: string; payload: Record<string, unknown> }[] = []
 
@@ -44,12 +49,7 @@ const experiments = {
   },
 } as const
 type Mode = keyof typeof experiments
-const styles = `
-body{font:15px/1.7 system-ui,sans-serif;background:#f4f6f8;color:#243047;margin:0}
-main{max-width:1000px;margin:36px auto;padding:0 20px}section{background:white;padding:20px;margin:18px 0;border:1px solid #dce2e9;border-radius:10px}
-table{border-collapse:collapse;width:100%}td,th{border:1px solid #dce2e9;padding:8px;text-align:left}h1,h2{line-height:1.3}h2{font-size:19px}button,a.control{display:inline-block;padding:7px 12px;margin:5px 6px 5px 0;border:1px solid #aab9cc;border-radius:5px;background:#eef4fc;color:#174d91;cursor:pointer;font:inherit}
-textarea{box-sizing:border-box;width:100%;min-height:90px;font:inherit}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fa;padding:12px}label{display:block;margin:8px 0}.hint{color:#57657a}#log{max-height:420px;overflow:auto;font:13px/1.7 ui-monospace,monospace}output{font-variant-numeric:tabular-nums}
-`
+const styles = demoStyles + `label { display: block; margin: 8px 0; }`
 const browserScript = `
 const executionId = crypto.randomUUID();
 const mode = MODE_TOKEN;
@@ -280,7 +280,7 @@ const navigation = `<nav><a class="control" href="/">实验目录</a>${Object.en
   .map(([mode, info]) => `<a class="control" href="/${mode}">${info.title}</a>`)
   .join("")}</nav>`
 function shell(title: string, body: string, script = ""): string {
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title><style>${styles}</style>${script ? `<script>${script}</script>` : ""}</head><body><main><h1>${title}</h1>${navigation}${body}</main></body></html>`
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title><style>${styles}</style>${script ? `<script>${script}</script>` : ""}</head><body class="demo-page"><main><h1>${title}</h1>${navigation}${body}</main></body></html>`
 }
 const directory = shell(
   "生命周期与历史导航实验",
@@ -317,7 +317,7 @@ function page(mode: Mode, target = false): string {
       : ""
   return shell(
     experiments[mode].title,
-    `<p class="hint">${experiments[mode].hint}</p><section><h2>状态与执行身份</h2><pre id="state"></pre>${serverTime}${transit}<button onclick="location.reload()">刷新并比较 executionId</button></section>${draft}${reporting}${historyControls}${locationControls}<section><h2>事件日志</h2><button id="clear-log">清空日志</button><p>每个实验在本标签独立保存最近 100 条日志，刷新后保留旧记录并追加新执行 ID；Console 同步输出。</p><pre id="log" role="log" aria-live="polite"></pre></section><script>renderLog(); renderState();</script>`,
+    `<p class="hint">${experiments[mode].hint}</p><section><h2>状态与执行身份</h2><pre id="state"></pre>${serverTime}${transit}<button onclick="location.reload()">刷新并比较 executionId</button></section>${draft}${reporting}${historyControls}${locationControls}<section><h2>事件日志</h2><button id="clear-log">清空日志</button><p>每个实验在本标签独立保存最近 100 条日志，刷新后保留旧记录并追加新执行 ID；Console 同步输出。</p><pre class="demo-log" id="log" role="log" aria-live="polite"></pre></section><script>renderLog(); renderState();</script>`,
     browserScript.replace("MODE_TOKEN", JSON.stringify(mode))
   )
 }
@@ -331,12 +331,11 @@ function betweenPage(from: Mode): string {
 /* ==================== local server ==================== */
 
 const server = createServer(async (request, response) => {
+  if (serveDemoAsset(request, response)) return
   const url = new URL(request.url ?? "/", "http://localhost")
   const path = url.pathname
   response.on("finish", () => {
-    console.log(
-      `[HTTP ${new Date().toISOString()}] ${request.method} ${encodeURI(path)} -> ${response.statusCode}`
-    )
+    logHttpRequest(request, response.statusCode, `HTTP ${new Date().toISOString()}`)
   })
   const send = (status: number, type: string, body: string, cache = "no-store") => {
     response.writeHead(status, { "Content-Type": type, "Cache-Control": cache })
@@ -410,22 +409,13 @@ const server = createServer(async (request, response) => {
       send(404, "text/plain; charset=utf-8", "Not Found")
     }
   } catch (error) {
-    console.error("Request failed:", error)
+    console.error(`Request failed: ${ascii(String(error))}`)
     if (!response.headersSent) send(500, "text/plain; charset=utf-8", "Internal Server Error")
     else response.end()
   }
 })
 
-server.on("error", (error: NodeJS.ErrnoException) => {
-  console.error(
-    error.code === "EADDRINUSE"
-      ? `Port ${port} is already in use. Try PORT=5007 node docs/browser/core/lifeCycle/index.ts`
-      : error.message
-  )
-  process.exitCode = 1
-})
-
-server.listen(port, "127.0.0.1", () => {
+startServer(server, port, () => {
   const address = server.address()
   if (!address || typeof address === "string") return
   const base = `http://localhost:${address.port}`

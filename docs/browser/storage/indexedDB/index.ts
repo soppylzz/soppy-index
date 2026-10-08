@@ -1,34 +1,26 @@
+import {
+  demoHead,
+  readPort,
+  serveDemoAsset,
+  startServer,
+  logHttpRequest,
+} from "../../../demo/server.ts"
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http"
 
 /* ==================== config ==================== */
 
-const PORT = Number(process.env.PORT ?? 5002)
-if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
-  throw new Error("PORT must be an integer from 0 to 65535")
-}
+const PORT = readPort("PORT", 5002, true)
 
 /* ==================== page ==================== */
 
 const PAGE = `<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IndexedDB Demo — 事务、索引与 structured clone</title>
-<style>
-  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; line-height: 1.7; color: #343a40; }
-  .card { border: 1px solid #dee2e6; border-radius: 8px; padding: 14px 20px; margin: 16px 0; }
-  .muted { color: #868e96; font-size: 14px; }
-  code { background: #f1f3f5; padding: 1px 5px; border-radius: 4px; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #dee2e6; padding: 4px 10px; text-align: left; font-size: 14px; }
-  button { margin: 2px 4px 2px 0; padding: 4px 10px; cursor: pointer; }
-  button:disabled { color: #adb5bd; cursor: not-allowed; }
-  input { padding: 3px 6px; }
-  #log { margin: 0; padding-left: 20px; font-size: 14px; }
-  #log li { margin: 2px 0; }
-</style>
+${demoHead}
 </head>
-<body>
+<body class="demo-page"><main>
 <h1>IndexedDB Demo</h1>
 
 <div class="card">
@@ -69,7 +61,7 @@ const PAGE = `<!doctype html>
 
 <div class="card">
   <p><strong>日志</strong></p>
-  <ul id="log" role="log" aria-live="polite"></ul>
+  <ul class="demo-log" id="log" role="log" aria-live="polite"></ul>
 </div>
 
 <script>
@@ -84,14 +76,7 @@ const PAGE = `<!doctype html>
       .replace(/"/g, "&quot;")
   }
 
-  function log(message) {
-    var item = document.createElement("li")
-    var row = performance.now().toFixed(1) + "ms | " + message
-    item.textContent = row
-    console.log(row)
-    logEl.append(item)
-    while (logEl.children.length > 40) logEl.removeChild(logEl.firstElementChild)
-  }
+  const log = globalThis.Demo.createLogger(logEl, { limit: 40, clock: "relative", console: true })
 
   function fmtTime(ts) {
     return new Date(ts).toLocaleTimeString()
@@ -206,7 +191,7 @@ const PAGE = `<!doctype html>
       log("① put request 成功——事务还没有提交，此时报成功为时过早")
     }
     tx.oncomplete = function () {
-      log("② transaction complete——数据此刻才真正落库，应在这里向上层报成功")
+      log("② transaction complete——事务已提交，可报告事务成功；这不等于强制刷盘保证")
       renderNotes()
     }
     tx.onerror = function () { log("事务失败：" + tx.error) }
@@ -357,14 +342,15 @@ const PAGE = `<!doctype html>
   window.addEventListener("unhandledrejection", function (event) { log("异步操作失败：" + event.reason) })
   init()
 </script>
-</body>
+</main></body>
 </html>`
 
 /* ==================== demo ==================== */
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+  if (serveDemoAsset(req, res)) return
   const url = new URL(req.url ?? "/", "http://localhost")
-  res.on("finish", () => console.log(`[indexedDB] ${req.method} ${req.url} -> ${res.statusCode}`))
+  res.on("finish", () => logHttpRequest(req, res.statusCode, "indexedDB"))
   res.setHeader("Cache-Control", "no-store")
   if (url.pathname === "/favicon.ico") {
     res.writeHead(204)
@@ -385,16 +371,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
   res.end(req.method === "HEAD" ? undefined : PAGE)
 })
 
-server.on("error", (error: NodeJS.ErrnoException) => {
-  console.error(
-    error.code === "EADDRINUSE"
-      ? `[indexedDB] Port ${PORT} is in use. Choose another port with PORT=5005.`
-      : `[indexedDB] ${error.message}`
-  )
-  process.exitCode = 1
-})
-
-server.listen(PORT, "127.0.0.1", () => {
+startServer(server, PORT, () => {
   const address = server.address()
   if (!address || typeof address === "string") return
   console.log(`indexedDB demo

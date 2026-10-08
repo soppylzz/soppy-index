@@ -1,36 +1,26 @@
+import {
+  demoHead,
+  readPort,
+  serveDemoAsset,
+  startServer,
+  logHttpRequest,
+} from "../../../demo/server.ts"
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http"
 
 /* ==================== config ==================== */
 
-const PORT = Number(process.env.PORT ?? 4000)
-if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
-  throw new Error("PORT must be an integer from 0 to 65535")
-}
+const PORT = readPort("PORT", 4000, true)
 
 /* ==================== page ==================== */
 
 const PAGE = `<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Web Storage 差异 Demo — localStorage vs sessionStorage</title>
-<style>
-  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; line-height: 1.7; color: #343a40; }
-  .card { border: 1px solid #dee2e6; border-radius: 8px; padding: 14px 20px; margin: 16px 0; }
-  .muted { color: #868e96; font-size: 14px; }
-  code { background: #f1f3f5; padding: 1px 5px; border-radius: 4px; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #dee2e6; padding: 4px 10px; text-align: left; font-size: 14px; }
-  td code { word-break: break-all; }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 560px) { .cols { grid-template-columns: 1fr; } }
-  button { margin: 2px 4px 2px 0; padding: 4px 10px; cursor: pointer; }
-  input { padding: 3px 6px; }
-  #log { margin: 0; padding-left: 20px; font-size: 14px; }
-  #log li { margin: 2px 0; }
-</style>
+${demoHead}
 </head>
-<body>
+<body class="demo-page"><main>
 <h1>Web Storage 差异 Demo</h1>
 <p class="muted">本标签 ID：<strong id="tab-id"></strong>（存在 sessionStorage 里——刷新不变，新标签页会变）</p>
 
@@ -40,8 +30,8 @@ const PAGE = `<!doctype html>
     <li>分别向 localStorage 和 sessionStorage 各写入一条数据（API 完全相同）。</li>
     <li>点击「重新加载本页」——两者都还在：sessionStorage 的生命周期是页面会话，不是页面。</li>
     <li>点击「打开第二个标签页」——新标签通过 noopener 打开，可见共享 localStorage，sessionStorage 从新的页面会话开始：它按标签页隔离。</li>
-    <li>回到旧标签再写一条 localStorage，切到新标签看事件日志：storage 事件只发给其他标签，且只对 localStorage 生效；写 sessionStorage 时谁也收不到。</li>
-    <li>关闭新标签重新打开，或关掉浏览器再访问本页——sessionStorage 已清空，localStorage 仍在：生命周期差异。</li>
+    <li>回到旧标签再写一条 localStorage，切到新标签看事件日志：本实验两个独立标签之间仅 localStorage 的变化会触发对方的 storage 事件；sessionStorage 不在两标签间共享。</li>
+    <li>关闭新标签重新打开，或关掉浏览器再访问本页——不恢复旧页面会话时，新会话通常不保留原 sessionStorage；localStorage 是否保留还受隐私、清理和浏览器策略影响。</li>
   </ol>
 </div>
 
@@ -60,7 +50,7 @@ const PAGE = `<!doctype html>
   <p>
     <button onclick="reloadPage()">重新加载本页</button>
     <button onclick="openTab()">打开第二个标签页</button>
-    <button onclick="testQuota()">写入 6MB 触发配额错误</button>
+    <button onclick="testQuota()">尝试较大写入（观察配额结果）</button>
   </p>
 </div>
 
@@ -78,11 +68,11 @@ const PAGE = `<!doctype html>
 </div>
 
 <div class="card">
-  <p><strong>事件日志</strong> <span class="muted">(storage 事件只在“其他标签页”触发，发起修改的标签不会收到)</span></p>
-  <ul id="log" role="log" aria-live="polite"></ul>
+  <p><strong>事件日志</strong> <span class="muted">(事件发给共享对应存储区域的其他文档；发起修改的文档不会收到)</span></p>
+  <ul class="demo-log" id="log" role="log" aria-live="polite"></ul>
 </div>
 
-<p class="muted">注：本实验通过 noopener 避免新页复制 opener 的 sessionStorage；手动保留 opener 打开页面时，新页可能初始复制该存储，之后独立修改。两者都只存字符串、约 5MB 配额、同步阻塞主线程，且只存在于客户端，不会随 HTTP 请求发送。</p>
+<p class="muted">注：本实验通过 noopener 避免新页复制 opener 的 sessionStorage；手动保留 opener 打开页面时，新页可能初始复制该存储，之后独立修改。两者都只存字符串，同步访问可能阻塞主线程；容量受实现和浏览器策略限制，且只存在于客户端，不会随 HTTP 请求发送。</p>
 
 <script>
   var logEl = document.getElementById("log")
@@ -96,14 +86,7 @@ const PAGE = `<!doctype html>
       .replace(/"/g, "&quot;")
   }
 
-  function log(message) {
-    var item = document.createElement("li")
-    var row = performance.now().toFixed(1) + "ms | " + message
-    item.textContent = row
-    console.log(row)
-    logEl.append(item)
-    while (logEl.children.length > 30) logEl.removeChild(logEl.firstElementChild)
-  }
+  const log = globalThis.Demo.createLogger(logEl, { limit: 30, clock: "relative", console: true })
 
   function tabId() {
     var id = sessionStorage.getItem("tabId")
@@ -166,7 +149,7 @@ const PAGE = `<!doctype html>
   function clearBoth() {
     localStorage.clear()
     sessionStorage.clear()
-    log("本标签清空两种存储（其他标签会收到 key=null 的 storage 事件）")
+    log("本标签清空两种存储（确有数据被清除时，其他共享文档可收到 key=null 的事件）")
     render()
   }
 
@@ -175,9 +158,9 @@ const PAGE = `<!doctype html>
     try {
       localStorage.setItem(probeKey, "x".repeat(6 * 1024 * 1024))
       localStorage.removeItem(probeKey)
-      log("写入约 6MB 成功，临时数据已删除；本次成功不代表配额固定或下次一定成功")
+      log("写入 6291456 个 ASCII 字符成功，临时数据已删除；本次成功不代表配额固定或下次一定成功")
     } catch (error) {
-      log("写入约 6MB 抛出 " + error.name + (error.name === "QuotaExceededError" ? "：超出配额，setItem 未生效" : "：检查浏览器存储权限与环境"))
+      log("写入 6291456 个 ASCII 字符抛出 " + error.name + (error.name === "QuotaExceededError" ? "：超出配额，setItem 未生效" : "：检查浏览器存储权限与环境"))
     }
   }
 
@@ -193,21 +176,22 @@ const PAGE = `<!doctype html>
   window.addEventListener("storage", function (event) {
     var area = event.storageArea === localStorage ? "localStorage" : "sessionStorage"
     var key = event.key === null ? "(clear)" : event.key
-    log("收到其他标签的 storage 事件：" + area + "[" + key + "] " + event.oldValue + " → " + event.newValue)
+    log("收到其他文档的 storage 事件：" + area + "[" + key + "] " + event.oldValue + " → " + event.newValue)
     render()
   })
 
   window.addEventListener("error", function (event) { log("操作失败：" + event.message) })
   render()
 </script>
-</body>
+</main></body>
 </html>`
 
 /* ==================== demo ==================== */
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+  if (serveDemoAsset(req, res)) return
   const url = new URL(req.url ?? "/", "http://localhost")
-  res.on("finish", () => console.log(`[webStorage] ${req.method} ${req.url} -> ${res.statusCode}`))
+  res.on("finish", () => logHttpRequest(req, res.statusCode, "webStorage"))
   res.setHeader("Cache-Control", "no-store")
   if (url.pathname === "/favicon.ico") {
     res.writeHead(204)
@@ -228,16 +212,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
   res.end(req.method === "HEAD" ? undefined : PAGE)
 })
 
-server.on("error", (error: NodeJS.ErrnoException) => {
-  console.error(
-    error.code === "EADDRINUSE"
-      ? `[webStorage] Port ${PORT} is in use. Choose another port with PORT=5005.`
-      : `[webStorage] ${error.message}`
-  )
-  process.exitCode = 1
-})
-
-server.listen(PORT, "127.0.0.1", () => {
+startServer(server, PORT, () => {
   const address = server.address()
   if (!address || typeof address === "string") return
   console.log(`web storage demo
@@ -254,7 +229,7 @@ steps:
 notes:
   - use the same origin in both tabs; privacy and session restore policies may affect persistence
   - clearing storage affects all keys for this demo origin
-  - the quota probe attempts a temporary 6MB string and reports the actual result
+  - the quota probe attempts a temporary string with 6291456 ASCII characters and reports the actual result
 
 observations:
   - the terminal prints HTTP requests and response status

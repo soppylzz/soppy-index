@@ -9,12 +9,7 @@ let controller
 let cleanup = () => {}
 let connected = false
 let restore = false
-function log(message) {
-  const line = document.createElement("li")
-  line.textContent = `${new Date().toISOString()} [${id}] ${message}`
-  logList.append(line)
-  while (logList.children.length > 120) logList.firstElementChild.remove()
-}
+const log = globalThis.Demo.createLogger(logList, { context: id, limit: 120 })
 function on(selector, type, handler, options = {}) {
   document
     .querySelector(selector)

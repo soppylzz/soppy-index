@@ -1,10 +1,14 @@
+import {
+  demoHead,
+  readPort,
+  serveDemoAsset,
+  startServer,
+  logHttpRequest,
+} from "../../demo/server.ts"
 import { createServer } from "node:http"
 import { readFileSync } from "node:fs"
 
-const port = Number(process.env.PORT ?? 5010)
-if (!Number.isInteger(port) || port < 1 || port > 65535) {
-  throw new Error("PORT must be an integer between 1 and 65535")
-}
+const port = readPort("PORT", 5010, false)
 const origin = `http://127.0.0.1:${port}`
 const assets = new Map(
   ["lab.js", "style.css"].map((name) => [
@@ -34,11 +38,11 @@ const experiments = {
 }
 function page(mode: keyof typeof experiments | "home"): string {
   const experiment = mode === "home" ? undefined : experiments[mode]
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${experiment?.title ?? "Observer 实验目录"}</title><link rel="stylesheet" href="/assets/style.css"></head>
-<body data-mode="${mode}"><main><nav><a href="/">实验目录</a> · <a href="/mutation">DOM 变化</a> · <a href="/intersection">交叉状态</a> · <a href="/resize">尺寸变化</a></nav><h1>${experiment?.title ?? "Observer 实验目录"}</h1>
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${experiment?.title ?? "Observer 实验目录"}</title>${demoHead}<link rel="stylesheet" href="/assets/style.css"></head>
+<body class="demo-page" data-mode="${mode}"><main><nav><a href="/">实验目录</a> · <a href="/mutation">DOM 变化</a> · <a href="/intersection">交叉状态</a> · <a href="/resize">尺寸变化</a></nav><h1>${experiment?.title ?? "Observer 实验目录"}</h1>
 ${
   experiment
-    ? `<p id="identity"></p><section><button id="connect">连接 / 重连</button><button id="disconnect">断开观察</button><p id="status" role="status"></p>${experiment.body}</section><section><h2>真实回调与操作日志</h2><p>操作只证明发起变化；「回调」才证明浏览器交付。日志最多 100 条；毫秒和批次数量不是固定保证。</p><ol id="log" role="log" aria-live="polite"></ol></section><script type="module" src="/assets/lab.js"></script>`
+    ? `<p id="identity"></p><section><button id="connect">连接 / 重连</button><button id="disconnect">断开观察</button><p id="status" role="status"></p>${experiment.body}</section><section><h2>真实回调与操作日志</h2><p>操作只证明发起变化；「回调」才证明浏览器交付。日志最多 100 条；毫秒和批次数量不是固定保证。</p><ol class="demo-log" id="log" role="log" aria-live="polite"></ol></section><script type="module" src="/assets/lab.js"></script>`
     : `<section><p>每个页面只研究一种信号，使用真实浏览器 API，无构建步骤。</p><table><tr><th>路由</th><th>实验</th></tr>${Object.entries(
         experiments
       )
@@ -51,6 +55,7 @@ ${
 }</main></body></html>`
 }
 const server = createServer((req, res) => {
+  if (serveDemoAsset(req, res)) return
   res.setHeader("Cache-Control", "no-cache")
   let path: string
   try {
@@ -61,7 +66,7 @@ const server = createServer((req, res) => {
     return
   }
   res.on("finish", () => {
-    console.log(`[observer] ${req.method} ${encodeURI(path)} -> ${res.statusCode}`)
+    logHttpRequest(req, res.statusCode, "observer")
   })
   let status = 200
   let mime = "text/plain; charset=utf-8"
@@ -85,15 +90,7 @@ const server = createServer((req, res) => {
   res.writeHead(status, { "Content-Type": mime })
   res.end(req.method === "HEAD" ? undefined : body)
 })
-server.on("error", (error: NodeJS.ErrnoException) => {
-  console.error(
-    error.code === "EADDRINUSE"
-      ? "[observer] Port conflict. Set PORT to a free port."
-      : `[observer] Server error: ${error.message}`
-  )
-  process.exitCode = 1
-})
-server.listen(port, "127.0.0.1", () => {
+startServer(server, port, () => {
   console.log(`Observer browser lab
   Directory: ${origin}/
   Routes: /mutation, /intersection, /resize
@@ -104,9 +101,3 @@ server.listen(port, "127.0.0.1", () => {
   Override the port with PORT=5012. This server listens on loopback only.
   Press Ctrl+C to stop.`)
 })
-function shutdown(): void {
-  server.close()
-  server.closeIdleConnections()
-}
-process.on("SIGINT", shutdown)
-process.on("SIGTERM", shutdown)

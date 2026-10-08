@@ -75,7 +75,7 @@ DOM 与布局结构不是一一对应：
 
 ### 为什么 `head`、`link` 等元素没有布局盒
 
-`head`、`link` 等节点存在于 DOM 中，但 Chromium/Blink 的 user-agent stylesheet（浏览器预设样式表）为它们设置了 `display: none`。下面是 old 版本中保留的 preset；本文最后核对于 2026-09-19，对应 Chromium commit `39cea72b3a158dda6cd7c951611b3da13bef600b`，可以查看 [`html.css` 固定版本](https://chromium.googlesource.com/chromium/src/+/39cea72b3a158dda6cd7c951611b3da13bef600b/third_party/blink/renderer/core/html/resources/html.css)以及[最新 main](https://chromium.googlesource.com/chromium/src/+/main/third_party/blink/renderer/core/html/resources/html.css)：
+`head`、`link` 等节点存在于 DOM 中，但 Chromium/Blink 的 user-agent stylesheet（浏览器预设样式表）为它们设置了 `display: none`。下面摘录该预设规则；本文最后核对于 2026-09-19，对应 Chromium commit `39cea72b3a158dda6cd7c951611b3da13bef600b`，可以查看 [`html.css` 固定版本](https://chromium.googlesource.com/chromium/src/+/39cea72b3a158dda6cd7c951611b3da13bef600b/third_party/blink/renderer/core/html/resources/html.css)以及[最新 main](https://chromium.googlesource.com/chromium/src/+/main/third_party/blink/renderer/core/html/resources/html.css)：
 
 ```css
 base,
@@ -131,7 +131,7 @@ div block container
 └── p block box
 ```
 
-因此，old 中“内容必须在行盒中，如果没有就添加匿名行盒”和“行盒与块盒不能相邻”的说法不够准确：
+理解这类盒结构时，需要区分：
 
 - 文本或 inline 元素先产生 inline-level boxes，浏览器再按可用宽度把它们排入一个或多个 line boxes；
 - 当块容器混合 block-level 与 inline-level 内容时，用来修正结构的是 anonymous block box，不是“匿名行盒”；
@@ -145,22 +145,13 @@ div block container
 
 JavaScript 读取到的不是一份统一的“页面最终结果”。不同 API 分别暴露样式声明、resolved value、布局几何或滚动状态；普通 Web API 不会直接返回 Blink 的 Paint Artifact、光栅化后的 tile 或 composited layer。
 
-| API                         | 主要读取的内容                                                     | 对应阶段                   | 关键边界                                                                                                  |
-| --------------------------- | ------------------------------------------------------------------ | -------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `element.style`             | 元素 `style` attribute 中的行内声明                                | DOM/CSSOM                  | 不执行层叠，不能代表最终生效样式                                                                          |
-| `getComputedStyle(element)` | 属性的 resolved value                                              | Style；部分属性依赖 Layout | 大多数属性返回 computed value；已生成盒的 `width`、`height`、margin、padding、inset 等可能返回 used value |
-| `offsetWidth/offsetHeight`  | 所有相关 fragment 的轴对齐 border-box 包围尺寸                     | Layout                     | 返回整数 CSS 像素，忽略元素及祖先的 transform；没有布局盒时返回 `0`                                       |
-| `offsetTop/offsetLeft`      | 元素 border edge 相对 `offsetParent` padding edge 的位置           | Layout                     | 使用历史 offset 模型，忽略 transform；不等于视口坐标                                                      |
-| `clientWidth/clientHeight`  | 元素 padding box 的内部尺寸                                        | Layout                     | 不含 border 和滚动条；普通 inline box 返回 `0`；根元素以及 quirks mode 的 `body` 有 viewport 特例         |
-| `clientTop/clientLeft`      | border 宽度，以及相应方向上位于 border 与 padding 之间的滚动条尺寸 | Layout                     | 普通 inline box 返回 `0`；它们不是元素相对父级的坐标                                                      |
-| `scrollWidth/scrollHeight`  | scrolling area 的完整尺寸                                          | Layout/Overflow            | 可以大于可见的 `clientWidth/clientHeight`                                                                 |
-| `scrollTop/scrollLeft`      | 当前滚动位置                                                       | Scroll state               | 读取滚动状态；设置它们会请求滚动，不代表重新执行完整渲染流水线                                            |
-| `getClientRects()`          | 元素各个 fragment 的矩形集合                                       | Layout + transforms        | 一个多行 inline 元素可能返回多个矩形                                                                      |
-| `getBoundingClientRect()`   | 所有非空 client rect 的轴对齐包围矩形                              | Layout + transforms        | 返回 viewport 坐标，会反映 transform 和当前滚动位置                                                       |
+| 观测入口                                    | 与渲染流程的关系                                  |
+| ------------------------------------------- | ------------------------------------------------- |
+| `element.style`                             | 行内声明，是样式计算的输入，不代表层叠结果        |
+| `getComputedStyle()`                        | 暴露 resolved value；部分属性还依赖 Layout 的结果 |
+| `offsetWidth`、`getBoundingClientRect()` 等 | 基于布局几何；是否纳入 transform 取决于具体接口   |
 
-`getComputedStyle()` 这个名字容易造成误解。CSSOM 实际定义的是 [resolved value](https://drafts.csswg.org/cssom/#resolved-values)：多数属性的 resolved value 是 computed value，但部分布局相关属性在元素生成盒时返回 used value。它返回的是只读样式视图，不是“Paint 之后屏幕上最终像素的颜色与尺寸”。
-
-`offset*`、`client*`、`scroll*` 和矩形 API 由 [CSSOM View](https://drafts.csswg.org/cssom-view/) 定义，主要建立在布局盒、fragment、滚动区域和 transform 几何之上。特别需要区分：`offsetWidth` 忽略 transform，而 `getBoundingClientRect()` 会反映 transform，所以旋转或缩放后的两个结果可能不同。
+接口的尺寸范围、坐标系、精度和特殊情况集中在 [DOM 几何读取](../dom/dom.md#4-几何读取布局尺寸与视觉矩形)，样式值的读取见 [DOM 样式读取](../dom/dom.md#5-cssom强制布局与读写分组)。这里关注这些读取为什么可能改变浏览器安排计算的时机。
 
 ### 读取是否一定触发同步布局
 
@@ -178,7 +169,7 @@ box.style.width = "200px" // Marks style/layout as dirty.
 const width = box.offsetWidth // May force a synchronous style/layout update.
 ```
 
-因此，性能问题通常不是“读取”本身，而是反复交错写入和读取，让浏览器无法批量处理更新。
+因此，性能问题通常不是“读取”本身，而是反复交错写入和读取，让浏览器无法批量处理更新。现有 [DOM `/layout` 实验](../dom/index.md#3-layout布局盒视觉矩形与读写)用真实节点对照两种读写方式；批量分组的代码与计时边界见 [DOM 笔记](../dom/dom.md#5-cssom强制布局与读写分组)。
 
 ## 5. Pre-paint、Paint 与 Layerization
 

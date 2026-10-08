@@ -68,7 +68,14 @@ key 中保留 schema 版本是一种简单迁移方式。更复杂、数据量�
 
 ## 4. storage 事件
 
-同一 origin 的另一个文档修改 Web Storage 时，相关窗口会收到 `storage` 事件。发起修改的当前文档不会收到自己的事件。
+`storage` 事件通知共享同一存储区的其他 Window，发起修改的文档不会收到自己的事件。两种存储的接收范围不同：
+
+| 存储区         | 接收范围                                                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------- |
+| localStorage   | 共享该存储区的其他同源文档，可包括其他标签页与同源 iframe                                         |
+| sessionStorage | 同一顶层浏览上下文中共享该会话存储区的其他同源文档，例如同标签页的同源 iframe；不传播到独立标签页 |
+
+同源访问仍可能受到第三方存储分区及浏览器策略限制，不能只比较 URL 就推断共享。写入相同值不会产生变化事件；removeItem 删除已有 key 时 newValue 为 null，clear 改变存储区时 key 为 null。[storage 事件说明](https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event)
 
 ```js
 window.addEventListener("storage", (event) => {
@@ -80,7 +87,7 @@ window.addEventListener("storage", (event) => {
 })
 ```
 
-该事件适合通知"某个值已改变"，不适合承担可靠消息队列：页面可能未打开，连续写入也不提供消息确认、重放或事务语义。事件的投递条件见 [MDN：Storage event](https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event)。
+片段只订阅 localStorage 的 theme。完整 demo 的操作函数在写入后主动 render 本页，另一个文档则在 storage 监听中 render；所以本页表格更新不是收到自己事件的证据。事件适合通知“某个值已改变”，不提供消息确认、重放或跨窗口读改写事务。以 JSON 包装 request / ack 的流程见 [通信笔记](../../communication/crossContextCommunication.md#storage-event存储变化的副作用)。
 
 ## 5. 同步 API 的成本
 

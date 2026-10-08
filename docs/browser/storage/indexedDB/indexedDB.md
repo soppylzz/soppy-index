@@ -30,7 +30,7 @@ IndexedDB 的异步模型主要基于 event，而不是原生 Promise。可以�
 
 ## 2. 打开数据库与 schema 升级
 
-object store 和 index 的创建、删除只能在 versionchange transaction 中完成，通常写在 `onupgradeneeded`：
+object store 和 index 的创建、删除只能在 versionchange transaction 中完成，通常写在 `onupgradeneeded`。以下是独立的 API 示例，使用 notes-app；本目录 demo 使用 idb-demo，二者不是同一个数据库：
 
 ```js
 function openNotesDatabase() {
@@ -57,7 +57,7 @@ function openNotesDatabase() {
 }
 ```
 
-数据库版本只能使用正整数。升级代码会从旧版本直接执行到目标版本，所以真实项目应根据 `event.oldVersion` 逐步迁移，而不是只假设用户来自上一个版本。
+示例只覆盖 notes store 不存在时的初始化：若旧库已有 notes 但缺少索引，这个分支不会补建索引。完整迁移需在升级事务中取得已有 store，再按旧版本及 indexNames 判断需要的变更。数据库版本只能使用正整数；用户可能跨多个版本升级，应根据 event.oldVersion 执行所需迁移，不能只假设来自上一个版本。[IndexedDB 升级说明](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB)
 
 其他标签页持有旧连接时，升级可能被阻塞。连接应监听 `versionchange` 并及时关闭：
 
@@ -69,14 +69,16 @@ database.addEventListener("versionchange", () => {
 })
 ```
 
+对应 [index.ts](./index.ts) 的实际流程是：`init()` 调用 `openDb(null, null)` 打开当前版本；openDb 在 onupgradeneeded 中初始化缺失的 store，并将升级事务中的 store 交给可选回调。`upgradeSchema()` 先关闭本页旧连接，再以 db.version + 1 重开，在回调中检查并创建 by-title 索引。其他标签通过 `attachVersionChange()` 关闭旧连接、禁用操作并提示刷新；若仍有连接未释放，发起方才需要处理 blocked。关闭本页连接不等于关闭了其他标签的连接。
+
+这个 demo 用递增版本演示 schema 修改入口，不是完整的生产版本迁移器。blocked 表示仍在等待，不等于升级已经失败；versionchange 表示需要让出旧连接，也不表示升级方已经提交成功。
+
 ## 3. 写入：以 transaction 完成为准
 
-一次 `put()` request 成功，不等于整个 transaction 已提交。需要在 `transaction.oncomplete` 后再向上层报告成功：
+一次 `put()` request 成功，不等于整个 transaction 已提交。需要在 `transaction.oncomplete` 后再向上层报告成功。下面的读写函数接收已打开的 database，连接由调用者复用或在不再使用时关闭：
 
 ```js
-async function saveNote(note) {
-  const database = await openNotesDatabase()
-
+function saveNote(database, note) {
   return new Promise((resolve, reject) => {
     const transaction = database.transaction("notes", "readwrite")
     const store = transaction.objectStore("notes")
@@ -98,19 +100,22 @@ async function saveNote(note) {
 ```js
 // Fetch first, then open a short database transaction.
 const remoteNote = await fetch("/api/note/42").then((response) => response.json())
-await saveNote(remoteNote)
+const database = await openNotesDatabase()
+try {
+  await saveNote(database, remoteNote)
+} finally {
+  database.close()
+}
 ```
 
-transaction 应尽量短小，只包含需要原子完成的数据库操作。
+这里展示一次操作结束后关闭连接；长期运行的应用也可以持有连接，但需处理 versionchange 并明确关闭职责。完整 demo 复用页面级 db，而不是每次按钮操作都重新打开。transaction 应尽量短小，只包含需要原子完成的数据库操作；异步等待前先取得远端数据，不要把“所有 await 都导致事务失效”当作规则。
 
 ## 4. 读取与索引
 
-按主键读取：
+按主键读取，仍使用调用者管理的连接：
 
 ```js
-async function getNote(id) {
-  const database = await openNotesDatabase()
-
+function getNote(database, id) {
   return new Promise((resolve, reject) => {
     const transaction = database.transaction("notes", "readonly")
     const request = transaction.objectStore("notes").get(id)
@@ -124,9 +129,7 @@ async function getNote(id) {
 按索引获取最近更新的数据：
 
 ```js
-async function getRecentNotes(limit = 20) {
-  const database = await openNotesDatabase()
-
+function getRecentNotes(database, limit = 20) {
   return new Promise((resolve, reject) => {
     const transaction = database.transaction("notes", "readonly")
     const index = transaction.objectStore("notes").index("by-updated-at")
@@ -150,13 +153,15 @@ async function getRecentNotes(limit = 20) {
 }
 ```
 
-数据量小时可以使用 `getAll()`；结果很大或需要逐步处理时，cursor 避免一次把所有记录放入内存。
+这两个读取函数返回查询结果；它们的 request 成功不应套用成写入事务提交的证据。getRecentNotes 在达到 limit 后停止继续游标，限制本次结果数量。数据量小时可以使用 getAll；较大结果集可用 cursor 逐步读取，但若不断把 cursor.value 推入数组而不设上限，仍会累积全部结果，并不会自动节省结果内存。
 
 ## 5. Structured clone 不等于任意值
 
-IndexedDB 可保存对象、数组、`Date`、`Blob`、`ArrayBuffer` 等 structured-cloneable 值，不需要先转 JSON。函数、DOM node 和部分平台对象不能被克隆，会抛出 `DataCloneError`。
+IndexedDB 按存储用途序列化值，不需要先转 JSON。通用类型与原型边界见 [常用 Web API](../../api/webApi.md#2-url-与结构化克隆)；具体值仍须满足 IndexedDB 的存储序列化规则。add / put 没有 transfer list 参数，不能将消息端口或 buffer 所有权交付的用法套进数据库写入。[IndexedDB 存储算法](https://w3c.github.io/IndexedDB/#clone-a-value)
 
-保存 class instance 后，不应期待其 prototype 方法在读取时自动恢复。数据库 schema 应使用明确的数据字段，行为逻辑放在应用代码中。
+对应 [index.ts](./index.ts) 的三个实验：demoCloneRich 在事务 complete 后读回并检查 Date、Map、ArrayBuffer；demoCloneFn 捕获 put 函数值时的 DataCloneError；demoCloneClass 对照读回对象的 instanceof 与 dist 方法，说明字段保存不等于类行为恢复。这些检查回答“能保存和读回什么”，写入是否提交仍看事务结果。
+
+数据库 schema 应使用明确的数据字段。读回后需要类行为时，由应用按数据版本校验和重建，不能期待 prototype 方法自动恢复；也不能用一次本地 structuredClone 成功代替数据库的真实写入与读回。
 
 ## 6. Demo 核心实现
 

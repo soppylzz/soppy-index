@@ -117,7 +117,7 @@ Cache-Control: no-cache
 ETag: "article-v42"
 ```
 
-`304` 节省的是响应 body 传输，它仍需要一次网络往返。两类 validator 同时存在时，HTTP 条件请求优先遵循 `If-None-Match` / ETag 的语义。
+`304` 节省的是响应 body 传输，它仍需要一次网络往返。两类 validator 同时存在时，HTTP 条件请求优先遵循 `If-None-Match` / ETag 的语义。no-cache 要求复用前验证，但不会替服务器生成验证器；没有可用验证器时可能重新获取完整响应，不应期待每次都出现 304。[RFC 9111：Validation](https://www.rfc-editor.org/rfc/rfc9111.html#section-4.3)
 
 ## 5. Vary：同一 URL 的不同表示
 
@@ -204,7 +204,9 @@ function serveAsset(req: IncomingMessage, res: ServerResponse, asset: Asset): vo
 }
 ```
 
-`asset`、`etag` 和 `lastModified` 来自当前实验资源与内存版本。浏览器端 probe 的核心是保持资源 URL 不变，只切换 cache mode：
+asset 来自五种固定资源配置。源码 etagOf 将资源名与内存版本拼成 ETag，lastModifiedOf 用固定基准时间加版本秒数生成日期，便于稳定对照；后者不是文件系统真实修改时间。bump 只递增服务端版本，不通知浏览器删除旧条目，所以 fresh 条目仍可返回旧正文。服务器重启会重置版本，重做实验时需同时考虑客户端已有条目。
+
+浏览器端 probe 的核心是保持资源 URL 不变，只切换 cache mode：
 
 ```js
 const response = await fetch("/assets/no-cache.svg", { cache: "no-cache" })

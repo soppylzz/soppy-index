@@ -2,7 +2,7 @@
 
 [返回仓库首页](../../../README.md) · [渲染与加载](../core/README.md) · [缓存实验](../cache/README.md) · [跨上下文通信](../communication/README.md) · [PWA 与 Cache Storage](../pwa/README.md)
 
-每个主题包含中文笔记与自包含、零依赖的 `node:http` 实验服务。使用 Node >= 22.18，在仓库根目录执行命令，再用真实浏览器打开对应地址；按 `Ctrl+C` 停止服务。
+每个主题包含中文笔记与可直接运行、无第三方运行时依赖的 `node:http` 实验服务。使用 Node >= 22.18，在仓库根目录执行命令，再用真实浏览器打开对应地址；按 `Ctrl+C` 停止服务。样式与公共工具复用 [docs/demo](../../demo/README.md)。
 
 ## 主题与运行
 

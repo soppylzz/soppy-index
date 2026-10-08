@@ -2,6 +2,8 @@
 
 [运行方式](./README.md) · [机制笔记](./crossContextCommunication.md)
 
+公共模块迁移后的知识 / demo 对应复核与实际运行记录见[集中验证](../../demo/validation.md)；下方早期记录保留各自的环境与覆盖边界。
+
 Node 只提供双源页面与脚本，收发和存储事件来自浏览器。终端 GET /assets/worker.js 成功，不能证明 worker 已执行或处理消息。
 
 ## 1. 准备与读日志

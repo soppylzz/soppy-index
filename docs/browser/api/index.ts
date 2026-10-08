@@ -1,15 +1,19 @@
+import {
+  ascii,
+  closeServers,
+  demoHead,
+  readPort,
+  assertDistinctPorts,
+  serveDemoAsset,
+  listenOnLoopback,
+  logHttpRequest,
+} from "../../demo/server.ts"
 import { createServer } from "node:http"
 import { readFileSync } from "node:fs"
 
-function portOf(name: string, fallback: number): number {
-  const value = Number(process.env[name] ?? fallback)
-  if (!Number.isInteger(value) || value < 1 || value > 65535)
-    throw new Error(`${name} must be an integer between 1 and 65535`)
-  return value
-}
-const port = portOf("PORT", 5013)
-const peerPort = portOf("PEER_PORT", 5014)
-if (port === peerPort) throw new Error("PORT and PEER_PORT must differ")
+const port = readPort("PORT", 5013)
+const peerPort = readPort("PEER_PORT", 5014)
+assertDistinctPorts(port, peerPort)
 const origin = `http://127.0.0.1:${port}`
 const peerOrigin = `http://127.0.0.1:${peerPort}`
 const experiments = {
@@ -41,9 +45,9 @@ function page(mode: keyof typeof experiments | "home"): string {
   const links = Object.entries(experiments)
     .map(([key, value]) => `<a href="/${key}">${value.title}</a>`)
     .join(" · ")
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${experiment?.title ?? "Web API 实验目录"}</title><link rel="stylesheet" href="/assets/style.css"></head><body data-mode="${mode}" data-peer="${peerOrigin}"><main><nav><a href="/">实验目录</a> · ${links}</nav><h1>${experiment?.title ?? "Web API 实验目录"}</h1>${
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${experiment?.title ?? "Web API 实验目录"}</title>${demoHead}<link rel="stylesheet" href="/assets/style.css"></head><body class="demo-page" data-mode="${mode}" data-peer="${peerOrigin}"><main><nav><a href="/">实验目录</a> · ${links}</nav><h1>${experiment?.title ?? "Web API 实验目录"}</h1>${
     experiment
-      ? `<p id="identity"></p><section><button id="connect">连接 / 重连</button><button id="disconnect">断开并清理</button><p id="status" role="status"></p>${experiment.body.replaceAll("__MAIN__", origin).replaceAll("__PEER__", peerOrigin)}</section><section><h2>操作与真实结果日志</h2><p>日志最多 120 条，包含 UTC 与上下文身份；操作日志不证明异步接收或业务处理。</p><ol id="log" role="log" aria-live="polite"></ol></section><script type="module" src="/assets/lab.js"></script>`
+      ? `<p id="identity"></p><section><button id="connect">连接 / 重连</button><button id="disconnect">断开并清理</button><p id="status" role="status"></p>${experiment.body.replaceAll("__MAIN__", origin).replaceAll("__PEER__", peerOrigin)}</section><section><h2>操作与真实结果日志</h2><p>日志最多 120 条，包含 UTC 与上下文身份；操作日志不证明异步接收或业务处理。</p><ol class="demo-log" id="log" role="log" aria-live="polite"></ol></section><script type="module" src="/assets/lab.js"></script>`
       : `<section><p>选择一个独立实验路由，按页面说明操作，观察页面日志与 DevTools Console。终端仅记录 HTTP。</p><table><tr><th>路由</th><th>实验</th></tr>${Object.entries(
           experiments
         )
@@ -55,10 +59,11 @@ function page(mode: keyof typeof experiments | "home"): string {
   }</main></body></html>`
 }
 function framePage(): string {
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><link rel="stylesheet" href="/assets/style.css"><title>iframe 子文档</title></head><body data-parent="${origin}"><main><p id="frame-label">独立 iframe 文档</p><button id="inside">点击子文档按钮</button><ol id="log"></ol></main><script defer src="/assets/frame.js"></script></body></html>`
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${demoHead}<link rel="stylesheet" href="/assets/style.css"><title>iframe 子文档</title></head><body class="demo-page" data-parent="${origin}"><main><p id="frame-label">独立 iframe 文档</p><button id="inside">点击子文档按钮</button><ol class="demo-log" id="log"></ol></main><script defer src="/assets/frame.js"></script></body></html>`
 }
 const servers = [port, peerPort].map((listenPort) =>
   createServer((req, res) => {
+    if (serveDemoAsset(req, res)) return
     res.setHeader("Cache-Control", "no-cache")
     let url: URL
     try {
@@ -69,9 +74,7 @@ const servers = [port, peerPort].map((listenPort) =>
       return
     }
     const path = url.pathname
-    res.on("finish", () =>
-      console.log(`[api:${listenPort}] ${req.method} ${encodeURI(path)} -> ${res.statusCode}`)
-    )
+    res.on("finish", () => logHttpRequest(req, res.statusCode, `api:${listenPort}`))
     if (
       listenPort === port &&
       path === "/api/delay" &&
@@ -141,19 +144,13 @@ const servers = [port, peerPort].map((listenPort) =>
   })
 )
 function shutdown(): void {
-  for (const server of servers) {
-    server.close()
-    server.closeIdleConnections()
-  }
+  closeServers(...servers)
 }
 try {
   for (const [index, server] of servers.entries()) {
-    await new Promise<void>((resolve, reject) => {
-      server.once("error", reject)
-      server.listen([port, peerPort][index], "127.0.0.1", resolve)
-    })
+    await listenOnLoopback(server, [port, peerPort][index])
     server.on("error", (error) => {
-      console.error(`[api] Server error: ${error.message}`)
+      console.error(`[api] Server error: ${ascii(error.message)}`)
       process.exitCode = 1
       shutdown()
     })
@@ -175,7 +172,7 @@ try {
   console.error(
     failure.code === "EADDRINUSE"
       ? "[api] Port conflict. Set PORT and PEER_PORT to free ports."
-      : `[api] Startup failed: ${failure.message}`
+      : `[api] Startup failed: ${ascii(failure.message)}`
   )
   process.exitCode = 1
   shutdown()

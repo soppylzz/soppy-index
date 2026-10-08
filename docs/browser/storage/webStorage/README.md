@@ -1,6 +1,6 @@
 # Web Storage
 
-[返回存储目录](../README.md) · [仓库首页](../../../../README.md) · [跨上下文通信](../../communication/README.md)
+[返回存储目录](../README.md) · [仓库首页](../../../../README.md) · [跨上下文通信](../../communication/README.md) · [公共样式与工具](../../../demo/README.md)
 
 - [知识笔记](./webStorage.md)：机制、边界和对应 demo 的核心代码。
 - [实验走查](./index.md)：启动、操作步骤、预期与验证边界。

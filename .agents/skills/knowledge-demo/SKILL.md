@@ -11,7 +11,7 @@ Read `AGENTS.md` and the relevant shared rules from the repository root. This sk
 
 Read the target note, its references, and a nearby demo first. Existing references from the repository root:
 
-- `docs/browser/storage/webStorage/index.ts` and its README: a self-contained `node:http` browser lab with Chinese steps, cards, tables, and an event log.
+- `docs/browser/storage/webStorage/index.ts` and its README: a `node:http` browser lab with Chinese steps, cards, tables, and an event log.
 - `docs/browser/cache/index.ts` and its README: one server, multiple focused routes, explicit response headers.
 - `docs/browser/core/eventLoop/simulator.ts` and `simulator.md`: a virtual-clock simulator with explicit simplifications. Use simulation only when that is the intended teaching model; do not claim it proves browser behavior.
 
@@ -19,7 +19,9 @@ Choose a small set of experiments where each predicts an observable result and e
 
 ## Local lab conventions
 
-Prefer a self-contained `index.ts`, Node >= 22.18, and built-in `node:http`; avoid new dependencies or build steps unless the topic needs them. Small browser scripts may live in HTML strings. Split assets into files only when it makes the mechanism easier to inspect. Follow existing typography: a readable centered page, simple cards/tables, muted hints, and chronological logs; no app framework is needed.
+Prefer a directly runnable `index.ts`, Node >= 22.18, and built-in `node:http`; avoid new dependencies or build steps unless the topic needs them. Small browser scripts may live in HTML strings. Split assets into files only when it makes the mechanism easier to inspect; no app framework is needed.
+
+Before creating or changing a browser HTTP demo, read [the shared demo contract](../../../docs/demo/README.md) and the relevant implementation in `docs/demo/`. This is the canonical reference for exported server helpers, `Demo.createLogger` options, asset URLs, CSS class names, and timing-sensitive exceptions. Reuse these interfaces rather than copying their implementations. Serve the shared assets on each participating origin, add the documented page/log classes, and keep mechanism-specific geometry and protocol logic local. Use explicit `.ts` extensions for native Node imports. For loading/lifecycle experiments, follow the documented inline-style and recorder exceptions so shared plumbing does not change the measured behavior. If the public contract changes, update its README and validate existing callers in the same task; do not duplicate the contract in AGENTS.md or another rule.
 
 Use Chinese UI instructions and English source comments. Give controls descriptive labels, use semantic HTML, and write log messages with `textContent`. Keep server plumbing secondary to the lesson. Use an explicit localhost port, report address conflicts clearly, and document shutdown. Bound user-controlled delays and serve known routes with correct MIME types and useful errors.
 

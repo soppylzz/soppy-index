@@ -4,7 +4,7 @@
 
 浏览器存储没有一个可安全硬编码的"固定容量"。可用空间取决于浏览器、设备、剩余磁盘、使用模式和隐私策略；数据默认还可能在存储压力下被回收。应用需要查询近似用量、处理写入失败，并为数据设计重建或同步路径。
 
-## 1. Storage bucket 与隔离
+## 1. 配额与隔离边界
 
 从应用视角看，IndexedDB、Cache Storage、OPFS 等数据通常计入 origin 的存储配额。浏览器可能进一步按顶层站点分区第三方存储，以减少跨站跟踪。
 
@@ -36,7 +36,7 @@ async function getStorageSummary() {
 
 ## 3. Best-effort 与 persistent
 
-站点数据默认通常属于 best-effort：只要空间充足会保留，但存储压力下可能被浏览器回收。`navigator.storage.persist()` 可以请求把该 origin 的数据标记为 persistent；浏览器会根据自身策略自动允许或拒绝。
+站点数据默认通常属于 best-effort，在存储压力等浏览器清理策略下可能被回收。navigator.storage.persist() 请求将当前默认存储 bucket 标记为 persistent；是否授予可由浏览器策略或用户权限交互决定，不能承诺一定静默批准或一定显示提示。
 
 ```js
 async function requestPersistentStorage() {
@@ -51,7 +51,7 @@ async function requestPersistentStorage() {
 
 返回 `false` 不是异常，也不意味着存储立即不可用。应用应继续工作，只是要把数据视为可回收。适合申请 persistent storage 的通常是用户难以重建的重要本地数据，而不是随时能重新下载的静态资源。
 
-用户主动清理站点数据时，即使 persistent storage 也可能被删除。"persistent"主要改变自动回收优先级，不是永久保存承诺。
+按 [Storage Standard 的持久化权限](https://storage.spec.whatwg.org/#persistence)，persistent 存储受到浏览器自动清理策略的保护，不只是把自动回收概率调低；用户或应用仍可主动删除。它不是数据备份、无限配额或写入成功承诺，应用仍需处理权限变化、写入错误及数据重建。
 
 ## 4. OPFS
 
@@ -156,7 +156,7 @@ const supportsOPFS = typeof navigator.storage?.getDirectory === "function"
 
 ## 9. 面试回答框架
 
-不要回答固定容量数字。说明浏览器按 origin 等边界管理配额，默认数据通常是 best-effort；`estimate()` 只给近似值，`persist()` 只是请求降低自动回收概率；所有写入仍需处理配额错误。若追问 OPFS，说明它是 origin 私有、按配额管理的文件系统，与用户授权访问普通文件不同。可结合本目录 demo 的压力测试说明配额错误恢复路径。
+不要回答固定容量数字。说明浏览器按 origin 等边界管理配额，默认数据通常是 best-effort；estimate 只给近似值，persist 请求自动清理保护，是否授予需要检查结果；所有写入仍需处理配额错误。若追问 OPFS，说明它是 origin 私有、按配额管理的文件系统，与用户授权访问普通文件不同。可结合本目录 demo 的压力测试说明有限写入、异常与清理路径，不把达到测试上限当成测得完整配额。
 
 ## 10. 参考资料
 

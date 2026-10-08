@@ -21,7 +21,9 @@ url.searchParams.append("tag", "a")
 url.searchParams.append("tag", "b")
 ```
 
-structuredClone 支持循环引用、Map、Date 等可克隆类型；不是复制任意 JavaScript 对象语义的工具。函数、DOM 节点等不能克隆，自定义原型、属性描述符等也不能假定原样保存。transfer 转移所有权，不是额外复制，原 ArrayBuffer 会 detached。[structuredClone 官方文档](https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone)
+结构化克隆用于保存值之间的关系及受支持类型的数据，不会复制对象的全部行为。structuredClone 支持循环引用、Map、Date 等；函数、DOM 节点等不能克隆，自定义原型、属性描述符等也不能假定原样保存。它与 JSON 序列化的区别不是简单的“复制得更深”，而是支持的类型和保留的语义不同。[structuredClone 官方文档](https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone)
+
+需要区分克隆与转移：克隆后两侧各持有相应数据，transfer 则交出可转移资源的所有权。例如转移 ArrayBuffer 后，原 buffer 会 detached：
 
 ```js
 const buffer = new ArrayBuffer(8)
@@ -30,7 +32,9 @@ const result = structuredClone({ buffer }, { transfer: [buffer] })
 log(`source=${buffer.byteLength} target=${result.buffer.byteLength}`)
 ```
 
-本实验同时验证循环引用、Date、Map，以及函数克隆抛 DataCloneError。跨窗口传递可克隆值、transferable 的可达性与端口所有权详见 [通信笔记](../communication/crossContextCommunication.md)，不在此重复。
+对应 [lab.js](./assets/lab.js) 的 tools：clone 按钮检查复制后的 self 是否仍指向副本自身、Date 类型及 Map 内容，再检查 buffer 转移前后的字节数；clone-error 按钮单独捕获函数克隆的 DataCloneError。这些是本地克隆实验，不证明跨窗口接收或数据库提交成功。
+
+本节主讲通用值语义；消息路径是否接受 transfer list、资源如何随消息交付见 [通信笔记](../communication/crossContextCommunication.md#3-克隆与转移)，保存及读回数据的约束见 [IndexedDB](../storage/indexedDB/indexedDB.md#5-structured-clone-不等于任意值)。
 
 ## 3. fetch：响应、读取、业务结果与取消
 
@@ -56,7 +60,17 @@ try {
 }
 ```
 
-AbortController 是一次性的取消信号，abort 后不会复位；重试要创建新的 controller。取消必须向下游传递 signal，并清理计时器和监听器；不能强制停止任意不检查 signal 的计算，也不能回滚已经到达服务端的事务。实际完整实现还区分每次请求身份，防止旧响应覆盖新操作。
+AbortController 是一次性的取消信号，abort 后不会复位；重试要创建新的 controller。取消必须向下游传递 signal，并清理计时器和监听器；不能强制停止任意不检查 signal 的计算，也不能回滚已经到达服务端的事务。
+
+[lab.js](./assets/lab.js) 的 `tools()` 中，`run()` 还用三层控制避免旧任务干扰新操作：
+
+| 源码中的控制                           | 负责的问题                                                   |
+| -------------------------------------- | ------------------------------------------------------------ |
+| request?.abort()，为新请求创建 current | 尝试取消上一请求，新 controller 不复用已取消的信号           |
+| request === current                    | 在响应与响应体成功分支确认任务身份，只发布当前请求的成功结果 |
+| 捕获本次连接的 signal.aborted          | 断开或重连后忽略旧连接的请求结果                             |
+
+这三者不能互相替代：abort 不撤销已完成工作，任务身份检查也不取消网络工作。源码在 fetch 返回与 response.json 完成后分别检查，覆盖“已有响应头但还在读取 body”的阶段；finally 只在 request 仍指向 current 时清理共享 timer，避免旧任务结束时清除新请求的超时。每次请求另有 requestId 用于日志关联；catch 可能记录同一连接内旧请求的取消结果，应按 id 识别，不能当作新请求失败。
 
 本实验服务在响应连接关闭时清理延迟定时器；这只演示本地资源回收，不等于证明所有请求取消都能避免服务端副作用。
 

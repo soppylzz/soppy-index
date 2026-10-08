@@ -4,12 +4,7 @@ const role = new URL(window.location.href).searchParams.get("role")
 const id = crypto.randomUUID().slice(0, 8)
 const list = document.querySelector("#log")
 let controller
-function log(message) {
-  const line = document.createElement("li")
-  line.textContent = `${new Date().toISOString()} [${id}] ${message}`
-  list.append(line)
-  while (list.children.length > 40) list.firstElementChild.remove()
-}
+const log = globalThis.Demo.createLogger(list, { context: id, limit: 40 })
 function ready() {
   window.parent.postMessage({ kind: "ready", role }, origin)
 }

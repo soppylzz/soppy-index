@@ -1,16 +1,19 @@
+import {
+  ascii,
+  closeServers,
+  demoHead,
+  readPort,
+  assertDistinctPorts,
+  serveDemoAsset,
+  listenOnLoopback,
+  logHttpRequest,
+} from "../../demo/server.ts"
 import { createServer } from "node:http"
 import { readFileSync } from "node:fs"
 
-function portOf(name: string, fallback: number): number {
-  const port = Number(process.env[name] ?? fallback)
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error(`${name} must be an integer between 1 and 65535`)
-  }
-  return port
-}
-const port = portOf("PORT", 5008)
-const peerPort = portOf("PEER_PORT", 5009)
-if (port === peerPort) throw new Error("PORT and PEER_PORT must differ")
+const port = readPort("PORT", 5008)
+const peerPort = readPort("PEER_PORT", 5009)
+assertDistinctPorts(port, peerPort)
 const origin = `http://127.0.0.1:${port}`
 const peerOrigin = `http://127.0.0.1:${peerPort}`
 const assets = new Map(
@@ -23,8 +26,8 @@ const assets = new Map(
 function page(frame: boolean): string {
   return `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>跨上下文通信实验</title><link rel="stylesheet" href="/assets/style.css"></head>
-<body data-parent="${origin}" data-peer="${peerOrigin}"><main>
+<title>跨上下文通信实验</title>${demoHead}<link rel="stylesheet" href="/assets/style.css"></head>
+<body class="demo-page" data-parent="${origin}" data-peer="${peerOrigin}"><main>
 <h1>${frame ? "接收上下文" : "跨上下文通信实验"}</h1>
 <p id="identity"></p><p id="status" role="status"></p>
 ${
@@ -46,18 +49,16 @@ ${
 <details><summary>拒绝路径的两个真实发送窗口</summary><iframe id="origin-probe" title="错误来源窗口" src="${origin}/frame?role=origin"></iframe><iframe id="source-probe" title="同源但错误窗口" src="${peerOrigin}/frame?role=source"></iframe></details>
 </section><p class="hint">调用返回只表示本地发送未抛异常；ack 才报告本实验处理结果。超时 1800ms 是应用策略，后台调度会影响它。关闭页面的通知尽力而为。日志最多 120 条；终端 HTTP 日志不证明消息处理。</p>`
 }
-<section><h2>按时间追加的日志</h2><ol id="log" role="log" aria-live="polite"></ol></section>
+<section><h2>按时间追加的日志</h2><ol class="demo-log" id="log" role="log" aria-live="polite"></ol></section>
 </main><script type="module" src="/assets/${frame ? "frame" : "main"}.js"></script></body></html>`
 }
 
 const servers = [port, peerPort].map((listenPort) => {
   const server = createServer((req, res) => {
+    if (serveDemoAsset(req, res)) return
     res.setHeader("Cache-Control", "no-store")
     res.on("finish", () => {
-      const path = new URL(req.url ?? "/", origin).pathname
-      console.log(
-        `[communication:${listenPort}] ${req.method} ${encodeURI(path)} -> ${res.statusCode}`
-      )
+      logHttpRequest(req, res.statusCode, `communication:${listenPort}`)
     })
     const path = new URL(req.url ?? "/", origin).pathname
     let status = 200
@@ -86,16 +87,13 @@ const servers = [port, peerPort].map((listenPort) => {
 })
 
 function shutdown(): void {
-  for (const server of servers) server.close()
+  closeServers(...servers)
 }
 try {
   for (const [index, server] of servers.entries()) {
-    await new Promise<void>((resolve, reject) => {
-      server.once("error", reject)
-      server.listen(index === 0 ? port : peerPort, "127.0.0.1", resolve)
-    })
+    await listenOnLoopback(server, index === 0 ? port : peerPort)
     server.on("error", (error) => {
-      console.error(`[communication] Server error: ${error.message}`)
+      console.error(`[communication] Server error: ${ascii(error.message)}`)
       process.exitCode = 1
       shutdown()
     })
@@ -117,7 +115,7 @@ try {
   console.error(
     failure.code === "EADDRINUSE"
       ? `[communication] Port conflict. Choose two free ports with PORT and PEER_PORT.`
-      : `[communication] Startup failed: ${failure.message}`
+      : `[communication] Startup failed: ${ascii(failure.message)}`
   )
   process.exitCode = 1
   shutdown()

@@ -14,12 +14,7 @@ let generation = 0
 let count = 0
 let feedback = ""
 let writes = 0
-function log(message) {
-  const line = document.createElement("li")
-  line.textContent = `${new Date().toISOString()} [${contextId}] ${message}`
-  logList.append(line)
-  while (logList.children.length > 100) logList.firstElementChild.remove()
-}
+const log = globalThis.Demo.createLogger(logList, { context: contextId, limit: 100 })
 function status(message) {
   document.querySelector("#status").textContent = message
 }

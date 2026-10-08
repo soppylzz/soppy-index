@@ -5,6 +5,7 @@
     "types": ["node"],
     "module": "esnext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
 
     "strict": true,
     "allowJs": true,

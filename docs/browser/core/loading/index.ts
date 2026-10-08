@@ -1,9 +1,17 @@
+import {
+  ascii,
+  demoStyles,
+  readPort,
+  serveDemoAsset,
+  startServer,
+  logHttpRequest,
+} from "../../../demo/server.ts"
 import { createServer, type ServerResponse } from "node:http"
 import { randomUUID } from "node:crypto"
 
 /* ==================== config ==================== */
 
-const PORT = Number(process.env.PORT ?? 5004)
+const PORT = readPort("PORT", 5004, true)
 
 /* ==================== experiments ==================== */
 const MODES: Record<string, { title: string; prediction: string }> = {
@@ -79,14 +87,7 @@ function escapeHtml(value: string): string {
   return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;")
 }
 
-const STYLES = `
-body { font-family: system-ui, sans-serif; max-width: 960px; margin: 32px auto; padding: 0 16px; line-height: 1.7; color: #343a40; }
-a { color: #1971c2; } code { background: #f1f3f5; padding: 2px 5px; border-radius: 4px; }
-.card { border: 1px solid #dee2e6; border-radius: 8px; padding: 14px 20px; margin: 16px 0; }
-.muted { color: #687078; font-size: 14px; } nav { display: flex; flex-wrap: wrap; gap: 8px 16px; }
-label { display: inline-block; margin: 4px 12px 4px 0; } input { width: 72px; }
-button { cursor: pointer; padding: 4px 10px; } pre { overflow-x: auto; font-size: 13px; }
-`
+const STYLES = demoStyles + `input { width: 72px; }`
 
 // Install observers before the experiments and preserve logs until the body exists.
 const OBSERVERS = `
@@ -96,6 +97,7 @@ window.record = function (label) {
     document.readyState.padEnd(11) + " | after=" +
     Boolean(document.getElementById("after")) + " | " + label
   window.labRows.push(row)
+  if (window.labRows.length > 120) window.labRows.shift()
   console.log(row)
   var output = document.getElementById("log")
   if (output) output.textContent = window.labRows.join("\\n")
@@ -118,17 +120,17 @@ record("head bootstrap")
 `
 
 function header(title: string): string {
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(title)} · Script Loading Lab</title><style>${STYLES}</style>
 <script>${OBSERVERS}</script>`
 }
 
 function body(title: string, prediction: string): string {
-  return `</head><body><h1>${escapeHtml(title)}</h1><p><a href="/">返回实验目录</a></p>
+  return `</head><body class="demo-page"><main><h1>${escapeHtml(title)}</h1><p><a href="/">返回实验目录</a></p>
 <div class="card"><strong>预期与原因</strong><p>${escapeHtml(prediction)}</p></div>
 <p class="muted">日志：相对导航的时间 | readyState | 后方 DOM 是否存在 | 事件。同步执行不会被 async 抢占。
 请打开 DevTools Network 与 Console；响应延迟只用于拉开就绪时间，毫秒值和竞争顺序以本次观察为准。</p>
-<div class="card"><pre id="log" aria-live="polite"></pre></div>`
+<div class="card"><pre class="demo-log" id="log" aria-live="polite"></pre></div>`
 }
 
 function scriptUrl(id: string, delay: number, extra = ""): string {
@@ -193,9 +195,10 @@ function send(res: ServerResponse, content: string, type: string, status = 200):
 /* ==================== HTTP server ==================== */
 
 const server = createServer((req, res) => {
+  if (serveDemoAsset(req, res)) return
   const url = new URL(req.url ?? "/", "http://localhost")
   const params = url.searchParams
-  res.on("finish", () => console.log(`[loading-lab] ${req.method} ${req.url} -> ${res.statusCode}`))
+  res.on("finish", () => logHttpRequest(req, res.statusCode, "loading-lab"))
 
   if (url.pathname === "/favicon.ico") {
     res.writeHead(204)
@@ -215,7 +218,7 @@ const server = createServer((req, res) => {
 <a href="/hints?kind=module&hint=none">module 对照</a>
 <a href="/hints?kind=module&hint=modulepreload">modulepreload</a>
 </nav><p>在 Network 查看请求开始时间与 Initiator；hint 不会直接执行脚本。</p></div>
-<script>record("index body parsed")</script></body></html>`,
+<script>record("index body parsed")</script></main></body></html>`,
       "text/html"
     )
     return
@@ -252,7 +255,7 @@ const server = createServer((req, res) => {
 work 仅对外部 classic 生效，会占用主线程。不同模式的执行路径请结合配套文档阅读。</p>
 <div id="after" class="card">后方 DOM 标记：parser 到这里才会创建我。</div>
 <img src="/slow.svg?delay=1600" width="180" height="30" alt="用于观察 load 等待的普通图片">
-</body></html>`,
+</main></body></html>`,
       tail
     )
     return
@@ -280,7 +283,7 @@ work 仅对外部 classic 生效，会占用主线程。不同模式的执行路
       `${body("Resource Hint", "消费标签在 600ms 后的 HTML chunk 才出现。对比 Network：hint 可提前发起请求；是否复用需结合 URL、类型和 fetch 设置判断。")}
 <div id="after">消费标签即将出现</div><script>record("consumer tag about to be parsed")</script>
 <script ${module ? 'type="module"' : "defer"} src="${escapeHtml(asset)}"></script>
-<script>record("HTML tail parsed (not EOF)")</script></body></html>`,
+<script>record("HTML tail parsed (not EOF)")</script></main></body></html>`,
       600
     )
     return
@@ -306,7 +309,7 @@ work 仅对外部 classic 生效，会占用主线程。不同模式的执行路
         source += `{ const end = performance.now() + ${work}; while (performance.now() < end) {} }\n`
       source += `window.record("classic ${id}: end")\n`
     }
-    console.log(`[loading-lab] request ${req.url}: response delayed ${delay}ms`)
+    console.log(`[loading-lab] request ${ascii(req.url ?? "/")}: response delayed ${delay}ms`)
     const timer = setTimeout(() => {
       res.writeHead(200, {
         "Content-Type": "text/javascript; charset=utf-8",
@@ -339,15 +342,7 @@ work 仅对外部 classic 生效，会占用主线程。不同模式的执行路
 
 /* ==================== demo ==================== */
 
-server.on("error", (error: NodeJS.ErrnoException) => {
-  console.error(
-    error.code === "EADDRINUSE"
-      ? `Port ${PORT} is in use. Choose another port with PORT=5005.`
-      : error.message
-  )
-  process.exitCode = 1
-})
-server.listen(PORT, "127.0.0.1", () => {
+startServer(server, PORT, () => {
   const address = server.address()
   if (!address || typeof address === "string") return
   const baseUrl = `http://localhost:${address.port}`

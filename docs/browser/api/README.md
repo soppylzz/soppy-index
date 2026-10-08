@@ -1,6 +1,6 @@
 # 浏览器 API
 
-[仓库首页](../../../README.md) · [DOM](../dom/README.md) · [Observer](../observer/README.md) · [跨上下文通信](../communication/README.md)
+[仓库首页](../../../README.md) · [DOM](../dom/README.md) · [Observer](../observer/README.md) · [跨上下文通信](../communication/README.md) · [公共样式与工具](../../demo/README.md)
 
 - [常用 Web API](./webApi.md)：URL、克隆、取消、FormData、文件与环境能力。
 - [Web Components](./webComponents.md)：自定义元素、模板、Shadow DOM、slot 与事件边界。

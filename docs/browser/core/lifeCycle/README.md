@@ -1,6 +1,6 @@
 # 页面生命周期与历史导航
 
-[返回浏览器核心目录](../README.md) · [资源加载](../loading/README.md) · [跨上下文通信](../../communication/README.md)
+[返回浏览器核心目录](../README.md) · [资源加载](../loading/README.md) · [跨上下文通信](../../communication/README.md) · [公共样式与工具](../../../demo/README.md)
 
 本目录把文档加载、后台活动、历史记录和页面恢复放在一起理解，每个实验使用独立路由。
 

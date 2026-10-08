@@ -1,13 +1,9 @@
 /* global document */
 export const identity = globalThis.crypto.randomUUID().slice(0, 8)
+let logger
 export function log(message) {
-  const row = document.createElement("li")
-  row.textContent = `${new Date().toISOString()} | ${identity} | ${message}`
-  document.querySelector("#log").append(row)
-  while (document.querySelector("#log").children.length > 120) {
-    document.querySelector("#log").firstElementChild.remove()
-  }
-  console.log(row.textContent)
+  logger ??= globalThis.Demo.createLogger("#log", { context: identity, limit: 120, console: true })
+  logger(message)
 }
 export function envelope(scope, op) {
   return { v: 1, type: "request", id: globalThis.crypto.randomUUID(), sender: identity, scope, op }

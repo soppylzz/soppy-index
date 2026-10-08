@@ -21,9 +21,7 @@
 
 ## Demo 编写约定
 
-浏览器实验按 [knowledge-demo skill](./skills/knowledge-demo/SKILL.md) 执行：服务成功监听后，CLI 应输出 demo 名称、访问地址、实验入口、操作顺序、观察位置和停止方式，并提示会改变结果的实验条件。CLI 输出语言遵循 [code-style](./rules/code-style.md)：启动提示、运行日志、警告与错误统一使用英文；页面讲解和浏览器 Console 日志可使用中文。启动列表引用实验信息时，也应检查动态插入的标题。终端的 HTTP 请求日志与浏览器执行日志应明确区分。算法 demo 保留其结果输出惯例。
-
-源代码、HTML 字符串中的 JavaScript，以及文档代码块都遵守 [code-style](./rules/code-style.md)：注释使用英文、保持精简，分隔线只用于独立语义块。启动说明应作为运行时输出，而非堆积在代码注释中。
+浏览器实验的设计、启动引导和验证流程见 [knowledge-demo skill](./skills/knowledge-demo/SKILL.md)，代码与输出语言见 [code-style](./rules/code-style.md)。公共样式与工具的接口契约集中在 [docs/demo](../docs/demo/README.md)，skill 会引导后续 session 读取；此处只保留导航。
 
 ## Claude Code 兼容方式
 

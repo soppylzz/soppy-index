@@ -1,13 +1,16 @@
+import {
+  ascii,
+  closeServers,
+  demoHead,
+  readPort,
+  serveDemoAsset,
+  listenOnLoopback,
+  logHttpRequest,
+} from "../../demo/server.ts"
 import { createServer } from "node:http"
 import { readFileSync } from "node:fs"
 
-function portOf(name: string, fallback: number): number {
-  const value = Number(process.env[name] ?? fallback)
-  if (!Number.isInteger(value) || value < 1 || value > 65535)
-    throw new Error(`${name} must be an integer between 1 and 65535`)
-  return value
-}
-const port = portOf("PORT", 5015)
+const port = readPort("PORT", 5015)
 
 const origin = `http://127.0.0.1:${port}`
 
@@ -36,9 +39,9 @@ function page(mode: keyof typeof experiments | "home"): string {
   const links = Object.entries(experiments)
     .map(([key, value]) => `<a href="/${key}">${value.title}</a>`)
     .join(" · ")
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${experiment?.title ?? "DOM 实验目录"}</title><link rel="stylesheet" href="/assets/style.css"></head><body data-mode="${mode}" ><main><nav><a href="/">实验目录</a> · ${links}</nav><h1>${experiment?.title ?? "DOM 实验目录"}</h1>${
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${experiment?.title ?? "DOM 实验目录"}</title>${demoHead}<link rel="stylesheet" href="/assets/style.css"></head><body class="demo-page" data-mode="${mode}" ><main><nav><a href="/">实验目录</a> · ${links}</nav><h1>${experiment?.title ?? "DOM 实验目录"}</h1>${
     experiment
-      ? `<p id="identity"></p><section><button id="connect">连接 / 重连</button><button id="disconnect">断开并清理</button><p id="status" role="status"></p>${experiment.body}</section><section><h2>操作与真实结果日志</h2><p>日志最多 120 条，包含 UTC 与上下文身份；操作日志不证明异步接收或业务处理。</p><ol id="log" role="log" aria-live="polite"></ol></section><script type="module" src="/assets/lab.js"></script>`
+      ? `<p id="identity"></p><section><button id="connect">连接 / 重连</button><button id="disconnect">断开并清理</button><p id="status" role="status"></p>${experiment.body}</section><section><h2>操作与真实结果日志</h2><p>日志最多 120 条，包含 UTC 与上下文身份；操作日志不证明异步接收或业务处理。</p><ol class="demo-log" id="log" role="log" aria-live="polite"></ol></section><script type="module" src="/assets/lab.js"></script>`
       : `<section><p>选择一个独立实验路由，按页面说明操作，观察页面日志与 DevTools Console。终端仅记录 HTTP。</p><table><tr><th>路由</th><th>实验</th></tr>${Object.entries(
           experiments
         )
@@ -52,6 +55,7 @@ function page(mode: keyof typeof experiments | "home"): string {
 
 const servers = [port].map((listenPort) =>
   createServer((req, res) => {
+    if (serveDemoAsset(req, res)) return
     res.setHeader("Cache-Control", "no-cache")
     let url: URL
     try {
@@ -62,9 +66,7 @@ const servers = [port].map((listenPort) =>
       return
     }
     const path = url.pathname
-    res.on("finish", () =>
-      console.log(`[dom:${listenPort}] ${req.method} ${encodeURI(path)} -> ${res.statusCode}`)
-    )
+    res.on("finish", () => logHttpRequest(req, res.statusCode, `dom:${listenPort}`))
 
     let status = 200
     let mime = "text/plain; charset=utf-8"
@@ -90,19 +92,13 @@ const servers = [port].map((listenPort) =>
   })
 )
 function shutdown(): void {
-  for (const server of servers) {
-    server.close()
-    server.closeIdleConnections()
-  }
+  closeServers(...servers)
 }
 try {
   for (const [index, server] of servers.entries()) {
-    await new Promise<void>((resolve, reject) => {
-      server.once("error", reject)
-      server.listen([port][index], "127.0.0.1", resolve)
-    })
+    await listenOnLoopback(server, [port][index])
     server.on("error", (error) => {
-      console.error(`[dom] Server error: ${error.message}`)
+      console.error(`[dom] Server error: ${ascii(error.message)}`)
       process.exitCode = 1
       shutdown()
     })
@@ -123,7 +119,7 @@ try {
   console.error(
     failure.code === "EADDRINUSE"
       ? "[dom] Port conflict. Set PORT to free ports."
-      : `[dom] Startup failed: ${failure.message}`
+      : `[dom] Startup failed: ${ascii(failure.message)}`
   )
   process.exitCode = 1
   shutdown()

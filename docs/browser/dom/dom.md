@@ -73,12 +73,18 @@ log(`fragment=${fragment.childNodes.length} parent=${node.parentNode.id}`)
 
 ## 4. 几何读取：布局尺寸与视觉矩形
 
-| 读取                  | 典型含义                                     | 坐标 / 精度                       |
-| --------------------- | -------------------------------------------- | --------------------------------- |
-| offsetWidth / Height  | 布局边框盒尺寸，包括可能占空间的滚动条       | 通常为整数；不体现 transform 放大 |
-| clientWidth / Height  | padding 盒内部可用尺寸，排除边框和占位滚动条 | 整数；根元素等有特殊规则          |
-| scrollWidth / Height  | 内容所需滚动范围，包括超出可视区域部分       | 整数，可能包含伪元素贡献          |
-| getBoundingClientRect | 视觉边框盒包围矩形，体现 transform           | 可有小数，left/top 相对视口       |
+这些接口由 [CSSOM View](https://drafts.csswg.org/cssom-view/) 定义。使用时先判断需要布局尺寸、视口矩形还是滚动状态，再选择接口：
+
+| 读取                    | 主要内容                                            | 坐标 / 精度与边界                                                                              |
+| ----------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| offsetWidth / Height    | 相关 fragment 的轴对齐 border-box 包围尺寸          | 整数 CSS 像素，忽略元素及祖先的 transform；无布局盒时为 0                                      |
+| offsetTop / Left        | border edge 相对 offsetParent padding edge 的位置   | 历史 offset 模型，忽略 transform，不是视口坐标                                                 |
+| clientWidth / Height    | padding 盒内部可用尺寸，排除边框和占位滚动条        | 整数；普通 inline box 为 0，根元素及 quirks mode 的 body 有视口特例                            |
+| clientTop / Left        | 对应方向的边框及位于边框与 padding 之间的滚动条尺寸 | 普通 inline box 为 0，不是元素相对父级的位置                                                   |
+| scrollWidth / Height    | scrolling area 的完整尺寸                           | 整数，可大于 client 尺寸，可能包含伪元素贡献                                                   |
+| scrollTop / Left        | 当前滚动位置                                        | 可有小数；设置它们请求滚动，不代表完整渲染流水线重跑                                           |
+| getClientRects()        | 各 fragment 的矩形集合                              | 视口坐标，反映 transform；多行 inline 可以有多个矩形                                           |
+| getBoundingClientRect() | client rect 的轴对齐包围矩形                        | 可有小数，left/top 相对视口，反映 transform 和滚动；计算包围范围时忽略空盒，全部为空时另有规则 |
 
 rect 加页面 scrollX / scrollY 可换算常见文档坐标，但不能将其当作所有嵌套容器和复杂变换的局部坐标公式。getBoundingClientRect 返回当前矩形快照，不是后续自动变化的 live 尺寸对象。[getBoundingClientRect 文档](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect)
 
@@ -90,13 +96,13 @@ log(`offset=${box.offsetWidth} client=${box.clientWidth} scroll=${box.scrollWidt
 log(`rect=${rect.width} left=${rect.left} scrollY=${window.scrollY}`)
 ```
 
-该片段依赖实验的 box 与 log；完整按钮还显示变换前后对照。尺寸变化的持续观察应考虑 [ResizeObserver](../observer/observer.md)，而不是每帧反复读取所有元素。
+该片段依赖实验的 box 与 log；完整按钮还显示变换前后对照。[lab.js](./assets/lab.js) 的 `layout()` 在 `metrics()` 中统一读取指标，transform 按钮只切换 scale 再读取，所以能比较同一元素的布局尺寸与视觉矩形。它未覆盖表中所有分片、根元素及 offsetParent 特例，已测范围见 [走查](./index.md)。尺寸变化的持续观察应考虑 [ResizeObserver](../observer/observer.md)，而不是每帧反复读取所有元素。
 
 ## 5. CSSOM、强制布局与读写分组
 
-element.style 只反映行内声明；样式表设置的 width 不会因此出现在 style.width。getComputedStyle 提供解析后的样式值，某些属性和条件可能需要样式甚至布局更新，不能把每次读取都说成必然重排。[getComputedStyle 文档](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
+CSSOM 提供样式访问接口。element.style 只反映行内声明；样式表设置的 width 不会因此出现在 style.width。getComputedStyle 提供只读的 resolved value 视图：多数属性返回 computed value，部分布局相关属性在元素生成盒等条件下返回 used value，因此不是原样 CSS 文本，也不是屏幕最终像素。[CSSOM resolved value](https://drafts.csswg.org/cssom/#resolved-values)、[getComputedStyle 文档](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
 
-布局失效后立即读取 offset、rect 等几何值，浏览器可能被迫先完成待处理的样式 / 布局工作。交错读写将这种同步结算反复插入循环；分组可减少被迫刷新机会，但不保证帧率或固定性能倍数。rAF 也不自动免除读写导致的布局。
+`/layout` 的样式按钮读取同一 box 的行内与解析值：初始 width 来自样式表，所以 style.width 为空，getComputedStyle(box).width 为 200px。读取是否需要同步结算取决于当前失效状态及所读属性，原理见 [渲染流程](../core/rendering.md#读取是否一定触发同步布局)。下面关注代码如何分组读写：
 
 ```js
 const widths = nodes.map((node) => node.offsetWidth)
@@ -105,6 +111,8 @@ nodes.forEach((node, index) => {
 })
 ```
 
-这是 `/layout` 的 batch 分支，省略节点构造、初始布局结算、最后一次读取和耗时统计。interleave 分支对相同的 200 个节点逐个读取再写入；两者最终都写为 101px。节点离屏但未 display:none，仍具有布局盒。
+这是 [lab.js](./assets/lab.js) 中 `layout()` 的 `benchmark(batch)` 的 batch 分支，先读完再写入。interleave 分支则逐节点读取 offsetWidth 后立即写 width。两者都构造 200 个初始宽度为 100px 的节点，最终写为 101px；节点离屏但未 display:none，仍具有布局盒。
+
+源码在计时前用 root.offsetHeight 结算初始布局，计时包含循环和最后一个节点的 offsetWidth 读取，结束后移除节点。片段省略了这些准备与收尾，不能仅比较循环代码就解释完整耗时。读写分组可减少被迫刷新机会，但不保证固定性能倍数；rAF 也不自动免除同步布局。
 
 耗时受热身、机器负载、布局范围、DevTools 和浏览器优化影响。实验只报告实际 performance.now 差值；判断同步 Layout 次数和调用来源，应另录 Performance trace，不能把耗时直接当作重排次数。实际已测范围与未测项见 [走查](./index.md)。

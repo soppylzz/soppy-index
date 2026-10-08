@@ -1,6 +1,6 @@
 # Observer API
 
-[仓库首页](../../../README.md) · [浏览器核心](../core/README.md) · [页面生命周期](../core/lifeCycle/README.md)
+[仓库首页](../../../README.md) · [浏览器核心](../core/README.md) · [页面生命周期](../core/lifeCycle/README.md) · [公共样式与工具](../../demo/README.md)
 
 根据变化信号选择观察器：DOM 结构与属性用 MutationObserver，几何交叉用 IntersectionObserver，布局盒尺寸用 ResizeObserver。
 
