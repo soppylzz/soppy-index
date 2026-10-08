@@ -1,12 +1,6 @@
 /**
- * A virtual browser event loop that models the HTML spec processing model:
- * task queue -> microtask checkpoint -> rendering update -> idle period.
- *
- * It is driven by a virtual clock (milliseconds) so the ordering is fully
- * deterministic. Rendering stages follow ../rendering.md; theory lives in
- * ./eventLoop.md; the annotated walkthrough lives in ./eventLoopSimulator.md.
- *
- * Run with Node 22+: node docs/browser/core/eventLoop/eventLoopSimulator.ts
+ * Deterministic teaching model, not a browser implementation.
+ * See ./index.md and ./simulator.md for guarantees and simplifications.
  */
 
 /* ==================== virtual clock & log ==================== */
@@ -26,7 +20,8 @@ function log(phase: string, label: string): void {
 
 /* ==================== queues ==================== */
 
-type TaskSource = "script" | "user-interaction" | "timer" | "networking" | "idle-timeout"
+type TaskSource =
+  "script" | "user-interaction" | "timer" | "networking" | "idle-timeout" | "intersection-observer"
 
 interface TaskItem {
   source: TaskSource
@@ -79,11 +74,6 @@ function scheduleTimer(label: string, delayMs: number, run: () => void): void {
   enqueueTask("timer", now + delayMs, label, run)
 }
 
-function simulateClick(label: string, listener: () => void): void {
-  // Input that already happened; its delivery becomes a user interaction task.
-  enqueueTask("user-interaction", now, label, listener)
-}
-
 function simulateNetworkResponse(label: string, latencyMs: number, onDone: () => void): void {
   // The host performs network work off the main thread; the completion is
   // delivered to the page as a networking task.
@@ -94,8 +84,8 @@ function mutateDom(label: string): void {
   mutationRecords.push(label)
   if (mutationDeliveryQueued) return
   mutationDeliveryQueued = true
-  // One coalesced compound microtask per checkpoint, not one task per mutation.
-  microtask("MutationObserver (compound microtask)", () => {
+  // One coalesced notification microtask per checkpoint, not one task per mutation.
+  microtask("MutationObserver (notification microtask)", () => {
     log("RUN", `MutationObserver delivers ${mutationRecords.length} record(s)`)
     mutationRecords = []
     mutationDeliveryQueued = false
@@ -202,12 +192,14 @@ function updateTheRendering(): void {
   style()
   layout()
 
-  // IntersectionObserver delivery runs inside the rendering update, once the
-  // frame has fresh layout ("update intersection observations" steps).
+  // Geometry observation and callback delivery are separate steps.
   if (ioPending !== null) {
-    log("IO", `IntersectionObserver callback: ${ioPending}`)
+    const target = ioPending
     ioPending = null
-    performMicrotaskCheckpoint()
+    log("RENDER", "intersection observations updated; notification task queued")
+    enqueueTask("intersection-observer", now, "notify intersection observers", () => {
+      log("IO", `IntersectionObserver callback: ${target}`)
+    })
   }
 
   prePaint()
@@ -235,17 +227,20 @@ function idlePeriodEnd(): number {
   return Math.min(...candidates)
 }
 
-function runIdlePeriod(): void {
+function runIdlePeriod(): boolean {
+  let ranCallback = false
   const end = idlePeriodEnd()
   for (;;) {
     if (ricQueue.length === 0 || now >= end) break
     if (taskQueue.some((task) => task.dueTime <= now)) break
     const item = ricQueue.shift()
     if (!item) break
+    ranCallback = true
     log("RIC", `${item.label} (idle period, timeRemaining ${Math.max(0, Math.round(end - now))}ms)`)
     item.run({ didTimeout: false, timeRemaining: () => Math.max(0, end - now) })
     performMicrotaskCheckpoint()
   }
+  return ranCallback
 }
 
 /* ==================== driver ==================== */
@@ -279,20 +274,40 @@ function drive(): void {
       continue
     }
 
-    if (ricQueue.length > 0) {
-      runIdlePeriod()
-      continue
-    }
+    if (ricQueue.length > 0 && runIdlePeriod()) continue
 
     const next = nextEventTime()
     if (next === null) return
     now = Math.max(now, next)
   }
+  throw new Error("Simulation exceeded its step limit before all work completed")
 }
 
 /* ==================== demo ==================== */
 
 function demo(): void {
+  console.log(`event loop simulator
+  run: node docs/browser/core/eventLoop/simulator.ts
+  model: virtual time, a fixed 16.7ms frame interval, input-first selection among ready tasks
+
+scenario:
+  - initial script schedules microtasks, a timer, a network response, rAF, rIC, and an observation
+  - a 50ms synchronous task delays a click arriving at virtual t=20ms
+  - the trace separates geometry observation from the later IntersectionObserver task
+
+read the trace:
+  [t=...] is virtual time, not elapsed wall time
+  TASK/MICRO: task execution and microtask checkpoints
+  DOM/RENDER/RAF: invalidation, rendering work, and animation callbacks
+  IO/RIC: observer notification and idle callbacks, including timeout delivery
+
+limits:
+  - ready-task priority and frame timing are demo policies, not browser guarantees
+  - no real DOM, fetch, timers, painting, or browser processes are created
+  - walkthrough: docs/browser/core/eventLoop/simulator.md
+
+trace:`)
+
   // Task 1: initial page script. While it runs, nothing else can run.
   enqueueTask("script", 0, "initial page script", () => {
     log("RUN", "script: sync start")

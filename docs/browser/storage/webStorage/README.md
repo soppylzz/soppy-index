@@ -1,5 +1,7 @@
 # Web Storage
 
+[返回存储目录](../README.md) · [仓库首页](../../../../README.md)
+
 Web Storage 提供 `localStorage` 和 `sessionStorage` 两个同步字符串键值容器。它们 API 相似，主要区别是生命周期和分区方式；两者都不适合大对象、高频写入或需要事务的场景。
 
 ## 1. localStorage 与 sessionStorage
@@ -18,10 +20,21 @@ Web Storage 提供 `localStorage` 和 `sessionStorage` 两个同步字符串键�
 
 [同目录的 `index.ts`](index.ts) 用零依赖的 `node:http` 提供一个实验页面，逻辑全部在浏览器端执行，按页面上的步骤操作即可：
 
+在仓库根目录使用 Node >= 22.18 运行，按 `Ctrl+C` 停止服务：
+
 ```bash
 node docs/browser/storage/webStorage/index.ts
-# 打开 http://localhost:4000
 ```
+
+在浏览器打开 <http://localhost:4000>。刷新和停止服务不会自动清除已存数据；需要重置时使用页面操作或 DevTools 清理当前 origin。
+
+服务成功监听后，CLI 打印当前地址、实验步骤、观察位置及停止方式；终端记录 HTTP 请求与状态，页面和浏览器 Console 按发生顺序记录带时间戳的结果。服务只监听本机，HTML 使用 `no-store`。端口被占用时可切换：
+
+```bash
+PORT=5005 node docs/browser/storage/webStorage/index.ts
+```
+
+切换端口会改变 origin，因此浏览器存储也会随之隔离。
 
 | 实验 | 操作                      | 现象                                              | 对应差异                                    |
 | ---- | ------------------------- | ------------------------------------------------- | ------------------------------------------- |
@@ -33,7 +46,7 @@ node docs/browser/storage/webStorage/index.ts
 
 页面另有一个「写入 6MB」按钮，用于触发 `QuotaExceededError`，感受约 5MB 的配额量级。
 
-> 实验需要两个真实标签页，请在 Chrome/Firefox 中打开。`window.open` 保留 opener 时部分浏览器会初始复制一份 sessionStorage（页面上有提示），对应第 1 节的 opener 注意事项。
+> 实验需要两个真实标签页，请在 Chrome/Firefox 中打开。页面按钮使用 `noopener`，避免新页复制 opener 的 sessionStorage。手动保留 opener 打开页面时仍需考虑第 1 节的复制语义；会话恢复行为也受浏览器策略影响。
 
 ## 3. 基本使用与序列化
 
@@ -79,7 +92,7 @@ window.addEventListener("storage", (event) => {
 })
 ```
 
-该事件适合通知"某个值已改变"，不适合承担可靠消息队列：页面可能未打开，连续写入也不提供消息确认、重放或事务语义。跨上下文通信的完整比较见 [`crossContextCommunication.md`](../../api/crossContextCommunication.md)。
+该事件适合通知"某个值已改变"，不适合承担可靠消息队列：页面可能未打开，连续写入也不提供消息确认、重放或事务语义。事件的投递条件见 [MDN：Storage event](https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event)。
 
 ## 5. 同步 API 的成本
 

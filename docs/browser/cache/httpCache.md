@@ -159,25 +159,21 @@ const response = await fetch("/api/profile", {
 })
 ```
 
-这里的 `no-cache` 要求检查缓存并在使用前验证，不等于 Cache Storage，也不是让应用自行实现缓存。可选值及精确语义见 [MDN：Request.cache](https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)。
+这里的 `no-cache` 要求检查缓存并在使用前验证，不等于 Cache Storage，也不是让应用自行实现缓存。可选值及精确语义见 [Fetch Standard](https://fetch.spec.whatwg.org/#concept-request-cache-mode)。
 
 ## 9. 可运行 Demo
 
-[同目录的 `index.ts`](index.ts) 用零依赖的 `node:http` 起了一个按真实部署策略缩小的站点（`node docs/browser/cache/index.ts`，打开 `http://localhost:5003`）：文档本身使用 `no-cache`，页面内五张图片各持一种策略，服务器端版本可随时修改。配合 DevTools 的 Network 面板（Size 列）与终端日志观察：
+运行方式见 [README](./README.md)，逐步操作与证据判读见 [demo.md](./demo.md)。实验保留五种资源策略，使用固定 URL 与明确的 fetch cache mode 对照：
 
-| 资源                        | 响应策略                     | fresh 期内普通刷新                  | 过期或服务器版本变化后     |
-| --------------------------- | ---------------------------- | ----------------------------------- | -------------------------- |
-| `/assets/fresh.svg`         | `public, max-age=60`         | 通常本地复用，服务器无请求          | 服务器改版后仍继续用旧缓存 |
-| `/assets/short-fresh.svg`   | `max-age=1` + validator      | 通常本地复用                        | 1 秒后过期，条件请求 `304` |
-| `/assets/no-cache.svg`      | `no-cache` + `ETag`          | 条件请求 `304`                      | 版本变化时拿到新 `200`     |
-| `/assets/last-modified.svg` | `no-cache` + `Last-Modified` | 条件请求 `304`（If-Modified-Since） | 版本变化时拿到新 `200`     |
-| `/assets/no-store.svg`      | `no-store`                   | 每次都是完整 `200`                  | 同左                       |
+| 资源              | 响应策略                         | 重点观察                                        |
+| ----------------- | -------------------------------- | ----------------------------------------------- |
+| fresh.svg         | public, max-age=60 + ETag        | 新鲜期复用；改版不主动失效；no-cache 可要求验证 |
+| short-fresh.svg   | max-age=1 + ETag + Last-Modified | 过期后的条件请求                                |
+| no-cache.svg      | no-cache + ETag                  | 验证返回 304；改版返回新 200                    |
+| last-modified.svg | no-cache + Last-Modified         | If-Modified-Since 验证                          |
+| no-store.svg      | no-store                         | 不保存响应，重复请求仍完整下载                  |
 
-页面上的判定表格来自 `PerformanceResourceTiming`：`transferSize=0` 表示没有网络传输（强缓存复用）；有传输但 body 大小为 0 即 `304`。终端会打印每个真正到达服务器的请求及条件请求头，可与 Network 面板互相印证——强缓存命中的资源不会出现在终端。
-
-页面还提供 `fetch` 的 `cache` 选项实验（`default` / `no-store` / `no-cache` / `force-cache` / `only-if-cached`）：修改 `fresh.svg` 的服务器版本后，`force-cache` 会不发任何请求地返回旧版本，`no-cache` 则通过条件请求拿到新版本。
-
-> 普通刷新、硬刷新与 Disable cache 绕过缓存的程度由浏览器实现决定，Chrome 与 Firefox 表现不同；`memory cache` 与 `disk cache` 的归属同样不可跨浏览器比较。
+刷新策略受浏览器和 DevTools 设置影响，因此不把“普通刷新一定直接复用 fresh 资源”作为结论。页面展示 Resource Timing 的最终响应状态与体积；fetch 验证后可以收到合并为 200 的缓存正文，bodySize 非零也不排除网络 304。实际网络状态码要与终端和 Network 交叉检查，定义见 [Resource Timing](https://www.w3.org/TR/resource-timing/#dom-performanceresourcetiming-transfersize)。
 
 ## 10. 部署策略
 
@@ -191,10 +187,9 @@ Cache-Control: public, max-age=31536000, immutable
 
 接口响应是否可缓存不能只看 GET：还要考虑用户身份、授权检查、`Vary`、共享缓存以及数据更新频率。包含用户私有内容的响应通常至少要避免被 shared cache 错误复用。
 
-## 11. 与另外两种“缓存”的边界
+## 11. 与应用缓存的边界
 
-- [Cache Storage](../pwa/cacheStorage.md) 是 JavaScript 可编程的 `Request` / `Response` 存储，不会自动替你执行 HTTP freshness 和 validation。
-- [BFCache](./bfcache.md) 保存整份页面的运行状态，用于历史导航恢复，不是资源响应缓存。
+Cache Storage 是 JavaScript 可编程的 `Request` / `Response` 存储，不会自动替你执行 HTTP freshness 和 validation。
 
 排查缓存时应同时检查 Network 中的 request/response headers、Size、缓存来源标记和 Service Worker，而不是只看状态码。
 

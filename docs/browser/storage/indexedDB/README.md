@@ -1,5 +1,7 @@
 # IndexedDB
 
+[返回存储目录](../README.md) · [仓库首页](../../../../README.md)
+
 IndexedDB 是浏览器内置的异步事务数据库。它以 object store 保存可被 structured clone 的 JavaScript 值，支持 key、index、cursor 和 transaction，适合离线业务数据、大量结构化对象以及需要索引查询的客户端状态。
 
 ## 1. 核心对象
@@ -160,10 +162,21 @@ IndexedDB 可保存对象、数组、`Date`、`Blob`、`ArrayBuffer` 等 structu
 
 [同目录的 `index.ts`](index.ts) 用零依赖的 `node:http` 提供一个实验页面，逻辑全部在浏览器端执行：
 
+在仓库根目录使用 Node >= 22.18 运行，按 `Ctrl+C` 停止服务：
+
 ```bash
 node docs/browser/storage/indexedDB/index.ts
-# 打开 http://localhost:5002 （5000 被 macOS AirPlay 占用）
 ```
+
+在浏览器打开 <http://localhost:5002>。刷新和停止服务不会自动清除已存数据；需要重置时使用页面操作或 DevTools 清理当前 origin。
+
+服务成功监听后，CLI 打印当前地址、实验步骤、观察位置及停止方式；终端记录 HTTP 请求与状态，页面和浏览器 Console 按发生顺序记录带时间戳的结果。服务只监听本机，HTML 使用 `no-store`。端口被占用时可切换：
+
+```bash
+PORT=5005 node docs/browser/storage/indexedDB/index.ts
+```
+
+切换端口会改变 origin，因此浏览器存储也会随之隔离。
 
 | 实验             | 操作                      | 观察                                                                           |
 | ---------------- | ------------------------- | ------------------------------------------------------------------------------ |
@@ -173,7 +186,7 @@ node docs/browser/storage/indexedDB/index.ts
 | structured clone | 三种类型实验按钮          | Date/Map/ArrayBuffer 原样读回；函数抛 `DataCloneError`；class 实例丢 prototype |
 | schema 升级      | 「升级增加索引」按钮      | 索引只能在 `onupgradeneeded` 中创建，日志显示 oldVersion → newVersion          |
 
-数据库按名字持久化，刷新或重启浏览器后数据仍在——这正是它与 Web Storage 的定位差异；「删除数据库」按钮调用 `indexedDB.deleteDatabase` 用于重置。连接注册了 `versionchange` 监听（对应第 2 节），被其他标签页阻塞时会打印 `onblocked`。
+数据库按 origin 与名字组织，通常可跨刷新和浏览器重启保留；localStorage 也可持久化，IndexedDB 的主要区别在于异步事务和结构化数据能力。「删除数据库」按钮调用 `indexedDB.deleteDatabase` 用于重置。升级前先关闭本页旧连接，打开、升级和删除期间禁用操作按钮。其他标签收到 `versionchange` 时关闭连接并提示刷新；未释放的连接仍会使请求触发 `onblocked`。
 
 ## 7. 错误、关闭与删除
 

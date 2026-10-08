@@ -1,5 +1,7 @@
 # Back/Forward Cache（BFCache）
 
+[生命周期目录](./README.md) · [生命周期笔记](./index.md) · [实验走查](./demo.md#3-bfcache-与新文档对照)
+
 BFCache 在用户离开页面时，尝试保存完整页面及其 JavaScript heap、DOM 和运行状态；用户通过浏览器前进或后退返回时，可以直接恢复快照。它优化的是历史导航，不是普通刷新，也不是 HTTP response 的缓存。
 
 ## 1. 与 HTTP cache 的区别
@@ -15,7 +17,7 @@ BFCache 在用户离开页面时，尝试保存完整页面及其 JavaScript hea
 
 ## 2. pageshow 与 pagehide
 
-使用 `pageshow` / `pagehide` 观察页面被恢复或离开。`event.persisted` 表示事件是否与 BFCache 页面有关：
+使用 `pageshow` / `pagehide` 观察页面被恢复或离开。`pageshow.persisted=true` 表示实际从 BFCache 恢复；`pagehide.persisted=true` 表示浏览器打算保留页面，但后续可能淘汰，不能保证恢复：
 
 ```js
 window.addEventListener("pageshow", (event) => {
@@ -33,7 +35,7 @@ window.addEventListener("pagehide", (event) => {
 
 BFCache 恢复后，内存中的数据可能已经过时。例如库存、登录状态和协作数据都可能在页面冻结期间改变。应在 `pageshow` 的 BFCache 分支中重新验证时效性强的数据，而不是无条件重建整个应用。
 
-更完整的页面状态转换见 [`pageLifecycle.md`](../api/pageLifecycle.md)。
+更完整的页面状态转换见 [页面生命周期](./index.md)。
 
 ## 3. 不要依赖 unload
 
@@ -64,7 +66,9 @@ Chromium 在支持的环境中提供 `PerformanceNavigationTiming.notRestoredRea
 const [navigationEntry] = performance.getEntriesByType("navigation")
 
 if (navigationEntry?.type === "back_forward") {
-  console.log(navigationEntry.notRestoredReasons)
+  if ("notRestoredReasons" in navigationEntry) {
+    console.log(navigationEntry.notRestoredReasons)
+  }
 }
 ```
 
@@ -82,14 +86,20 @@ if (navigationEntry?.type === "back_forward") {
 
 ## 6. 可运行 Demo
 
-[同目录的 `index.ts`](index.ts) 同时提供一个 BFCache 实验页：运行 `node docs/browser/cache/index.ts`，打开 `http://localhost:5003/bfcache`，页面显示本次执行的 ID、内存计数器、未提交草稿与生命周期日志：
+[同目录的生命周期实验](./index.ts) 提供历史导航对照，运行：
 
-1. 在草稿框输入文本、点几次计数器，然后前往中间页 `/between`，再按浏览器「后退」返回。
-2. BFCache 命中：`pageshow` 的 `event.persisted` 为 `true`，执行 ID、计数器、草稿与日志原样保留，服务器终端没有出现任何新请求——整页快照恢复，连 HTTP cache 都没有参与。
-3. BFCache 未命中：出现一次全新的初始化（执行 ID 变化），`persisted` 为 `false`；此时文档与图片才重新走 HTTP cache（终端出现条件请求）。Chromium 下可用 `notRestoredReasons` 查看原因，页面上会直接打印。
-4. 打开 `/bfcache?unload=1` 注册 `unload` 监听后重复上面的步骤，对比部分浏览器因此不进入 BFCache 的行为差异。
+```bash
+node docs/browser/core/lifeCycle/index.ts
+```
 
-> Chrome 在 DevTools 打开时可能禁用 BFCache，导致后退总是未命中；可关闭 DevTools 后观察页面内日志，或在 Application 面板用 Back/forward cache 测试按钮诊断。点击中间页链接后再返回，页面内的历史日志原样可见本身就是「DOM 被快照」的直接证据。
+打开默认 <http://localhost:5006/>，观察执行 ID、内存计数、草稿与真实事件：
+
+1. 输入草稿，记下 executionId 和计数，从主页面前往 `/between`，再通过历史记录后退。
+2. `pageshow.persisted=true` 且执行 ID 保持，说明原文档恢复；本轮不会重新触发 DOMContentLoaded/load。
+3. 再刷新或通过中转页的普通链接返回，对比执行 ID 改变、初始化重新发生。草稿仍可能从 sessionStorage 读回，因此草稿保留本身不能证明命中。
+4. 恢复后实验会请求新的服务端时间，网络仍可能出现请求；不能用“终端零请求”定义 BFCache 命中。
+
+本实验不注册 unload；离开提醒使用仅在待确认修改时注册的 beforeunload。DevTools 与浏览器策略可能影响资格，应结合诊断工具复核，完整步骤和实际验证见 [demo.md](./demo.md)。
 
 ## 7. 兼容性
 
@@ -97,7 +107,7 @@ if (navigationEntry?.type === "back_forward") {
 
 ## 8. 面试回答框架
 
-先说明 BFCache 保存的是页面快照，只服务于前进/后退；再用 `pageshow.persisted` 解释恢复检测；最后说明页面恢复后要重新验证时效数据，而且命中与否由浏览器决定。若追问与 HTTP cache 的区别，强调后者保存 response，页面仍可能重新初始化——可引用[本目录 demo](#6-可运行-demo) 的对照实验：命中时终端零请求，未命中时文档与图片才重新协商。
+先说明 BFCache 保存的是页面快照，只服务于前进/后退；再用 `pageshow.persisted` 解释恢复检测；最后说明页面恢复后要重新验证时效数据，而且命中与否由浏览器决定。若追问与 HTTP cache 的区别，强调后者保存 response，页面仍可能重新初始化——可引用[本目录 demo](#6-可运行-demo) 的对照实验：结合 persisted、执行 ID 和初始化事件判断，不能只看请求数量。
 
 ## 9. 参考资料
 

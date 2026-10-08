@@ -1,13 +1,14 @@
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http"
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http"
 
 /* ==================== config ==================== */
 
-const PORT = 4000
+const PORT = Number(process.env.PORT ?? 4000)
+if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
+  throw new Error("PORT must be an integer from 0 to 65535")
+}
 
 /* ==================== page ==================== */
 
-// the interesting logic is client-side: keep this page free of template literals
-// so the server file needs no escaping inside the TS template
 const PAGE = `<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -38,7 +39,7 @@ const PAGE = `<!doctype html>
   <ol class="muted">
     <li>分别向 localStorage 和 sessionStorage 各写入一条数据（API 完全相同）。</li>
     <li>点击「重新加载本页」——两者都还在：sessionStorage 的生命周期是页面会话，不是页面。</li>
-    <li>点击「打开第二个标签页」——新标签能看到全部 localStorage，sessionStorage 却是空的：它按标签页隔离。</li>
+    <li>点击「打开第二个标签页」——新标签通过 noopener 打开，可见共享 localStorage，sessionStorage 从新的页面会话开始：它按标签页隔离。</li>
     <li>回到旧标签再写一条 localStorage，切到新标签看事件日志：storage 事件只发给其他标签，且只对 localStorage 生效；写 sessionStorage 时谁也收不到。</li>
     <li>关闭新标签重新打开，或关掉浏览器再访问本页——sessionStorage 已清空，localStorage 仍在：生命周期差异。</li>
   </ol>
@@ -78,10 +79,10 @@ const PAGE = `<!doctype html>
 
 <div class="card">
   <p><strong>事件日志</strong> <span class="muted">(storage 事件只在“其他标签页”触发，发起修改的标签不会收到)</span></p>
-  <ul id="log"></ul>
+  <ul id="log" role="log" aria-live="polite"></ul>
 </div>
 
-<p class="muted">注：通过 window.open 保留 opener 打开的新页面，部分浏览器会初始复制一份 sessionStorage，之后两边独立修改；两者都只存字符串、约 5MB 配额、同步阻塞主线程，且只存在于客户端，不会随 HTTP 请求发送。</p>
+<p class="muted">注：本实验通过 noopener 避免新页复制 opener 的 sessionStorage；手动保留 opener 打开页面时，新页可能初始复制该存储，之后独立修改。两者都只存字符串、约 5MB 配额、同步阻塞主线程，且只存在于客户端，不会随 HTTP 请求发送。</p>
 
 <script>
   var logEl = document.getElementById("log")
@@ -97,9 +98,11 @@ const PAGE = `<!doctype html>
 
   function log(message) {
     var item = document.createElement("li")
-    item.textContent = message
-    logEl.prepend(item)
-    while (logEl.children.length > 30) logEl.removeChild(logEl.lastElementChild)
+    var row = performance.now().toFixed(1) + "ms | " + message
+    item.textContent = row
+    console.log(row)
+    logEl.append(item)
+    while (logEl.children.length > 30) logEl.removeChild(logEl.firstElementChild)
   }
 
   function tabId() {
@@ -168,12 +171,13 @@ const PAGE = `<!doctype html>
   }
 
   function testQuota() {
+    var probeKey = "__quota-probe-" + crypto.randomUUID()
     try {
-      localStorage.setItem("__big", "x".repeat(6 * 1024 * 1024))
-      localStorage.removeItem("__big")
-      log("写入约 6MB 竟然成功——本浏览器配额较大，试着加大到 50MB？")
+      localStorage.setItem(probeKey, "x".repeat(6 * 1024 * 1024))
+      localStorage.removeItem(probeKey)
+      log("写入约 6MB 成功，临时数据已删除；本次成功不代表配额固定或下次一定成功")
     } catch (error) {
-      log("写入约 6MB 抛出 " + error.name + "：超出配额，setItem 未生效")
+      log("写入约 6MB 抛出 " + error.name + (error.name === "QuotaExceededError" ? "：超出配额，setItem 未生效" : "：检查浏览器存储权限与环境"))
     }
   }
 
@@ -182,7 +186,7 @@ const PAGE = `<!doctype html>
   }
 
   function openTab() {
-    window.open(location.href, "_blank")
+    window.open(location.href, "_blank", "noopener")
     log("已打开第二个标签页：去新标签对比两个表格，再在新标签里写入试试")
   }
 
@@ -193,6 +197,7 @@ const PAGE = `<!doctype html>
     render()
   })
 
+  window.addEventListener("error", function (event) { log("操作失败：" + event.message) })
   render()
 </script>
 </body>
@@ -201,26 +206,60 @@ const PAGE = `<!doctype html>
 /* ==================== demo ==================== */
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
-  console.log(`[webStorage] ${req.method} ${req.url}`)
+  const url = new URL(req.url ?? "/", "http://localhost")
+  res.on("finish", () => console.log(`[webStorage] ${req.method} ${req.url} -> ${res.statusCode}`))
+  res.setHeader("Cache-Control", "no-store")
+  if (url.pathname === "/favicon.ico") {
+    res.writeHead(204)
+    res.end()
+    return
+  }
+  if (url.pathname !== "/") {
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" })
+    res.end("Not found")
+    return
+  }
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    res.writeHead(405, { Allow: "GET, HEAD", "Content-Type": "text/plain; charset=utf-8" })
+    res.end("Method not allowed")
+    return
+  }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" })
-  res.end(PAGE)
+  res.end(req.method === "HEAD" ? undefined : PAGE)
 })
 
-server.on("error", (error) => {
-  console.error(`[webStorage] failed to listen on :${PORT}`, error)
-  process.exit(1)
+server.on("error", (error: NodeJS.ErrnoException) => {
+  console.error(
+    error.code === "EADDRINUSE"
+      ? `[webStorage] Port ${PORT} is in use. Choose another port with PORT=5005.`
+      : `[webStorage] ${error.message}`
+  )
+  process.exitCode = 1
 })
 
-server.listen(PORT)
+server.listen(PORT, "127.0.0.1", () => {
+  const address = server.address()
+  if (!address || typeof address === "string") return
+  console.log(`web storage demo
+  open http://localhost:${address.port} in a modern browser
+  press Ctrl+C to stop; use PORT=5005 to choose another port
 
-console.log(`web storage demo
-  open http://localhost:${PORT} in Chrome or Firefox
+steps:
+  1. write a value into localStorage and sessionStorage
+  2. reload: both normally survive a page reload
+  3. open a second tab with the page button (noopener): only localStorage is shared
+  4. write again: storage events arrive in the other tab, not the writer
+  5. close the new tab and open another to compare page sessions
 
-the whole demo runs in the browser:
-  1. write a value into each storage
-  2. reload this page (both survive)
-  3. open a second tab (localStorage shared, sessionStorage empty)
-  4. write again and watch the storage event arrive only in the other tab
-  5. close tabs or restart the browser (sessionStorage is gone)`)
+notes:
+  - use the same origin in both tabs; privacy and session restore policies may affect persistence
+  - clearing storage affects all keys for this demo origin
+  - the quota probe attempts a temporary 6MB string and reports the actual result
+
+observations:
+  - the terminal prints HTTP requests and response status
+  - the page and browser Console print timestamped experiment results
+  - walkthrough: docs/browser/storage/webStorage/README.md`)
+})
 
 export {}

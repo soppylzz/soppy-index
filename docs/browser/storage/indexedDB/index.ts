@@ -2,11 +2,13 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 
 /* ==================== config ==================== */
 
-const PORT = 5002
+const PORT = Number(process.env.PORT ?? 5002)
+if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
+  throw new Error("PORT must be an integer from 0 to 65535")
+}
 
 /* ==================== page ==================== */
 
-// client-side logic only; no template literals inside so the TS file needs no escaping
 const PAGE = `<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -67,7 +69,7 @@ const PAGE = `<!doctype html>
 
 <div class="card">
   <p><strong>日志</strong></p>
-  <ul id="log"></ul>
+  <ul id="log" role="log" aria-live="polite"></ul>
 </div>
 
 <script>
@@ -84,9 +86,11 @@ const PAGE = `<!doctype html>
 
   function log(message) {
     var item = document.createElement("li")
-    item.textContent = message
-    logEl.prepend(item)
-    while (logEl.children.length > 40) logEl.removeChild(logEl.lastElementChild)
+    var row = performance.now().toFixed(1) + "ms | " + message
+    item.textContent = row
+    console.log(row)
+    logEl.append(item)
+    while (logEl.children.length > 40) logEl.removeChild(logEl.firstElementChild)
   }
 
   function fmtTime(ts) {
@@ -128,7 +132,7 @@ const PAGE = `<!doctype html>
     document.getElementById("db-status").innerHTML =
       "数据库 <code>idb-demo</code> · v" + db.version +
       " · store <code>notes</code>（keyPath: id）· 索引：<code>" +
-      esc(indexes.join("</code>, <code>")) + "</code>"
+      esc(indexes.join(", ")) + "</code>"
   }
 
   function refreshUpgradeButton() {
@@ -285,15 +289,23 @@ const PAGE = `<!doctype html>
     }
   }
 
+  function setReady(ready) {
+    document.querySelectorAll("button").forEach(function (button) { button.disabled = !ready })
+  }
+
   function upgradeSchema() {
-    openDb(db.version + 1, function (store) {
+    var nextVersion = db.version + 1
+    db.close()
+    db = null
+    setReady(false)
+    openDb(nextVersion, function (store) {
       if (!store.indexNames.contains("by-title")) {
         store.createIndex("by-title", "title")
         log("onupgradeneeded 中创建索引 by-title")
       }
     }).then(function (database) {
-      db.close()
       db = database
+      setReady(true)
       attachVersionChange()
       renderStatus()
       refreshUpgradeButton()
@@ -305,6 +317,8 @@ const PAGE = `<!doctype html>
 
   function deleteDatabaseAll() {
     db.close()
+    db = null
+    setReady(false)
     var request = indexedDB.deleteDatabase("idb-demo")
     request.onsuccess = function () {
       log("数据库已删除")
@@ -318,12 +332,17 @@ const PAGE = `<!doctype html>
     db.addEventListener("versionchange", function () {
       log("收到 versionchange：其他标签页在升级，本连接主动 close")
       db.close()
+      db = null
+      setReady(false)
+      document.getElementById("db-status").textContent = "连接已关闭；请刷新页面以重新打开"
     })
   }
 
   function init() {
+    setReady(false)
     openDb(null, null).then(function (database) {
       db = database
+      setReady(true)
       attachVersionChange()
       renderStatus()
       refreshUpgradeButton()
@@ -334,6 +353,8 @@ const PAGE = `<!doctype html>
     })
   }
 
+  window.addEventListener("error", function (event) { log("操作失败：" + event.message) })
+  window.addEventListener("unhandledrejection", function (event) { log("异步操作失败：" + event.reason) })
   init()
 </script>
 </body>
@@ -342,27 +363,62 @@ const PAGE = `<!doctype html>
 /* ==================== demo ==================== */
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
-  console.log(`[indexedDB] ${req.method} ${req.url}`)
+  const url = new URL(req.url ?? "/", "http://localhost")
+  res.on("finish", () => console.log(`[indexedDB] ${req.method} ${req.url} -> ${res.statusCode}`))
+  res.setHeader("Cache-Control", "no-store")
+  if (url.pathname === "/favicon.ico") {
+    res.writeHead(204)
+    res.end()
+    return
+  }
+  if (url.pathname !== "/") {
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" })
+    res.end("Not found")
+    return
+  }
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    res.writeHead(405, { Allow: "GET, HEAD", "Content-Type": "text/plain; charset=utf-8" })
+    res.end("Method not allowed")
+    return
+  }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" })
-  res.end(PAGE)
+  res.end(req.method === "HEAD" ? undefined : PAGE)
 })
 
-server.on("error", (error) => {
-  console.error(`[indexedDB] failed to listen on :${PORT}`, error)
-  process.exit(1)
+server.on("error", (error: NodeJS.ErrnoException) => {
+  console.error(
+    error.code === "EADDRINUSE"
+      ? `[indexedDB] Port ${PORT} is in use. Choose another port with PORT=5005.`
+      : `[indexedDB] ${error.message}`
+  )
+  process.exitCode = 1
 })
 
-server.listen(PORT)
+server.listen(PORT, "127.0.0.1", () => {
+  const address = server.address()
+  if (!address || typeof address === "string") return
+  console.log(`indexedDB demo
+  open http://localhost:${address.port} in a modern browser
+  press Ctrl+C to stop; use PORT=5005 to choose another port
 
-console.log(`indexedDB demo
-  open http://localhost:${PORT} in Chrome or Firefox
+steps:
+  1. wait for the database to open, then add, list, and delete notes
+  2. compare put request success with transaction complete
+  3. try a delayed write after the transaction becomes inactive
+  4. round-trip Date/Map/ArrayBuffer; compare functions and class instances
+  5. upgrade the schema, then open another tab to observe versionchange
+  6. use Delete database to reset the experiment
 
-experiments:
-  - CRUD with the by-updated-at index and a reverse cursor
-  - two-phase log: put request success vs transaction complete
-  - setTimeout inside a transaction -> TransactionInactiveError
-  - structured clone: Date/Map/ArrayBuffer round-trip, DataCloneError, prototype loss
-  - schema upgrade: createIndex only inside onupgradeneeded
-  - the database persists across reloads and browser restarts`)
+notes:
+  - writes are confirmed at transaction complete, not request success
+  - upgrades close this page's old connection before requesting a new version
+  - other tabs close on versionchange; reload them to reopen the database
+  - data normally survives reloads; stopping the server does not clear it
+
+observations:
+  - the terminal prints HTTP requests and response status
+  - the page and browser Console print timestamped experiment results
+  - walkthrough: docs/browser/storage/indexedDB/README.md`)
+})
 
 export {}

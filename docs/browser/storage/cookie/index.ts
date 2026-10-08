@@ -3,10 +3,18 @@ import { randomUUID } from "node:crypto"
 
 /* ==================== config ==================== */
 
-const BANK_PORT = 3000
-const EVIL_PORT = 3001
-const BANK = "http://localhost:3000"
-const EVIL = "http://127.0.0.1:3001"
+function readPort(name: string, fallback: number): number {
+  const port = Number(process.env[name] ?? fallback)
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`${name} must be an integer from 1 to 65535`)
+  }
+  return port
+}
+
+const BANK_PORT = readPort("BANK_PORT", 3000)
+const EVIL_PORT = readPort("EVIL_PORT", 3001)
+const BANK = `http://localhost:${BANK_PORT}`
+const EVIL = `http://127.0.0.1:${EVIL_PORT}`
 
 type Variant = "legacy" | "hardened"
 
@@ -77,20 +85,23 @@ ${body}
 }
 
 function sendHtml(res: ServerResponse, body: string, status = 200): void {
-  res.writeHead(status, { "Content-Type": "text/html; charset=utf-8" })
+  res.writeHead(status, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" })
   res.end(body)
 }
 
 function sendRedirect(res: ServerResponse, location: string): void {
-  res.writeHead(302, { Location: location })
+  res.writeHead(302, { Location: location, "Cache-Control": "no-store" })
   res.end()
 }
 
-function logRequest(name: string, req: IncomingMessage, path: string): void {
+function logRequest(name: string, req: IncomingMessage, res: ServerResponse, path: string): void {
   const sid = parseCookies(req.headers.cookie).get("sid")
-  console.log(
-    `[${name}] ${req.method} ${path} cookie=${sid ?? "absent"} origin=${req.headers.origin ?? "-"}`
-  )
+  res.setHeader("Cache-Control", "no-store")
+  res.on("finish", () => {
+    console.log(
+      `[${name}] ${req.method} ${path} -> ${res.statusCode} cookie=${sid ?? "absent"} origin=${req.headers.origin ?? "-"}`
+    )
+  })
 }
 
 function sessionBadge(session: { variant: Variant; id: string } | null): string {
@@ -104,11 +115,11 @@ function sessionBadge(session: { variant: Variant; id: string } | null): string 
   )}</code></span></p>`
 }
 
-/* ==================== bank (victim, localhost:3000) ==================== */
+/* ==================== bank (victim) ==================== */
 
 const bank = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", BANK)
-  logRequest("bank", req, url.pathname)
+  logRequest("bank", req, res, url.pathname)
 
   if (url.pathname === "/login") {
     const variant: Variant = url.searchParams.get("variant") === "legacy" ? "legacy" : "hardened"
@@ -138,7 +149,7 @@ const bank = createServer(async (req, res) => {
         `
       ${sessionBadge(session)}
       <div class="card">
-        <p>这里是受害站点 <code>localhost:3000</code>。先选择一种会话配置登录，再去
+        <p>这里是受害站点 <code>${BANK}</code>。先选择一种会话配置登录，再去
         <a href="${EVIL}/">evil 控制台</a> 依次执行攻击，回来对比结果。</p>
         <p>
           <a href="/login?variant=legacy">以 legacy 登录</a>
@@ -299,11 +310,11 @@ const bank = createServer(async (req, res) => {
   sendHtml(res, page("404", `<p>未知路径</p>`), 404)
 })
 
-/* ==================== evil (attacker, 127.0.0.1:3001) ==================== */
+/* ==================== evil (attacker) ==================== */
 
 const evil = createServer((req, res) => {
   const url = new URL(req.url ?? "/", EVIL)
-  logRequest("evil", req, url.pathname)
+  logRequest("evil", req, res, url.pathname)
 
   if (url.pathname === "/") {
     sendHtml(
@@ -311,7 +322,7 @@ const evil = createServer((req, res) => {
       page(
         "evil（攻击者控制台）",
         `
-      <p class="muted">攻击者站点运行在 <code>127.0.0.1:3001</code>。先到
+      <p class="muted">攻击者站点运行在 <code>${EVIL}</code>。先到
       <a href="${BANK}/">bank</a> 登录一个变体，再依次执行下面的攻击。每次攻击后回 bank 首页或看终端
       （<code>cookie=absent</code> 表示 Cookie 没有被浏览器附带）。</p>
       <div class="card">
@@ -422,21 +433,30 @@ const evil = createServer((req, res) => {
 
 /* ==================== demo ==================== */
 
+let listeningServers = 0
+
 function listen(server: Server, port: number, name: string): void {
   server.on("error", (error) => {
-    console.error(`[${name}] failed to listen on :${port}`, error)
+    console.error(
+      `[${name}] failed to listen on :${port}; choose another port with BANK_PORT/EVIL_PORT`,
+      error
+    )
     process.exit(1)
   })
-  server.listen(port)
+  server.listen(port, "127.0.0.1", () => {
+    listeningServers++
+    if (listeningServers === 2) printDemoGuide()
+  })
 }
 
-listen(bank, BANK_PORT, "bank")
-listen(evil, EVIL_PORT, "evil")
-
-console.log(`cookie demo
+function printDemoGuide(): void {
+  console.log(`cookie demo
   bank   (victim)   ${BANK}
   evil   (attacker) ${EVIL}
+  press Ctrl+C to stop
+  choose other ports with BANK_PORT=3002 EVIL_PORT=3003
 
+steps:
 1. open ${BANK}/ in Chrome or Firefox
 2. login as legacy or hardened
 3. run attacks 1-4 from ${EVIL}/
@@ -445,7 +465,13 @@ console.log(`cookie demo
 notes:
   - keep evil on 127.0.0.1: localhost vs 127.0.0.1 is a cross-site pair,
     while ports are ignored for site computation
-  - the terminal prints cookie= for every request, so you can see
-    whether the browser attached the Cookie header`)
+  - browser policy can further restrict cookies; inspect Network before concluding why a cookie is absent
+  - terminal logs show response status, cookie=, and Origin; browser Network shows Cookie/Set-Cookie
+  - HttpOnly hides the session from document.cookie, but does not prevent authenticated requests
+  - walkthrough: docs/browser/storage/cookie/README.md`)
+}
+
+listen(bank, BANK_PORT, "bank")
+listen(evil, EVIL_PORT, "evil")
 
 export {}

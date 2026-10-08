@@ -2,11 +2,13 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 
 /* ==================== config ==================== */
 
-const PORT = 5001
+const PORT = Number(process.env.PORT ?? 5001)
+if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
+  throw new Error("PORT must be an integer from 0 to 65535")
+}
 
 /* ==================== page ==================== */
 
-// client-side logic only; no template literals inside so the TS file needs no escaping
 const PAGE = `<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -31,40 +33,49 @@ const PAGE = `<!doctype html>
   <p id="storage-summary">读取中……</p>
   <p id="persist-status" class="muted">读取中……</p>
   <p>
-    <button onclick="refreshEstimate()">刷新用量</button>
-    <button onclick="requestPersist()">申请持久化存储（persist()）</button>
+    <button onclick="runExperiment(refreshEstimate)">刷新用量</button>
+    <button onclick="runExperiment(requestPersist)">申请持久化存储（persist()）</button>
   </p>
 </div>
 
 <div class="card">
   <p><strong>OPFS</strong> <span class="muted">（origin 私有文件系统：无磁盘路径，文件名仅本 origin 内有意义，计入配额）</span></p>
   <p>
-    <button onclick="opfsWrite()">写入草稿文件</button>
-    <button onclick="opfsRead()">读取最新草稿</button>
-    <button onclick="opfsList()">列出全部文件</button>
-    <button onclick="opfsClear()">清空 OPFS</button>
+    <button onclick="runExperiment(opfsWrite)">写入草稿文件</button>
+    <button onclick="runExperiment(opfsRead)">读取最新草稿</button>
+    <button onclick="runExperiment(opfsList)">列出全部文件</button>
+    <button onclick="runExperiment(opfsClear)">清空 OPFS</button>
   </p>
   <ul id="opfs-files"></ul>
 </div>
 
 <div class="card">
   <p><strong>QuotaExceededError 恢复</strong> <span class="muted">（逐块写入 10MB 直到报错，上限 200MB，随后按"可再生数据先删"清理）</span></p>
-  <button onclick="quotaStress()">写入压力测试</button>
+  <button onclick="runExperiment(quotaStress)">写入压力测试</button>
 </div>
 
 <div class="card">
   <p><strong>日志</strong></p>
-  <ul id="log"></ul>
+  <ul id="log" role="log" aria-live="polite"></ul>
 </div>
 
 <script>
   var logEl = document.getElementById("log")
+  var stressRunning = false
 
   function log(message) {
     var item = document.createElement("li")
-    item.textContent = message
-    logEl.prepend(item)
-    while (logEl.children.length > 40) logEl.removeChild(logEl.lastElementChild)
+    var row = performance.now().toFixed(1) + "ms | " + message
+    item.textContent = row
+    console.log(row)
+    logEl.append(item)
+    while (logEl.children.length > 40) logEl.removeChild(logEl.firstElementChild)
+  }
+
+  function runExperiment(action) {
+    return Promise.resolve().then(action).catch(function (error) {
+      log("操作失败：" + error.name + " · " + error.message)
+    })
   }
 
   function fmtBytes(value) {
@@ -78,7 +89,7 @@ const PAGE = `<!doctype html>
       document.getElementById("storage-summary").textContent = "当前环境不支持 estimate()"
       return
     }
-    navigator.storage.estimate().then(function (estimate) {
+    return navigator.storage.estimate().then(function (estimate) {
       var usage = estimate.usage || 0
       var quota = estimate.quota || 0
       var ratio = quota ? ((usage / quota) * 100).toFixed(3) + "%" : "-"
@@ -89,8 +100,11 @@ const PAGE = `<!doctype html>
   }
 
   function refreshPersisted() {
-    if (!navigator.storage || !navigator.storage.persisted) return
-    navigator.storage.persisted().then(function (persisted) {
+    if (!navigator.storage || !navigator.storage.persisted) {
+      document.getElementById("persist-status").textContent = "当前环境不支持 persisted()"
+      return
+    }
+    return navigator.storage.persisted().then(function (persisted) {
       document.getElementById("persist-status").innerHTML = persisted
         ? "当前 origin 数据已标记为 <strong>persistent</strong>（自动回收优先级降低，但用户清理站点数据仍会删除）"
         : "当前 origin 数据为 <strong>best-effort</strong>：存储压力下可能被浏览器回收"
@@ -102,11 +116,11 @@ const PAGE = `<!doctype html>
       log("当前环境不支持 persist()")
       return
     }
-    navigator.storage.persist().then(function (granted) {
+    return navigator.storage.persist().then(function (granted) {
       log(granted
         ? "persist() 返回 true：数据被标记为 persistent"
         : "persist() 返回 false：不是错误，应用继续工作，只是数据仍视为可回收")
-      refreshPersisted()
+      return refreshPersisted()
     })
   }
 
@@ -126,7 +140,7 @@ const PAGE = `<!doctype html>
     await writable.write(JSON.stringify({ text: "草稿内容", savedAt: new Date().toISOString() }))
     await writable.close()
     log("OPFS 写入 " + name + "——不暴露磁盘路径，随站点数据清理删除")
-    refreshEstimate()
+    runExperiment(refreshEstimate)
   }
 
   async function opfsNames() {
@@ -179,6 +193,10 @@ const PAGE = `<!doctype html>
   }
 
   async function opfsClear() {
+    if (stressRunning) {
+      log("请等待压力测试清理完成后再清空 OPFS")
+      return
+    }
     if (!opfsSupported()) {
       log("当前环境不支持 OPFS")
       return
@@ -187,8 +205,8 @@ const PAGE = `<!doctype html>
     const root = await navigator.storage.getDirectory()
     for (const name of names) await root.removeEntry(name)
     log("已清空 OPFS 全部 " + names.length + " 个文件")
-    refreshEstimate()
-    opfsList()
+    runExperiment(refreshEstimate)
+    runExperiment(opfsList)
   }
 
   async function quotaStress() {
@@ -196,41 +214,62 @@ const PAGE = `<!doctype html>
       log("当前环境不支持 OPFS")
       return
     }
-    const root = await navigator.storage.getDirectory()
+    if (stressRunning) {
+      log("压力测试正在运行，请等待清理完成")
+      return
+    }
+    stressRunning = true
+    var root = null
+    const names = []
+    const runId = crypto.randomUUID()
     const chunk = 10 * 1024 * 1024
     var written = 0
+    var removed = 0
     try {
+      root = await navigator.storage.getDirectory()
       for (var i = 0; i < 20; i++) {
-        const handle = await root.getFileHandle("stress-" + i + ".bin", { create: true })
+        const name = "stress-" + runId + "-" + i + ".bin"
+        names.push(name)
+        const handle = await root.getFileHandle(name, { create: true })
         const writable = await handle.createWritable()
-        await writable.write(new Blob([new Uint8Array(chunk)]))
-        await writable.close()
+        try {
+          await writable.write(new Blob([new Uint8Array(chunk)]))
+          await writable.close()
+        } catch (error) {
+          try { await writable.abort() } catch {
+            // The stream may already be closed.
+          }
+          throw error
+        }
         written++
-        refreshEstimate()
+        runExperiment(refreshEstimate)
       }
-      log("写入 " + written * 10 + "MB 未触发 QuotaExceededError——本机配额很大，真实应用不能据此假设写入一定成功")
+      log("写入 " + written * 10 + "MB 未触发 QuotaExceededError；达到本次测试上限，开始清理")
     } catch (error) {
-      log("写入第 " + (written + 1) + " 块时抛出 " + error.name + "——按数据价值顺序清理：可再生的测试数据最先删")
-    }
-    for (var j = 0; j < written; j++) {
-      try {
-        await root.removeEntry("stress-" + j + ".bin")
-      } catch (error) {
-        // already gone or never created; nothing to recover from
+      log("已完成 " + written + " 块，随后抛出 " + error.name + "：" + error.message)
+    } finally {
+      for (const name of names) {
+        try {
+          await root.removeEntry(name)
+          removed++
+        } catch (error) {
+          if (error.name !== "NotFoundError") log("清理 " + name + " 失败：" + error.name)
+        }
       }
+      stressRunning = false
+      log("清理完成：本次尝试的 " + names.length + " 个文件中，已删除 " + removed + " 个；其他失败见日志")
+      runExperiment(refreshEstimate)
+      runExperiment(opfsList)
     }
-    log("清理完成：压力测试文件已全部删除")
-    refreshEstimate()
-    opfsList()
   }
 
   if (!window.isSecureContext) {
     log("当前不是安全上下文：OPFS 等 API 可能不可用（localhost 属于安全上下文）")
   }
 
-  refreshEstimate()
-  refreshPersisted()
-  opfsList()
+  runExperiment(refreshEstimate)
+  runExperiment(refreshPersisted)
+  runExperiment(opfsList)
 </script>
 </body>
 </html>`
@@ -238,26 +277,63 @@ const PAGE = `<!doctype html>
 /* ==================== demo ==================== */
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
-  console.log(`[storageManagement] ${req.method} ${req.url}`)
+  const url = new URL(req.url ?? "/", "http://localhost")
+  res.on("finish", () =>
+    console.log(`[storageManagement] ${req.method} ${req.url} -> ${res.statusCode}`)
+  )
+  res.setHeader("Cache-Control", "no-store")
+  if (url.pathname === "/favicon.ico") {
+    res.writeHead(204)
+    res.end()
+    return
+  }
+  if (url.pathname !== "/") {
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" })
+    res.end("Not found")
+    return
+  }
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    res.writeHead(405, { Allow: "GET, HEAD", "Content-Type": "text/plain; charset=utf-8" })
+    res.end("Method not allowed")
+    return
+  }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" })
-  res.end(PAGE)
+  res.end(req.method === "HEAD" ? undefined : PAGE)
 })
 
-server.on("error", (error) => {
-  console.error(`[storageManagement] failed to listen on :${PORT}`, error)
-  process.exit(1)
+server.on("error", (error: NodeJS.ErrnoException) => {
+  console.error(
+    error.code === "EADDRINUSE"
+      ? `[storageManagement] Port ${PORT} is in use. Choose another port with PORT=5005.`
+      : `[storageManagement] ${error.message}`
+  )
+  process.exitCode = 1
 })
 
-server.listen(PORT)
+server.listen(PORT, "127.0.0.1", () => {
+  const address = server.address()
+  if (!address || typeof address === "string") return
+  console.log(`storage management demo
+  open http://localhost:${address.port} in a modern browser
+  press Ctrl+C to stop; use PORT=5005 to choose another port
 
-console.log(`storage management demo
-  open http://localhost:${PORT} in Chrome or Firefox
+steps:
+  1. inspect estimate(): usage and quota are approximate
+  2. request persist(): false is a valid result, not an error
+  3. write, read, and list an OPFS draft; refresh the usage estimate
+  4. optionally run the quota probe: 10MB chunks with a 200MB cap
+  5. inspect cleanup logs, then use Clear OPFS to reset draft files
 
-experiments:
-  - estimate(): approximate usage/quota, reacts to OPFS writes
-  - persist(): request persistent storage, observe the boolean result
-  - OPFS: write/read/list private origin files, all counted in quota
-  - quota stress test: write 10MB chunks until QuotaExceededError
-    (200MB safety cap), then clean up by data value`)
+notes:
+  - OPFS requires browser support and a secure context; localhost is suitable
+  - the quota probe cleans up its own files, including a partially written file
+  - repeated quota probes cannot run concurrently in this page
+  - stopping the server does not clear browser storage
+
+observations:
+  - the terminal prints HTTP requests and response status
+  - the page and browser Console print timestamped experiment results
+  - walkthrough: docs/browser/storage/storageManagement/README.md`)
+})
 
 export {}

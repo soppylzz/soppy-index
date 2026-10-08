@@ -1,5 +1,7 @@
 # 存储管理：隔离、配额、持久化与 OPFS
 
+[返回存储目录](../README.md) · [仓库首页](../../../../README.md)
+
 浏览器存储没有一个可安全硬编码的"固定容量"。可用空间取决于浏览器、设备、剩余磁盘、使用模式和隐私策略；数据默认还可能在存储压力下被回收。应用需要查询近似用量、处理写入失败，并为数据设计重建或同步路径。
 
 ## 1. Storage bucket 与隔离
@@ -110,10 +112,21 @@ async function saveWithQuotaRecovery(save, removeOldEntries) {
 
 [同目录的 `index.ts`](index.ts) 用零依赖的 `node:http` 提供一个实验页面，逻辑全部在浏览器端执行：
 
+在仓库根目录使用 Node >= 22.18 运行，按 `Ctrl+C` 停止服务：
+
 ```bash
 node docs/browser/storage/storageManagement/index.ts
-# 打开 http://localhost:5001
 ```
+
+在浏览器打开 <http://localhost:5001>。刷新和停止服务不会自动清除已存数据；需要重置时使用页面操作或 DevTools 清理当前 origin。
+
+服务成功监听后，CLI 打印当前地址、实验步骤、观察位置及停止方式；终端记录 HTTP 请求与状态，页面和浏览器 Console 按发生顺序记录带时间戳的结果。服务只监听本机，HTML 使用 `no-store`。端口被占用时可切换：
+
+```bash
+PORT=5005 node docs/browser/storage/storageManagement/index.ts
+```
+
+切换端口会改变 origin，因此浏览器存储也会随之隔离。
 
 | 实验               | 操作                       | 观察                                                                          |
 | ------------------ | -------------------------- | ----------------------------------------------------------------------------- |
@@ -122,7 +135,7 @@ node docs/browser/storage/storageManagement/index.ts
 | OPFS               | 写入 / 读取 / 列出草稿文件 | origin 私有文件系统：文件可写读回，文件名仅在本 origin 内有意义               |
 | QuotaExceededError | 「写入压力测试」按钮       | 逐块写入 10MB 文件直到报错（或达 200MB 安全上限），随后按"可再生数据先删"清理 |
 
-> 压力测试设了 200MB 安全上限：本机配额可能很大（Chrome 常给到磁盘的较大比例），demo 不会真的写满磁盘。
+> 压力测试通过独立文件名前缀区分每次运行，并在 finally 中尝试清理本次文件，包含写入失败时创建的文件；清理失败会记录具体错误。测试期间禁止重复启动或清空 OPFS。压力测试设了 200MB 上限：本机配额可能很大（Chrome 常给到磁盘的较大比例），demo 不会真的写满磁盘。
 
 ## 7. 数据生命周期设计
 
