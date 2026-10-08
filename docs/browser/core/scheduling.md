@@ -2,12 +2,12 @@
 
 Event Loop 和调度解决的是相邻但不同的问题：Event Loop 描述 task、microtask checkpoint 与渲染机会如何衔接；调度关注浏览器如何在多类工作之间选择，以及开发者如何表达工作的时机、优先级和让步边界。
 
-| 层次                | 主要问题                                         | 本文关注点                                        |
-| ------------------- | ------------------------------------------------ | ------------------------------------------------- |
-| Event Loop 规范模型 | callback 在 task、microtask 还是渲染步骤中运行？ | 见 [Browser Event Loop](./eventLoop/eventLoop.md) |
-| 浏览器内部调度      | 多个可运行 task queue 中先选择哪一个？           | Blink 队列属性和动态优先级                        |
-| Web 调度 API        | 页面应把工作安排到什么时候，以什么紧急程度执行？ | rAF、rIC、`postTask()`、`yield()`                 |
-| 应用层分片          | 长工作如何切分、让步并恢复？                     | 时间预算、continuation 与 fallback                |
+| 层次                | 主要问题                                         | 本文关注点                                    |
+| ------------------- | ------------------------------------------------ | --------------------------------------------- |
+| Event Loop 规范模型 | callback 在 task、microtask 还是渲染步骤中运行？ | 见 [Browser Event Loop](./eventLoop/index.md) |
+| 浏览器内部调度      | 多个可运行 task queue 中先选择哪一个？           | Blink 队列属性和动态优先级                    |
+| Web 调度 API        | 页面应把工作安排到什么时候，以什么紧急程度执行？ | rAF、rIC、`postTask()`、`yield()`             |
+| 应用层分片          | 长工作如何切分、让步并恢复？                     | 时间预算、continuation 与 fallback            |
 
 本文中的 Chromium 源码摘录最后核对于 2026-09-19，对应 commit `39cea72b3a158dda6cd7c951611b3da13bef600b`。固定版本用于保证摘录与链接一致，`main` 链接用于观察后续变化；浏览器兼容性最后核对于 2026-09-20。
 
@@ -100,7 +100,7 @@ return TaskPriority::kNormalPriority;
 
 rAF 与 `setTimeout(fn, 16)` 的核心区别不是数字 `16`：timer 只在 delay 到期后获得运行资格，不理解显示刷新节奏；rAF 由浏览器结合 rendering opportunity 安排，而且后台页面通常会暂停或显著降低调用频率。
 
-如果一次 rAF callback 自身执行过久，仍然会占用主线程并错过帧。rAF 解决“何时提交视觉更新”，不负责自动切分计算工作。渲染阶段的详细关系见 [Browser Event Loop：渲染时机](./eventLoop/eventLoop.md#5-渲染时机)和 [Browser Rendering](./rendering.md)。
+如果一次 rAF callback 自身执行过久，仍然会占用主线程并错过帧。rAF 解决“何时提交视觉更新”，不负责自动切分计算工作。渲染阶段的详细关系见 [Browser Event Loop：渲染时机](./eventLoop/index.md#5-渲染时机)和 [Browser Rendering](./rendering.md)。
 
 ### 怎么用
 
