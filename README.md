@@ -14,6 +14,7 @@ Personal interview preparation: Chinese study notes paired with runnable example
 | Browser APIs          | [Web API labs](docs/browser/api/README.md)                                       | URL, cloning, abortable fetch, files, Web Components and iframe                       |
 | Browser DOM           | [DOM labs](docs/browser/dom/README.md)                                           | Nodes, collections, form state, layout reads and event propagation                    |
 | Browser PWA           | [PWA notes](docs/browser/pwa/README.md)                                          | Service Worker lifecycle, Cache Storage, manifest and installation                    |
+| Chromium              | [Official docs in Chinese and English](docs/chromium/README.md)                  | Architecture, rendering, navigation, WebUI and a frontend learning path               |
 | Demo infrastructure   | [Shared styles and helpers](docs/demo/README.md)                                 | Shared browser lab styling, port binding, bounded logs and agent integration          |
 | Algorithms            | [Data structures](algorithm/structure/) and [special topics](algorithm/special/) | A README and runnable `index.ts` for each topic; links below                          |
 | Interview practice    | [Hot 100](algorithm/hot100/)                                                     | Solutions grouped by problem type                                                     |
