@@ -3,11 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npm run lint:fix && tsc && node ./dist/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "dev:web": "tsc && npx serve src/intern-lab"
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
