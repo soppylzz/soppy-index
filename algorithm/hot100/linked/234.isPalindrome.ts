@@ -40,7 +40,7 @@ function isPalindrome(head: ListNode | null): boolean {
     fast = fast.next.next
   }
 
-  let half = reverseListSimplified(slow.next)
+  const half = reverseListSimplified(slow.next)
 
   let p1 = head,
     p2 = half

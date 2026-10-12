@@ -1,8 +1,8 @@
 import { ListNode } from "./listNode"
 
 function addTwoNumbers(l1: ListNode | null, l2: ListNode | null): ListNode | null {
+  const head = new ListNode((l1!.val + l2!.val) % 10)
   let add = Math.floor((l1!.val + l2!.val) / 10),
-    head = new ListNode((l1!.val + l2!.val) % 10),
     tail = head
 
   l1 = l1!.next

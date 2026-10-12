@@ -9,8 +9,8 @@ function invertTree(root: TreeNode | null): TreeNode | null {
     const head: TreeNode = queue.shift()!
     ;[head.left, head.right] = [head.right, head.left]
 
-    head.left && queue.push(head.left)
-    head.right && queue.push(head.right)
+    if (head.left) queue.push(head.left)
+    if (head.right) queue.push(head.right)
   }
 
   return root

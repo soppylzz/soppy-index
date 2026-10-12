@@ -12,7 +12,7 @@ function rotate(nums: number[], k: number): void {
 // flip way
 function flip(nums: number[], start: number, end: number) {
   while (start < end) {
-    let temp = nums[start]
+    const temp = nums[start]
     nums[start] = nums[end]
     nums[end] = temp
 

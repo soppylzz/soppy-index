@@ -7,9 +7,8 @@ function flatten(root: TreeNode | null): void {
     const left = tree.left
     const right = tree.right
 
-    let res,
-      start = tree,
-      end
+    const start = tree
+    let res, end
 
     tree.left = null
     res = traverse(left)

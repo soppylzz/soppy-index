@@ -21,8 +21,8 @@ function mergeKLists(lists: Array<ListNode | null>): ListNode | null {
 
   function sink(): ListNode {
     ;[heap[0], heap[heap.length - 1]] = [heap[heap.length - 1], heap[0]]
-    let heapLength = heap.length - 1,
-      cur = 0
+    const heapLength = heap.length - 1
+    let cur = 0
 
     while (true) {
       const left = 2 * cur + 1

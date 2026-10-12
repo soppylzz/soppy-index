@@ -28,8 +28,8 @@ function reverseListViaRecursion(head: ListNode | null): ListNode | null {
 function reverseList(head: ListNode | null): ListNode | null {
   if (head === null) return null
 
+  const tail = head
   let pointer: ListNode | null = head.next,
-    tail = head,
     temp
 
   while (pointer !== null) {

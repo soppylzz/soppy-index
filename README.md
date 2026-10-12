@@ -54,10 +54,10 @@ Install development dependencies for validation:
 npm ci
 npx --no-install tsc --noEmit
 npx --no-install eslint docs/browser/core/loading/index.ts
-npx --no-install prettier --check docs/browser/core/loading
+npm run format:check -- docs/browser/core/loading
 ```
 
-The root TypeScript configuration includes `code/`, `algorithm/`, and `docs/`; type challenges have their own exercise context. `npm run lint` checks the whole repository. Use targeted formatting for normal edits: `npm run format` rewrites the entire repository.
+The root TypeScript configuration includes `code/`, `algorithm/`, and `docs/`; type challenges have their own exercise context. `npm run lint` checks source files and caches successful results while skipping generated output. Use `npm run format -- <path>` to format selected files and `npm run format:check -- <path>` to check them.
 
 ## Algorithm topics
 

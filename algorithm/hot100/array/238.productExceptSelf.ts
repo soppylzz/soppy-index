@@ -1,6 +1,6 @@
 // with division
 function productExceptSelfViaDivide(nums: number[]): number[] {
-  let zeroIndexs = []
+  const zeroIndexs = []
   let productExceptZero = 1
 
   for (let i = 0; i < nums.length; i++) {

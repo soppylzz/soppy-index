@@ -1,7 +1,7 @@
 function combinationSum(candidates: number[], target: number): number[][] {
   const result: number[][] = []
 
-  let temp: number[] = []
+  const temp: number[] = []
   let flag = 0
 
   function generate(target: number) {

@@ -34,8 +34,7 @@ function trapViaPointer(height: number[]): number {
   let trapped = 0,
     left,
     right,
-    currentTrapped,
-    mid
+    currentTrapped
 
   const n = height.length
 
@@ -62,7 +61,7 @@ function trapViaPointer(height: number[]): number {
   }
 
   /* =============== trap right =============== */
-  mid = left
+  const mid = left
   right = n - 1
   left = right - 1
   currentTrapped = 0

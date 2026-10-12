@@ -4,8 +4,7 @@ function numSquares(n: number): number {
    * think: greedy (largest square first) fails, e.g. 12 = 4+4+4, not 9+1+1+1.
    * this is a knapsack problem: squares up to sqrt(i) are the items.
    */
-  let minCap = Infinity,
-    currentCap
+  let currentCap
 
   const dp = Array(n + 1).fill(0)
 

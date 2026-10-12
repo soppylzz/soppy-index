@@ -37,8 +37,7 @@ function longestValidParenthesesViaStupidStack(s: string): number {
   const stack = []
   const lengths = Array(s.length + 1).fill(0)
 
-  let maxLength = 0,
-    currentLength = 0
+  let maxLength = 0
 
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
@@ -48,7 +47,7 @@ function longestValidParenthesesViaStupidStack(s: string): number {
     } else {
       if (stack.length > 0) {
         const topIdx = stack.pop()!
-        currentLength = i - topIdx + 1
+        const currentLength = i - topIdx + 1
         lengths[i + 1] = currentLength + lengths[topIdx]
         maxLength = Math.max(maxLength, lengths[i + 1])
       }

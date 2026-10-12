@@ -19,8 +19,8 @@ function topKFrequent(nums: number[], k: number): number[] {
   }
 
   function unshift() {
-    let cur = 0,
-      heapLength = heap.length - 1
+    let cur = 0
+    const heapLength = heap.length - 1
 
     ;[heap[cur], heap[heap.length - 1]] = [heap[heap.length - 1], heap[cur]]
     const result = heap.pop()

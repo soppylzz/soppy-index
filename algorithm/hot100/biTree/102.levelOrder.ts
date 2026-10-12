@@ -16,8 +16,8 @@ function levelOrder(root: TreeNode | null): number[][] {
       const node = queue.shift()!
 
       res.push(node.val)
-      node.left && cache.push(node.left)
-      node.right && cache.push(node.right)
+      if (node.left) cache.push(node.left)
+      if (node.right) cache.push(node.right)
     }
 
     result.push(res)

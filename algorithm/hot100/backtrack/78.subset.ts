@@ -3,8 +3,8 @@ function subsets(nums: number[]): number[][] {
 
   const n = nums.length
 
-  let temp: number[] = [],
-    flag = 0
+  const temp: number[] = []
+  let flag = 0
 
   function generate() {
     for (let i = flag; i < n; i++) {
