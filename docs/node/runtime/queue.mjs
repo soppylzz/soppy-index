@@ -1,0 +1,15 @@
+import { readFile } from "node:fs"
+const record = (context, event) => console.log(JSON.stringify({ context, event }))
+record("top", "sync")
+process.nextTick(() => record("top", "nextTick"))
+Promise.resolve().then(() => record("top", "promise"))
+queueMicrotask(() => record("top", "microtask"))
+setTimeout(() => record("top", "timer"), 0)
+setImmediate(() => record("top", "immediate"))
+readFile(new URL(import.meta.url), () => {
+  record("io", "callback")
+  process.nextTick(() => record("io", "nextTick"))
+  Promise.resolve().then(() => record("io", "promise"))
+  setTimeout(() => record("io", "timer"), 0)
+  setImmediate(() => record("io", "immediate"))
+})

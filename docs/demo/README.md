@@ -19,6 +19,8 @@ node docs/browser/dom/index.ts
 | [server.ts](./server.ts)         | 白名单公共资源路由、端口参数、真实监听、关闭服务与英文 HTTP 日志  |
 | [validation.md](./validation.md) | 本轮接入的实测环境、结果与限制                                    |
 
+[Node HTTP](../node/http/README.md) 也使用本模块；其专用薄封装接口维护在该组 README。CSS 知识点采用[文字与 CSS 片段](../css/README.md)说明，不依赖本模块。
+
 已接入 [API](../browser/api/README.md)、[DOM](../browser/dom/README.md)、[Observer](../browser/observer/README.md)、[通信](../browser/communication/README.md)、[加载](../browser/core/loading/README.md)、[生命周期](../browser/core/lifeCycle/README.md)、[HTTP 缓存](../browser/cache/README.md) 和 [Storage 四组实验](../browser/storage/README.md)。事件循环 CLI 模拟器有自己的虚拟时钟，不使用页面样式或浏览器 logger。
 
 ## 2. HTML 与样式契约

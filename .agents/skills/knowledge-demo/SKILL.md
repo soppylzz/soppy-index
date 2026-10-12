@@ -1,6 +1,6 @@
 ---
 name: knowledge-demo
-description: Create or revise runnable knowledge-point demos and their Chinese walkthroughs in this interview repository, especially browser labs. Use for teaching observable mechanisms; algorithm implementations retain their own conventions.
+description: Create or revise runnable knowledge-point demos and their Chinese walkthroughs in this interview repository, including browser labs and Node CLI experiments. Use for teaching observable mechanisms; algorithm implementations retain their own conventions.
 ---
 
 # Knowledge-point demos
@@ -21,7 +21,9 @@ Choose a small set of experiments where each predicts an observable result and e
 
 Prefer a directly runnable `index.ts`, Node >= 22.18, and built-in `node:http`; avoid new dependencies or build steps unless the topic needs them. Small browser scripts may live in HTML strings. Split assets into files only when it makes the mechanism easier to inspect; no app framework is needed.
 
-Before creating or changing a browser HTTP demo, read [the shared demo contract](../../../docs/demo/README.md) and the relevant implementation in `docs/demo/`. This is the canonical reference for exported server helpers, `Demo.createLogger` options, asset URLs, CSS class names, and timing-sensitive exceptions. Reuse these interfaces rather than copying their implementations. Serve the shared assets on each participating origin, add the documented page/log classes, and keep mechanism-specific geometry and protocol logic local. Use explicit `.ts` extensions for native Node imports. For loading/lifecycle experiments, follow the documented inline-style and recorder exceptions so shared plumbing does not change the measured behavior. If the public contract changes, update its README and validate existing callers in the same task; do not duplicate the contract in AGENTS.md or another rule.
+Before creating or changing a browser HTTP demo, read [the shared demo contract](../../../docs/demo/README.md) and the relevant implementation in `docs/demo/`. This is the canonical reference for exported server helpers, `Demo.createLogger` options, asset URLs, CSS class names, and timing-sensitive exceptions. Reuse these interfaces rather than copying their implementations. Serve the shared assets on each participating origin, add the documented page/log classes, and keep mechanism-specific geometry and protocol logic local. Use explicit `.ts` extensions for native Node imports.
+
+CSS knowledge points follow [the CSS notes index](../../../docs/css/README.md) and use text with CSS snippets rather than runnable labs. For Node CLI labs, read [the Node lab contract](../../../docs/node/README.md) and reuse its bounded runner/logging helpers; keep process, stream, worker, and file cleanup in the experiment. Keep the Node public interface in its README rather than copying the contract into harness files. For loading/lifecycle experiments, follow the documented inline-style and recorder exceptions so shared plumbing does not change the measured behavior. If a public contract changes, update its README and validate existing callers in the same task; do not duplicate the contract in AGENTS.md or another rule.
 
 Use Chinese UI instructions and English source comments. Give controls descriptive labels, use semantic HTML, and write log messages with `textContent`. Keep server plumbing secondary to the lesson. Use an explicit localhost port, report address conflicts clearly, and document shutdown. Bound user-controlled delays and serve known routes with correct MIME types and useful errors.
 

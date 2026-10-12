@@ -1,0 +1,13 @@
+{
+  "name": "node-lesson-package",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./public.mjs",
+      "require": "./public.cjs"
+    }
+  },
+  "imports": {
+    "#value": "./public.mjs"
+  }
+}
