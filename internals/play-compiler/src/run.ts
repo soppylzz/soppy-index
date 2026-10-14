@@ -1,7 +1,6 @@
 import { resolve } from "node:path"
 import { execa } from "execa"
 import { main } from "@soppy-index/compiler-cli"
-import { runLab } from "../../../docs/node/lab.ts"
 const modes = {
   hello: ["compile", "examples/hello.ts", "--target", "legacy"],
   "hello-js": ["compile", "examples/hello.js", "--target", "legacy"],
@@ -17,7 +16,7 @@ const modes = {
   ],
 }
 const mode = process.argv[2] as keyof typeof modes
-await runLab("compiler-play", async () => {
+try {
   if (!(mode in modes)) throw new Error(`Unknown mode '${mode}'`)
   await main(modes[mode])
   const output = mode.startsWith("hello")
@@ -29,4 +28,7 @@ await runLab("compiler-play", async () => {
     stdio: "inherit",
     timeout: 5000,
   })
-})
+} catch (error) {
+  console.error((error as Error).message)
+  process.exitCode = 1
+}

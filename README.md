@@ -30,3 +30,7 @@ Frontend learning notes, runnable experiments, and coding exercises. This projec
 | Coding practice | [Structures](coding/structure/) · [Algorithms](coding/algorithm/) · [Hot 100](coding/hot100/) · [Type challenges](coding/type-challenges/) |
 
 Lab READMEs provide prerequisites, run commands, observations, and shutdown instructions. Shared browser helpers are documented in [docs/demo](docs/demo/README.md).
+
+## License
+
+[MIT](LICENSE).

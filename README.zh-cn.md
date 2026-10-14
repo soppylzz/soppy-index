@@ -30,3 +30,7 @@
 | 编程练习 | [数据结构](coding/structure/) · [算法](coding/algorithm/) · [Hot 100](coding/hot100/) · [类型挑战](coding/type-challenges/) |
 
 各实验 README 提供前置条件、运行命令、观察位置与停止方式。浏览器公共组件的说明见 [docs/demo](docs/demo/README.md)。
+
+## 许可证
+
+[MIT](LICENSE)。

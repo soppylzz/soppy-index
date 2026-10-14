@@ -13,7 +13,7 @@ pnpm build
 pnpm compiler:check
 ```
 
-前三个命令安装并检查/构建项目本身；`check` 调用 `internals/compiler-cli/src/cli.ts` 的手写分析链路检查 `internals/play-compiler/examples/hello.ts`。开发 tsc 不能替代这个检查，`build` 也不会帮我们编译示例源码。以下命令从仓库根目录运行。CLI 实验自然退出，无端口；playground 入口复用仓库 logger，主体只提供编译 API。
+前三个命令安装并检查/构建项目本身；`check` 调用 `internals/compiler-cli/src/cli.ts` 的手写分析链路检查 `internals/play-compiler/examples/hello.ts`。开发 tsc 不能替代这个检查，`build` 也不会帮我们编译示例源码。以下命令从仓库根目录运行。CLI 实验自然退出，无端口；playground 入口直接在终端输出编译信息与生成代码的执行结果，主体只提供编译 API。
 
 ## P1：从文本到 Token 和 AST
 
