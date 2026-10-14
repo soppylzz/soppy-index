@@ -29,7 +29,7 @@ export default defineConfig([
     },
   },
   {
-    files: ["handwrite/type-challenges/**/*.ts"],
+    files: ["coding/type-challenges/**/*.ts"],
     rules: {
       "@typescript-eslint/ban-ts-comment": ["error", { minimumDescriptionLength: 0 }],
       "@typescript-eslint/no-explicit-any": "off",

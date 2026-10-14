@@ -28,7 +28,7 @@ logs/
 Thumbs.db
 
 # Personal misc material
-misc/
+/misc/
 __reference__/
 
 # Local agent configuration

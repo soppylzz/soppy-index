@@ -1,50 +1,45 @@
 ---
 name: knowledge-demo
-description: Create or revise runnable knowledge-point demos and their Chinese walkthroughs in this interview repository, including browser labs and Node CLI experiments. Use for teaching observable mechanisms; algorithm implementations retain their own conventions.
+description: Create or revise runnable knowledge demos and Chinese walkthroughs, including browser labs and Node CLI experiments. Algorithm examples use their own conventions.
 ---
 
-# Knowledge-point demos
+# Knowledge Demos
 
-Read `AGENTS.md` and the relevant shared rules from the repository root. This skill is ordinary Markdown linked from the shared guide. Clients may use their native discovery where supported; Claude Code reads this file on demand through `AGENTS.md`, without a registered slash command.
+Read `AGENTS.md`, relevant rules, the target note/references, and a nearby demo. The shared source is exposed through `.claude/skills` for Claude Code.
 
-## Match the experiment to the mechanism
+## Choose the experiment
 
-Read the target note, its references, and a nearby demo first. Existing references from the repository root:
+Use a few comparisons with one control variable each, predicting an observable result and explaining its cause. Browser mechanisms must run in the real browser; simulation must be labeled and cannot prove browser behavior.
 
-- `docs/browser/storage/webStorage/index.ts` and its README: a `node:http` browser lab with Chinese steps, cards, tables, and an event log.
-- `docs/browser/cache/index.ts` and its README: one server, multiple focused routes, explicit response headers.
-- `docs/browser/core/eventLoop/simulator.ts` and `simulator.md`: a virtual-clock simulator with explicit simplifications. Use simulation only when that is the intended teaching model; do not claim it proves browser behavior.
+Examples: `docs/browser/storage/webStorage/index.ts` (steps/events), `docs/browser/cache/index.ts` (routes/headers), `docs/browser/core/eventLoop/simulator.ts` (explicit simulation limits).
 
-Choose a small set of experiments where each predicts an observable result and explains its cause. Keep one control variable per comparison where practical. For browser-native parsing, loading, storage, or lifecycle behavior, let the real browser perform the work rather than faking its output with timers.
+## Contracts and implementation
 
-## Local lab conventions
+- Notes labs prefer directly runnable erasable TS and `node:http`; add dependencies/build steps only for the topic. Small browser scripts may stay inline; avoid unnecessary frameworks/assets. Workspace implementations and playgrounds follow existing `packages/` / `internals/` boundaries and scripts.
+- Before browser HTTP work, read [docs/demo](../../../docs/demo/README.md) and its relevant helpers. Reuse server/logger/assets/classes; serve shared assets on every origin, and keep topic geometry/protocol code local. Follow loading/lifecycle inline-style and recorder exceptions so infrastructure does not alter measurements.
+- Node CLI labs read [docs/node](../../../docs/node/README.md), reuse bounded runner/logger helpers, and own process/stream/worker/file cleanup. CSS topics use [docs/css](../../../docs/css/README.md) with text/snippets rather than labs.
+- Keep shared contracts in their READMEs. Contract changes require updating their documentation and validating callers in the same task; do not copy contracts into harness files.
+- Use explicit `.ts` extensions for native imports. Follow [code](../../rules/code.md) for English comments/CLI text and Chinese browser teaching text. Use semantic HTML, descriptive controls, `textContent`, bounded delays, known routes, correct MIME types, and useful errors.
+- Bind explicit localhost ports; report conflicts and shutdown. Keep server plumbing secondary to the lesson.
 
-Prefer a directly runnable `index.ts`, Node >= 22.18, and built-in `node:http`; avoid new dependencies or build steps unless the topic needs them. Small browser scripts may live in HTML strings. Split assets into files only when it makes the mechanism easier to inspect; no app framework is needed.
+## Timing and evidence
 
-Before creating or changing a browser HTTP demo, read [the shared demo contract](../../../docs/demo/README.md) and the relevant implementation in `docs/demo/`. This is the canonical reference for exported server helpers, `Demo.createLogger` options, asset URLs, CSS class names, and timing-sensitive exceptions. Reuse these interfaces rather than copying their implementations. Serve the shared assets on each participating origin, add the documented page/log classes, and keep mechanism-specific geometry and protocol logic local. Use explicit `.ts` extensions for native Node imports.
+For loading experiments, delay HTTP responses, not script-local timers, to control availability. Busy loops are only for demonstrating main-thread blocking. Separate requests/response completion from JS execution; explain cache/DevTools effects. Dynamically inserted scripts need attributes before insertion; resource-hint experiments compare matching URLs/fetch settings and whether cache reuse is possible.
 
-CSS knowledge points follow [the CSS notes index](../../../docs/css/README.md) and use text with CSS snippets rather than runnable labs. For Node CLI labs, read [the Node lab contract](../../../docs/node/README.md) and reuse its bounded runner/logging helpers; keep process, stream, worker, and file cleanup in the experiment. Keep the Node public interface in its README rather than copying the contract into harness files. For loading/lifecycle experiments, follow the documented inline-style and recorder exceptions so shared plumbing does not change the measured behavior. If a public contract changes, update its README and validate existing callers in the same task; do not duplicate the contract in AGENTS.md or another rule.
+Record relevant event names, timestamps, `readyState`, DOM availability, request logs, or resource timing. Exact timings and cross-source order are observations, not guarantees. Server receipt does not prove browser execution.
 
-Use Chinese UI instructions and English source comments. Give controls descriptive labels, use semantic HTML, and write log messages with `textContent`. Keep server plumbing secondary to the lesson. Use an explicit localhost port, report address conflicts clearly, and document shutdown. Bound user-controlled delays and serve known routes with correct MIME types and useful errors.
+## Runtime guidance
 
-For loading experiments, delay HTTP responses to control resource availability; do not substitute `setTimeout` inside a script for slow fetching. Reserve busy loops for explicitly demonstrating main-thread execution blocking. Separate the time a request starts/finishes from the time JavaScript executes. Explain cache behavior and what DevTools changes affect the experiment.
+After a successful HTTP listen, print the demo name, reachable URLs, experiments/topics, short action sequence, observation locations, stop instruction, and relevant host/cache conditions. Derive URLs/modes from actual configuration; no success banner after bind failure. Separate concise server logs from browser lifecycle/execution logs. Check interpolated startup labels for English too.
 
-Record enough evidence for the question: event name, timestamp, `readyState`, DOM availability, request log, or resource timings. Exact milliseconds and cross-source event ordering are observations, not promises. If inserting scripts dynamically, set attributes before insertion. If demonstrating resource hints, compare a matching resource URL and fetch settings and explain whether cache reuse is enabled.
+CLI simulators introduce purpose/log notation when useful and show their full trace; algorithms retain their own demo/footer convention. Longer theory belongs in walkthroughs, not startup comments.
 
-## Terminal startup guidance
+## Walkthrough and checks
 
-HTTP demos must print a compact guide when the server is successfully listening, following the storage labs. Include the demo name, reachable URL(s), important experiment entrypoints or topics, a short sequence of actions, where to observe results, and how to stop the process. Mention conditions that change the experiment, such as host selection or DevTools cache settings. Keep URLs and available modes consistent with the actual configuration; derive them from shared values where practical. Do not print a success banner before a failed bind.
+READMEs provide navigation, prerequisites, commands, URL/port, and shutdown. Pair `index.ts` with `index.md`; otherwise match script/walkthrough names (e.g. `simulator.ts` / `simulator.md`). Use descriptive topic filenames for deeper notes. Include short mechanism-focused excerpts, link full code, and identify omitted helpers/cleanup/error handling.
 
-Distinguish server request/response logs from browser execution and lifecycle logs. Do not imply that a received request proves script execution. Keep request logs concise enough that the experiment remains readable. A CLI-only simulator should introduce its purpose and log notation where useful; it does not need HTTP URLs or browser steps. Algorithm demos retain their existing output conventions.
+Map each experiment to actions, predicted observation, and cause; state exclusions and timing conditions. Mark illustrative traces; publish actual output only after observing it.
 
-Follow [code-style](../../rules/code-style.md) for output language: all CLI text must be English; browser teaching UI and logs may remain Chinese. Check interpolated labels as well as literal strings, especially when startup guides reuse browser experiment metadata. Terminal text is runtime guidance, not a code comment. Keep comments sparse, names descriptive, and section dividers semantic. Avoid adding explanatory comments to each startup log line; keep the longer theory in the walkthrough.
+Run appropriate TS/ESLint/Prettier checks. Start servers and verify startup text, URLs, response types, delays, endpoints, cleanup, and bind-failure behavior. Inspect stdout/stderr and browser errors/events. Verify central behavior in a real browser when available, with automation dependencies/profiles outside the repository; otherwise report the limit and provide manual steps, never mark predictions verified. For CLI-only experiments, inspect the complete trace.
 
-## Walkthrough and validation
-
-Use README.md for navigation and a compact run entry, index.md for the walkthrough paired with index.ts, and a descriptive topic filename (such as crossContextCommunication.md) for knowledge notes. When a runnable script has another name, keep its walkthrough name aligned (for example simulator.ts and simulator.md). Include short, relevant demo excerpts next to the mechanisms they explain; link the complete implementation and identify omitted helpers, cleanup, and error handling rather than presenting excerpts as standalone programs.
-
-Put the start command, URL/port, stop instruction, and prerequisites in the local README. Map each experiment to operation, predicted observation, and mechanism. Link deeper theory and state important exclusions. Mark illustrative traces as illustrative; publish actual output only after observing it.
-
-Run a focused TypeScript check, ESLint, and Prettier as appropriate. Start the server and check its startup guide, relevant endpoints, response types, delays, and error paths. Confirm the displayed URLs match the active port, and that a bind failure reports the error without a success banner. Inspect actual stdout/stderr from startup and representative request/error paths for English output; a CLI-only simulator also needs its full trace checked. Validate the central behavior in a real browser when available: inspect execution/event logs and browser errors rather than only HTTP status. Temporary automation dependencies and profiles should stay outside the repository. If a browser is unavailable, report that limit and provide manual steps; never label predicted behavior as verified.
-
-Check relative Markdown links and run commands after moves. Do not repair unrelated files or generate snapshots that merely duplicate implementation. Report what changed, checks actually run, and remaining limits.
+Check links and commands after moves. Preserve unrelated work, avoid implementation-mirroring snapshots, and report actual checks and limits.

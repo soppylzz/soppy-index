@@ -1,7 +1,5 @@
-# Claude Code entrypoint
+# Claude Code Entry
 
 @AGENTS.md
-@.agents/rules/code-style.md
-@.agents/rules/markdown-docs.md
 
-Load diagram rules and the knowledge-demo skill from the shared guide when relevant. `.agents/skills/` is shared task guidance; this repository does not register Claude slash commands there. See `.agents/README.md` for configuration and discovery details.
+Read the task-specific rules/skills linked there before editing. `.claude/rules` and `.claude/skills` link to the shared directories; client details are in `.agents/README.md`.

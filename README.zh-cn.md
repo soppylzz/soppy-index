@@ -1,0 +1,32 @@
+<h1 align="center"><img width="60%" src="./assets/wordmark.png" alt="soppy-index" /></h1>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&amp;logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D22.18-339933?logo=node.js&amp;logoColor=white" alt="Node.js >= 22.18" />
+</p>
+
+<div align="center">
+
+[English](README.md) | [简体中文](README.zh-cn.md)
+
+</div>
+
+前端学习笔记、可运行实验与编程练习。项目正在持续开发中。
+
+## 特性
+
+- **学习笔记** — 用中文解释前端概念及其底层机制。
+- **可观察实验** — 通过浏览器和 Node.js 实验，将理论与实际行为联系起来。
+- **编程练习** — 数据结构、算法与 TypeScript 类型练习。
+
+## 学习材料
+
+| 领域 | 入口 |
+| --- | --- |
+| 浏览器 | [核心机制](docs/browser/core/README.md) · [存储](docs/browser/storage/README.md) · [缓存](docs/browser/cache/README.md) · [通信](docs/browser/communication/README.md) · [观察器](docs/browser/observer/README.md) |
+| 浏览器 API | [API](docs/browser/api/README.md) · [DOM](docs/browser/dom/README.md) · [PWA](docs/browser/pwa/README.md) · [Chromium](docs/chromium/README.md) |
+| 语言与运行时 | [JavaScript](docs/javascript/README.md) · [TypeScript](docs/typescript/README.md) · [Node.js](docs/node/README.md) |
+| Web 基础 | [CSS](docs/css/README.md) · [网络](docs/network/README.md) · [安全](docs/security/README.md) · [认证实验](docs/auth/README.md) |
+| 编程练习 | [数据结构](coding/structure/) · [算法](coding/algorithm/) · [Hot 100](coding/hot100/) · [类型挑战](coding/type-challenges/) |
+
+各实验 README 提供前置条件、运行命令、观察位置与停止方式。浏览器公共组件的说明见 [docs/demo](docs/demo/README.md)。
