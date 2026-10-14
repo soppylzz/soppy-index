@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "bumpVersionsWithWorkspaceProtocolOnly": true,
+  "ignore": [
+    "@soppy-index/compiler-cli",
+    "@soppy-index/play-compiler",
+    "@soppy-index/test",
+    "auth-next-session-lab"
+  ],
+  "privatePackages": { "version": true, "tag": false }
+}
