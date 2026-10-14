@@ -8,22 +8,22 @@
 
 ```bash
 cd docs/auth/demo
-npm ci
-npm run dev
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-访问 <http://127.0.0.1:3000/>。按 `Ctrl+C` 停止。若 3000 端口被占用，停止占用进程后再启动。生产构建可运行 `npm run build`，但本实验的内存会话、固定演示账号、缺少持久化和限速机制只适合本地单进程学习。
+访问 <http://127.0.0.1:3000/>。按 `Ctrl+C` 停止。若 3000 端口被占用，停止占用进程后再启动。生产构建可运行 `pnpm build`，但本实验的内存会话、固定演示账号、缺少持久化和限速机制只适合本地单进程学习。
 
 ## 观察步骤
 
-| 操作                               | 预测                                                       | 原因                                       |
-| ---------------------------------- | ---------------------------------------------------------- | ------------------------------------------ |
-| 未登录打开 `/account` 与 `/api/me` | 页面跳到 `/login`，API 返回 401                            | 服务端逐入口查询会话                       |
-| 用页面给出的演示凭据登录           | POST 返回 303，响应设置 Cookie，随后能访问账户页           | Route Handler 验证凭据后生成随机会话 ID    |
-| 在 DevTools 查看 Cookie            | `HttpOnly`、`SameSite=Lax`，开发环境 HTTP 下无 `Secure`    | 让浏览器自动带会话，但不让页面 JS 直接读取 |
-| 在账户页退出                       | POST 返回 303 并清 Cookie；旧 Cookie 再访问 API 也返回 401 | 服务端先撤销会话，再清浏览器副本           |
-| 篡改退出表单的隐藏 `csrf` 值       | 403，会话仍有效                                            | 服务端把随机 token 与当前会话绑定校验      |
-| 从其他源提交登录/退出 POST         | 403                                                        | POST Route Handler 校验 Origin             |
+| 操作 | 预测 | 原因 |
+| --- | --- | --- |
+| 未登录打开 `/account` 与 `/api/me` | 页面跳到 `/login`，API 返回 401 | 服务端逐入口查询会话 |
+| 用页面给出的演示凭据登录 | POST 返回 303，响应设置 Cookie，随后能访问账户页 | Route Handler 验证凭据后生成随机会话 ID |
+| 在 DevTools 查看 Cookie | `HttpOnly`、`SameSite=Lax`，开发环境 HTTP 下无 `Secure` | 让浏览器自动带会话，但不让页面 JS 直接读取 |
+| 在账户页退出 | POST 返回 303 并清 Cookie；旧 Cookie 再访问 API 也返回 401 | 服务端先撤销会话，再清浏览器副本 |
+| 篡改退出表单的隐藏 `csrf` 值 | 403，会话仍有效 | 服务端把随机 token 与当前会话绑定校验 |
+| 从其他源提交登录/退出 POST | 403 | POST Route Handler 校验 Origin |
 
 用 DevTools Network 查看请求、重定向和 Set-Cookie；Application/Storage 面板看 Cookie 属性。`HttpOnly` Cookie 仍会随合适请求发送，只是 `document.cookie` 看不到。状态码和头是预测，只有实际运行后才能当作观察结果。
 

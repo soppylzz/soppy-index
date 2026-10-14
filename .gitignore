@@ -27,14 +27,14 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Personal study material
-# Local job records and interview questions.
-jobs/
-questions/
-# Reference material in any directory.
+# Personal misc material
+misc/
 __reference__/
 
 # Local agent configuration
 # Personal Claude Code settings and instructions.
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Generated Git hook wrappers.
+.husky/_/

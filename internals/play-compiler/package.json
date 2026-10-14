@@ -1,0 +1,26 @@
+{
+  "name": "@soppy-index/play-compiler",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./plugin": "./src/vite-plugin.ts"
+  },
+  "scripts": {
+    "hello": "node --conditions=development src/run.ts hello",
+    "hello:js": "node --conditions=development src/run.ts hello-js",
+    "modules": "node --conditions=development src/run.ts modules",
+    "modules:cjs": "node --conditions=development src/run.ts modules-cjs",
+    "dev": "node --conditions=development node_modules/vite/bin/vite.js --config vite/vite.config.ts --host 127.0.0.1 --port 5178 --strictPort",
+    "build": "node --conditions=development node_modules/vite/bin/vite.js build --config vite/vite.config.ts",
+    "preview": "node --conditions=development node_modules/vite/bin/vite.js preview --config vite/vite.config.ts --host 127.0.0.1 --port 5179 --strictPort",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "@soppy-index/compiler": "workspace:*",
+    "@soppy-index/compiler-cli": "workspace:*",
+    "execa": "catalog:",
+    "vite": "catalog:"
+  }
+}

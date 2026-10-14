@@ -7,9 +7,26 @@
   "trailingComma": "es5",
   "overrides": [
     {
+      "files": "**/*.md",
+      "options": {
+        "parser": "markdown",
+        "proseWrap": "never"
+      }
+    },
+    {
       "files": [".prettierrc", ".releaserc"],
       "options": {
         "parser": "json"
+      }
+    },
+    {
+      "files": [
+        "internals/play-compiler/examples/**/*.{ts,js}",
+        "internals/play-compiler/vite/*.mini.ts",
+        "packages/compiler/**/*.md"
+      ],
+      "options": {
+        "semi": true
       }
     }
   ]

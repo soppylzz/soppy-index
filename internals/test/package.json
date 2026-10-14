@@ -1,0 +1,21 @@
+{
+  "name": "@soppy-index/test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --conditions=development src/run.ts",
+    "typecheck": "tsc --noEmit",
+    "test:built": "node src/check-built.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "@soppy-index/compiler": "workspace:*",
+    "@soppy-index/compiler-cli": "workspace:*",
+    "@soppy-index/play-compiler": "workspace:*",
+    "@jridgewell/trace-mapping": "catalog:",
+    "execa": "catalog:",
+    "tinyglobby": "catalog:",
+    "vite": "catalog:"
+  }
+}

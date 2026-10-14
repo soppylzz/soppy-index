@@ -1,0 +1,4 @@
+const age: number = "18";
+const greet = (name: string): string => name;
+greet(123);
+console.log(missing);
