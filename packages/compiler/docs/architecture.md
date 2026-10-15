@@ -38,7 +38,7 @@ flowchart LR
 | P6 | 导出符号与类型 → 声明/map | 只打印原始类型和直接导出的箭头 | maps 中签名和声明查询 |
 | P7 | 插件原始 TS → ESM/map → Vite | pre hook + 精确过滤，真实 build / dev | vite 中钩子证据和组合 map |
 
-Visitor 的 `walk` 遍历所有结构节点；Binder 单独区分声明位置、引用位置与成员名。Transform 的 `rewrite` 是自底向上的不可变重建；各 pass 共用 AST 协议，原始 Token/AST 可在 CLI 中单独观察。[真实阶段入口](references.md)说明工程实现如何处理恢复、性能与更多语义。
+Visitor 的 `walk` 遍历所有结构节点；Binder 单独区分声明位置、引用位置与成员名。Transform 的 `rewrite` 是自底向上的不可变重建；各 pass 共用 AST 协议，原始 Token/AST 可在 inspect 实验中单独观察。[真实阶段入口](references.md)说明工程实现如何处理恢复、性能与更多语义。
 
 ## 转换的前提
 
@@ -46,7 +46,7 @@ Visitor 的 `walk` 遍历所有结构节点；Binder 单独区分声明位置、
 
 箭头具有词法 `this/arguments/super/new.target`、不可作为构造函数等语义。这里从语言入口拒绝那些观察路径；函数体只能是表达式，因此降级为 `function (...) { return expression; }` 成立。真实 Babel/tsc 要处理捕获、helper、调用上下文和其他嵌套语义。
 
-`const` 有不可重新赋值、块作用域和 TDZ；`var` 是函数作用域、声明提升。这里无赋值、无块/循环，所有未来声明引用连同延迟捕获都拒绝；唯一的函数局部声明是参数。源文件由 CLI 作为 Node 模块运行，Vite 也以 ESM 加载，不承诺把产物作为 classic script 时的全局属性行为。上述前提才使 `const→var` 的示例降级可比较。真实工程需要考虑循环逐次绑定、名称碰撞、控制流和声明提升。
+`const` 有不可重新赋值、块作用域和 TDZ；`var` 是函数作用域、声明提升。这里无赋值、无块/循环，所有未来声明引用连同延迟捕获都拒绝；唯一的函数局部声明是参数。生成文件由 playground 脚本作为 Node 模块运行，Vite 也以 ESM 加载，不承诺把产物作为 classic script 时的全局属性行为。上述前提才使 `const→var` 的示例降级可比较。真实工程需要考虑循环逐次绑定、名称碰撞、控制流和声明提升。
 
 语法转换改变表达形式；polyfill 提供运行时不存在的 API。把箭头改成普通函数不会自动提供 `Promise/Map/fetch`。本编译器不注入 polyfill；Vite 自带的 modulepreload 支持代码来自真实构建工具，也不意味着本编译器实现了运行时兼容层。
 

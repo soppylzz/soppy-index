@@ -8,7 +8,7 @@
 
 测试记录原始 input 包含 `: string`，插件产物包含 `export var greet = function`，map 带原始 sourcesContent；dev/build 最终映射仍回到 TS 函数体。插件拒绝无效类型输入，普通 `.ts/.js` 与第三方依赖不会被它拦截。配置载入本身由 Vite 工具处理，和编译示例源码是两件事。
 
-本教学插件选择 transform 内预检查，适合自包含的小模块。具名跨文件导入要用本项目 `modules` 命令预检查；插件没有伪装成全项目 Checker。生产工具通常把完整类型检查作为独立命令/进程，因为每文件按需转译与跨文件类型分析的职责和成本不同；固定版本的说明见 [Vite 7.3.1 features](https://github.com/vitejs/vite/blob/95e8923f35d0252c9f6eb2d5e358c084542706f1/docs/guide/features.md)。
+本教学插件选择 transform 内预检查，适合自包含的小模块。具名跨文件导入要用compiler 的 `loadGraph` API 预检查；插件没有伪装成全项目 Checker。生产工具通常把完整类型检查作为独立命令/进程，因为每文件按需转译与跨文件类型分析的职责和成本不同；固定版本的说明见 [Vite 7.3.1 features](https://github.com/vitejs/vite/blob/95e8923f35d0252c9f6eb2d5e358c084542706f1/docs/guide/features.md)。
 
 ## 开发与生产
 
@@ -19,7 +19,7 @@
 
 这里描述 **7.3.1**，不套用其他 Vite 主版本的构建器。依赖预构建与生产 CJS 处理的区别以该版本的 [dep-pre-bundling.md](https://github.com/vitejs/vite/blob/95e8923f35d0252c9f6eb2d5e358c084542706f1/docs/guide/dep-pre-bundling.md) 为准。示例不含第三方运行时依赖，不自行实现 HMR、预构建或代码分割。
 
-Compiler 决定如何理解受限源码、诊断与变换；Bundler 负责解析实际资源依赖、加载、组织 chunk 与构建优化。插件必须返回 ESM，让 Bundler 保留静态模块信息。我们的 `legacy` 输出仅保证子集语法降级；Vite 最终 bundle 还含普通 JS 入口及自身运行时代码，不承诺整体 ES5。
+Compiler 决定如何理解受限源码、诊断与变换；Bundler 负责解析实际资源依赖、加载、组织 chunk 与构建优化。插件必须返回 ESM，让 Bundler 保留静态模块信息。compiler 的 `legacy` 输出仅保证子集语法降级；Vite 最终 bundle 还含普通 JS 入口及自身运行时代码，不承诺整体 ES5。
 
 ## 多阶段映射
 

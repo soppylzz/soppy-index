@@ -8,11 +8,9 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "bumpVersionsWithWorkspaceProtocolOnly": true,
-  "ignore": [
-    "@soppy-index/compiler-cli",
-    "@soppy-index/play-compiler",
-    "@soppy-index/test",
-    "auth-next-session-lab"
-  ],
-  "privatePackages": { "version": true, "tag": false }
+  "ignore": ["@soppy-index/play-compiler", "@soppy-index/test", "auth-next-session-lab"],
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  }
 }

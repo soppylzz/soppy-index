@@ -13,7 +13,7 @@ export async function writeGraph(
   outDir: string,
   programs: Map<string, Program>,
   options: ModuleOutputOptions = {}
-): Promise<string[]> {
+): Promise<string> {
   let canonicalOutput = resolve(outDir)
   try {
     canonicalOutput = await realpath(canonicalOutput)
@@ -32,5 +32,5 @@ export async function writeGraph(
   }
   const result = emitGraph(graph, outDir, programs, options)
   await writeArtifacts(outDir, result.artifacts)
-  return result.outputs
+  return result.entryOutput
 }

@@ -22,7 +22,7 @@ export async function writeArtifacts(
       existing.type !== "module"
     )
       throw new Error(
-        "Output directory has incompatible package.json; choose a dedicated --out directory"
+        "Output directory has incompatible package.json; choose a dedicated output directory"
       )
   } else artifacts.set(manifest, JSON.stringify({ type: "module" }) + "\n")
   for (const [file, text] of artifacts) await fs.outputFile(file, text)

@@ -17,7 +17,9 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm --filter @soppy-index/test run test compiler",
+    "test:built": "node __test__/built.ts"
   },
   "dependencies": {
     "@jridgewell/gen-mapping": "catalog:",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@soppy-index/test": "workspace:*"
   }
 }

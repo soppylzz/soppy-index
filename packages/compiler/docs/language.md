@@ -38,13 +38,13 @@ Binder 先登记模块声明，再按源码顺序激活。引用当前尚未激�
 
 ## 模块扩展
 
-只新增前置静态具名导入 `import { name } from "./file";`、副作用导入 `import "./effect";`、`export const`。导入必须排在执行语句之前。不支持 alias、默认导出、re-export、动态 import/require 或 npm 包解析。路径与跨模块边界见[模块说明](modules.md)。单文件 `compile/check` 不解析具名导入，请用 `modules` 建图；Vite 教学插件仅接受自包含的 `.mini.ts` 模块。
+只新增前置静态具名导入 `import { name } from "./file";`、副作用导入 `import "./effect";`、`export const`。导入必须排在执行语句之前。不支持 alias、默认导出、re-export、动态 import/require 或 npm 包解析。路径与跨模块边界见[模块说明](modules.md)。单文件 `compile/analyze` 不解析导入，请用 `loadGraph` 建图；Vite 教学插件仅接受自包含的 `.mini.ts` 模块。
 
 CJS 输出还保留 `require/module/exports/Object`，避免生成的运行时代码与用户变量碰撞。ESM 模式不增加这些保留名称。
 
 ## 诊断与限制
 
-所有编译诊断有 `code/phase/message/file/start/end`。词法、语法采用首错停止；名称和类型错误可在一次分析中收集多个，存在任何诊断时不进入转换。I/O、CLI 参数错误由入口报告英文消息和非零退出码，不伪造源码范围。
+所有编译诊断有 `code/phase/message/file/start/end`。词法、语法采用首错停止；名称和类型错误可在一次分析中收集多个，存在任何诊断时不进入转换。I/O、实验脚本错误由入口报告英文消息和非零退出码，不伪造源码范围。
 
 | 阶段 | 主要 code | 意义 |
 | --- | --- | --- |

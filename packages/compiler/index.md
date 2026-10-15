@@ -13,7 +13,7 @@ pnpm build
 pnpm compiler:check
 ```
 
-前三个命令安装并检查/构建项目本身；`check` 调用 `internals/compiler-cli/src/cli.ts` 的手写分析链路检查 `internals/play-compiler/examples/hello.ts`。开发 tsc 不能替代这个检查，`build` 也不会帮我们编译示例源码。以下命令从仓库根目录运行。CLI 实验自然退出，无端口；playground 入口直接在终端输出编译信息与生成代码的执行结果，主体只提供编译 API。
+前三个命令安装并检查/构建项目本身；`check.ts` 直接调用 compiler 的 `analyze`检查 `internals/play-compiler/examples/hello.ts`。开发 tsc 不能替代这个检查，`build` 也不会帮我们编译示例源码。以下命令从仓库根目录运行。Node 实验自然退出，无端口；playground 入口直接在终端输出编译信息与生成代码的执行结果，主体只提供编译 API。
 
 ## P1：从文本到 Token 和 AST
 
@@ -27,18 +27,18 @@ console.log(greet("world"));
 
 ```bash
 pnpm compiler:inspect > /tmp/compiler-inspection.json
-pnpm compiler check internals/play-compiler/fixtures/syntax-error.mini
+pnpm compiler:errors
 ```
 
 打开 inspection 中的 tokens：`greeting` 是 identifier，`string` 是 keyword，字符串同时有原始 text 与解码后的 value。注释/空白不产生 token，但推进源码位置。AST 中第一条 Variable 的 annotation 为 string，第二条变量没有变量标注，init 的 Arrow 包含参数标注和返回标注。Binary 持有两个引用；Call 表示内外两层调用。
 
-缺少分号的 fixture 在下一条 `console` 开始的位置报告 `P001`。scanner 负责切分，不证明 parser 接受该 Token 序列；例如有括号不代表支持一般函数声明。完整代码分别在 [lexer](src/lexer.ts) 与 [parser](src/parser.ts)，单行/多行注释和准确范围由 [core 测试](../../internals/test/compiler/core.test.ts)断言。
+缺少分号的 fixture 在下一条 `console` 开始的位置报告 `P001`。scanner 负责切分，不证明 parser 接受该 Token 序列；例如有括号不代表支持一般函数声明。完整代码分别在 [lexer](src/lexer.ts) 与 [parser](src/parser.ts)，单行/多行注释和准确范围由 [core 测试](__test__/core.test.ts)断言。
 
 ## P2：名字与类型是两个问题
 
 ```bash
 pnpm compiler:check
-pnpm compiler check internals/play-compiler/fixtures/type-errors.mini
+pnpm compiler:errors
 ```
 
 符号表含 module scope 中的 greeting/greet，以及 function scope 的 name。函数体 greeting 指向外部声明，name 指向参数；遇到遮蔽时不能只按字符串名查一个全局表。
@@ -50,7 +50,7 @@ pnpm compiler check internals/play-compiler/fixtures/type-errors.mini
 ```bash
 pnpm compiler:hello
 pnpm compiler:hello:js
-pnpm compiler inspect internals/play-compiler/examples/hello.ts --target legacy > /tmp/compiler-legacy-inspection.json
+pnpm compiler:inspect
 ```
 
 独立 pass 顺序是 erase-types、lower-arrows、lower-constants；原 AST 仍保留注解和 Arrow。生成的关键片段为：

@@ -65,7 +65,7 @@ test("AST preserves groups, left-associative plus and parameter/return annotatio
 test("hello TS and JS execute after independent legacy passes; original AST survives", async () => {
   for (const language of ["ts", "js"] as const) {
     const text = await readFile(
-      new URL(`../../play-compiler/examples/hello.${language}`, import.meta.url),
+      new URL(`./fixtures/hello.${language}.mini`, import.meta.url),
       "utf8"
     )
     const result = compile(source(text), { language, target: "legacy" })
@@ -96,10 +96,7 @@ test("binding resolves lexical closure and parameter shadowing to different symb
   assert.deepEqual(run(text, { target: "legacy" }).output, [[5]])
 })
 test("combined error fixture has binder and checker diagnostics with exact source range", async () => {
-  const text = await readFile(
-    new URL("../../play-compiler/fixtures/type-errors.mini", import.meta.url),
-    "utf8"
-  )
+  const text = await readFile(new URL("./fixtures/type-errors.mini", import.meta.url), "utf8")
   const diagnostics = errors(text).diagnostics
   assert.deepEqual(diagnostics.map((d) => d.code).sort(), ["B002", "T001", "T003"])
   const missing = diagnostics.find((d) => d.code === "B002")!
@@ -146,10 +143,7 @@ test("unsupported grammar cannot silently emit code", () => {
     assert.throws(() => compile(source(text)), CompileError, text)
 })
 test("syntax error fixture reports the missing semicolon at next statement", async () => {
-  const text = await readFile(
-    new URL("../../play-compiler/fixtures/syntax-error.mini", import.meta.url),
-    "utf8"
-  )
+  const text = await readFile(new URL("./fixtures/syntax-error.mini", import.meta.url), "utf8")
   assert.equal(errors(text).diagnostics[0].start.line, 1)
 })
 test("JS mode rejects annotations and still enforces binding", () => {
@@ -178,10 +172,7 @@ test("syntax target and module format are independent; CJS generated names canno
 })
 
 test("single-file compilation rejects all unresolved imports, including side-effect-only paths", () => {
-  assert.throws(
-    () => compile(source('import "./effect.ts";')),
-    /Imports require the modules command/
-  )
+  assert.throws(() => compile(source('import "./effect.ts";')), /Imports require loadGraph/)
 })
 
 test("JS rejects bare arrows in plus operands and observable function coercion/callbacks", () => {

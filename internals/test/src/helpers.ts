@@ -26,6 +26,13 @@ export async function execute(file: string): Promise<string> {
   ).stdout
 }
 
+export async function writeFiles(files: ReadonlyMap<string, string>): Promise<void> {
+  for (const [file, text] of files) {
+    await mkdir(dirname(file), { recursive: true })
+    await writeFile(file, text)
+  }
+}
+
 export function locate(
   text: string,
   needle: string,

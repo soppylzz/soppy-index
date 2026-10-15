@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url"
 import { build, createServer } from "vite"
 import { TraceMap, originalPositionFor } from "@jridgewell/trace-mapping"
 import { miniCompilerPlugin, type PluginEvidence } from "@soppy-index/play-compiler/plugin"
-import { locate } from "../src/helpers.ts"
-const root = fileURLToPath(new URL("../../play-compiler/vite/", import.meta.url))
+import { locate } from "@soppy-index/test"
+const root = fileURLToPath(new URL("../vite/", import.meta.url))
 function config(evidence: PluginEvidence[]) {
   return {
     configFile: false as const,

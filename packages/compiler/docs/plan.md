@@ -1,13 +1,13 @@
 # 实施计划与阶段验收
 
-当前采用 pnpm monorepo，语言主体仍是一个 `packages/compiler` 包，`src/` 按阶段分层，`docs/` 放中文讲解。测试迁到 `internals/test/compiler`；examples、fixtures 与 Vite 实验迁到 `internals/play-compiler`；CLI 和产物写入迁到 `internals/compiler-cli`。开发工具链与手写编译器分离，核心不调用第三方 parser、checker、transformer 或 generator。
+当前采用 pnpm monorepo，语言主体仍是一个 `packages/compiler` 包，`src/` 按阶段分层，`docs/` 放中文讲解。测试按职责放在 compiler 与 playground 各自的 `__test__/`，共享 runner/helper 保留在 `internals/test`；examples、fixtures 与 Vite 实验迁到 `internals/play-compiler`；实验脚本与产物写入位于 `internals/play-compiler/src`。开发工具链与手写编译器分离，核心不调用第三方 parser、checker、transformer 或 generator。
 
 | 阶段 | 依赖 | 实现与验收 |
 | --- | --- | --- |
 | P0 | 无 | 公共位置、诊断、AST、选项与结果；pnpm 安装、共享 base 与各包 TS 配置 |
 | P1 | P0 | 手写 scanner / parser；Token、AST 可观察，非法输入有范围 |
 | P2 | P1 | 独立 binder / checker；作用域、闭包、重复和前向引用诊断、基本类型 |
-| P3 | P2 | 类型擦除、箭头降级、const 降级、模块转换独立 pass；CLI、TS / JS 实际输出 |
+| P3 | P2 | 类型擦除、箭头降级、const 降级、模块转换独立 pass；直接 API 实验、TS / JS 实际输出 |
 | P4 | P3 | printer 采集生成位置和来源；标准 map、查询标识符 / 表达式 / 调用 |
 | P5 | P4 | 无环模块图、导入导出签名、ESM / CJS 可执行；保守副作用分析与固定点裁剪 |
 | P6 | P5 | 从符号与类型输出导出声明、声明映射及查询 |

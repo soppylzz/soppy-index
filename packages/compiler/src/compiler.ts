@@ -33,7 +33,7 @@ export function analyze(
       unresolvedImport,
       "modules",
       "M006",
-      "Imports require the modules command; single-file compilation is self-contained"
+      "Imports require loadGraph(); single-file compilation is self-contained"
     )
   const binding = bind(source, ast, imported)
   const checking = check(source, ast, binding, options.language)

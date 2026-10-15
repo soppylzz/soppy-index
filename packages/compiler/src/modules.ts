@@ -110,7 +110,7 @@ export function emitGraph(
   outDir: string,
   programs: Map<string, Program>,
   options: ModuleOutputOptions = {}
-): { artifacts: Map<string, string>; outputs: string[] } {
+): { artifacts: Map<string, string>; outputs: string[]; entryOutput: string } {
   const extension = options.format === "cjs" ? ".cjs" : ".js"
   const outputName = (file: string) =>
     relative(graph.root, file).slice(0, -extname(file).length) + extension
@@ -165,5 +165,5 @@ export function emitGraph(
       artifacts.set(`${declarationName}.map`, JSON.stringify(declaration.map))
     }
   }
-  return { artifacts, outputs }
+  return { artifacts, outputs, entryOutput: resolve(outDir, outputName(graph.entry)) }
 }

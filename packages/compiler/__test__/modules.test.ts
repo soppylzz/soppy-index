@@ -1,16 +1,19 @@
 import assert from "node:assert/strict"
-import { readFile, access, writeFile } from "node:fs/promises"
+import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 import { CompileError } from "@soppy-index/compiler/model"
-import { loadGraph } from "@soppy-index/compiler/modules"
-import { writeGraph } from "@soppy-index/compiler-cli"
+import { loadGraph, emitGraph } from "@soppy-index/compiler/modules"
 import { shake } from "@soppy-index/compiler/shake"
-import { execute, fixture } from "../src/helpers.ts"
-const entry = fileURLToPath(
-  new URL("../../play-compiler/examples/modules/main.ts", import.meta.url)
-)
+import { execute, fixture, writeFiles } from "@soppy-index/test"
+const entry = fileURLToPath(new URL("./fixtures/modules/main.ts", import.meta.url))
+async function emitFiles(...args: Parameters<typeof emitGraph>): Promise<string> {
+  const { artifacts, entryOutput } = emitGraph(...args)
+  artifacts.set(join(args[1], "package.json"), '{"type":"module"}\n')
+  await writeFiles(artifacts)
+  return entryOutput
+}
 for (const format of ["esm", "cjs"] as const)
   test(`module ${format}: cross-module signatures, unused pure deletion and exact side-effect order`, async (context) => {
     const graph = await loadGraph(entry),
@@ -19,18 +22,16 @@ for (const format of ["esm", "cjs"] as const)
     const shaking = shake(graph)
     assert.equal(shaking.report.find((r) => r.name === "unused")?.action, "drop")
     assert.equal(shaking.report.find((r) => r.name === "noisy")?.action, "keep")
-    await writeGraph(graph, out, shaking.programs, { format, target: "legacy" })
+    const output = await emitFiles(graph, out, shaking.programs, { format, target: "legacy" })
     const extension = format === "cjs" ? "cjs" : "js"
-    assert.equal(
-      await execute(join(out, `main.${extension}`)),
-      "library effect\neffect module\nHello, world\n"
-    )
+    assert.equal(output, join(out, `main.${extension}`))
+    assert.equal(await execute(output), "library effect\neffect module\nHello, world\n")
     const text = await readFile(join(out, `library.${extension}`), "utf8")
     assert.doesNotMatch(text, /unused/)
     assert.match(text, /noisy/)
     assert.doesNotMatch(await readFile(join(out, `main.${extension}`), "utf8"), /\.ts["']/)
     const unshaken = join(root, "unshaken")
-    await writeGraph(graph, unshaken, new Map(), { format })
+    await emitFiles(graph, unshaken, new Map(), { format })
     assert.equal(
       await execute(join(unshaken, `main.${extension}`)),
       await execute(join(out, `main.${extension}`))
@@ -48,7 +49,7 @@ test("worklist follows closures, intermediate imports and transitive local symbo
     shaking = shake(graph)
   assert.equal(shaking.report.find((r) => r.name === "prefix")?.action, "keep")
   assert.ok(shaking.report.filter((r) => r.name === "dead").every((r) => r.action === "drop"))
-  await writeGraph(graph, join(root, "out"), shaking.programs, { format: "cjs" })
+  await emitFiles(graph, join(root, "out"), shaking.programs, { format: "cjs" })
   assert.equal(await execute(join(root, "out/main.cjs")), "prefix:x\n")
 })
 test("unused import binding becomes a side-effect import without reordering evaluation", async (context) => {
@@ -58,7 +59,7 @@ test("unused import binding becomes a side-effect import without reordering eval
   })
   const graph = await loadGraph(join(root, "main.ts")),
     shaking = shake(graph)
-  await writeGraph(graph, join(root, "out"), shaking.programs)
+  await emitFiles(graph, join(root, "out"), shaking.programs)
   assert.match(await readFile(join(root, "out/main.js"), "utf8"), /import "\.\/dep\.js"/)
   assert.equal(await execute(join(root, "out/main.js")), "dep\nmain\n")
 })
@@ -105,7 +106,7 @@ test("duplicate output stems are refused", async (context) => {
     "a.js": "const y = 2;",
   })
   const graph = await loadGraph(join(root, "main.ts"))
-  await assert.rejects(() => writeGraph(graph, join(root, "out"), new Map()), /Output collision/)
+  await assert.rejects(() => emitFiles(graph, join(root, "out"), new Map()), /Output collision/)
 })
 test("special export property names work in CJS without prototype mutation", async (context) => {
   const root = await fixture(context, {
@@ -113,35 +114,6 @@ test("special export property names work in CJS without prototype mutation", asy
     "dep.ts": 'export const __proto__ = "safe";',
   })
   const graph = await loadGraph(join(root, "main.ts"))
-  await writeGraph(graph, join(root, "out"), new Map(), { format: "cjs" })
+  await emitFiles(graph, join(root, "out"), new Map(), { format: "cjs" })
   assert.equal(await execute(join(root, "out/main.cjs")), "safe\n")
-})
-
-test("unsupported declarations fail before any output is written", async (context) => {
-  const root = await fixture(context, {
-    "main.ts": 'import "./dep"; const f = (x: number) => x; export const alias = f;',
-    "dep.ts": 'console.log("dep");',
-  })
-  const graph = await loadGraph(join(root, "main.ts"))
-  await assert.rejects(
-    () => writeGraph(graph, join(root, "out"), new Map()),
-    /directly exported arrow/
-  )
-  await assert.rejects(() => access(join(root, "out")))
-})
-
-test("output refuses source directories and preserves existing package metadata", async (context) => {
-  const root = await fixture(context, {
-    "main.ts": "console.log(1);",
-    "out/package.json": '{"type":"module","name":"keep-me"}\n',
-  })
-  const graph = await loadGraph(join(root, "main.ts"))
-  await assert.rejects(() => writeGraph(graph, root, new Map()), /differ from source/)
-  await writeGraph(graph, join(root, "out"), new Map())
-  assert.equal(JSON.parse(await readFile(join(root, "out/package.json"), "utf8")).name, "keep-me")
-  await writeFile(join(root, "out/package.json"), '{"type":"commonjs"}\n')
-  await assert.rejects(
-    () => writeGraph(graph, join(root, "out"), new Map()),
-    /incompatible package/
-  )
 })

@@ -23,7 +23,8 @@
       "files": [
         "internals/play-compiler/examples/**/*.{ts,js}",
         "internals/play-compiler/vite/*.mini.ts",
-        "packages/compiler/**/*.md"
+        "packages/compiler/**/*.md",
+        "packages/compiler/__test__/fixtures/**/*.{ts,js}"
       ],
       "options": {
         "semi": true

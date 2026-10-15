@@ -11,7 +11,7 @@ export interface Source {
   file: string
   text: string
 }
-export type Phase = "lexer" | "parser" | "binder" | "checker" | "modules" | "declaration" | "cli"
+export type Phase = "lexer" | "parser" | "binder" | "checker" | "modules" | "declaration"
 export interface Diagnostic extends Span {
   code: string
   phase: Phase

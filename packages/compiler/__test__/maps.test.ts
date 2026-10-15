@@ -4,7 +4,7 @@ import { TraceMap, originalPositionFor } from "@jridgewell/trace-mapping"
 import { analyze, compile } from "@soppy-index/compiler/compiler"
 import { emitDeclarations } from "@soppy-index/compiler/declarations"
 import { CompileError } from "@soppy-index/compiler/model"
-import { locate } from "../src/helpers.ts"
+import { locate } from "@soppy-index/test"
 function assertOrigin(
   code: string,
   map: ConstructorParameters<typeof TraceMap>[0],

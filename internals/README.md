@@ -2,13 +2,12 @@
 
 [Project](../README.md)
 
-Following the package/playground separation in soppy-vue, reusable implementations live in `packages/*`; adapters, tests, and experiments live here. Core packages must not depend on internals. Declare each workspace's dependencies explicitly with `workspace:*`; shared third-party versions and installation state belong to the root catalog and lockfile.
+Reusable implementations live in `packages/*`; adapters, shared infrastructure, and experiments live here. Tests belong to their owning workspace's `__test__/` directory. Core runtime code must not depend on internals; tests may use shared helpers. Declare each workspace's dependencies explicitly with `workspace:*`; shared third-party versions and installation state belong to the root catalog and lockfile.
 
 | Workspace | Purpose |
 | --- | --- |
-| [@soppy-index/compiler-cli](compiler-cli/README.md) | Argument handling and compiler artifact output |
-| [@soppy-index/test](test/README.md) | Test discovery, fixtures, and bounded execution |
-| [@soppy-index/play-compiler](play-compiler/README.md) | Examples, CLI experiments, and real Vite integration |
+| [@soppy-index/test](test/README.md) | Shared test discovery, fixture helpers, and bounded execution |
+| [@soppy-index/play-compiler](play-compiler/README.md) | Examples, direct compiler API experiments, and real Vite integration |
 
 The existing [Auth lab](../docs/auth/demo/README.md) remains under `docs/auth/demo` and participates in the root workspace. `pnpm build` builds package implementations; playground builds have separate commands. `pnpm typecheck` checks root/package/infra configurations, while `pnpm auth:typecheck` checks the Auth application separately.
 
@@ -16,7 +15,7 @@ Source tests use the `development` export condition; `pnpm test:built` builds an
 
 ## Adding a learning topic
 
-Use `packages/<topic>`, `internals/play-<topic>`, and `internals/test/<topic>`. Workspace globs and test discovery already support this layout. Planned bundler, React, and JSX topics are not implemented yet; add dependencies and shared abstractions only when real reuse requires them. A React runtime need not depend on a TS checker, and JSX needs its own explicit syntax boundary.
+Use `packages/<topic>` and `internals/play-<topic>`, with `__test__/*.test.ts` beside each workspace's source directory. Test helpers are a dev dependency, and each tested workspace exposes a `test` script. Workspace globs and shared discovery support this layout. Planned bundler, React, and JSX topics are not implemented yet; add dependencies and shared abstractions only when real reuse requires them. A React runtime need not depend on a TS checker, and JSX needs its own explicit syntax boundary.
 
 ## Git and package versions
 
