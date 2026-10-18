@@ -8,16 +8,16 @@
 node docs/browser/dom/index.ts
 ```
 
-访问启动引导给出的地址，按各实验的 README / index.md 操作；`Ctrl+C` 停止服务。最低运行环境为 Node >= 22.18。这里维护公共接口及样式名称，agent 编写流程由 [knowledge-demo skill](../../.agents/skills/knowledge-demo/SKILL.md) 维护。
+访问启动引导给出的地址，按各实验的 README / index.md 操作；`Ctrl+C` 停止服务。最低运行环境为 Node >= 22.18。这里维护公共接口及样式名称，agent 编写流程由 [代码规范](../../.agents/prompts/conduct-of-code.md) 维护。
 
 ## 1. 文件与职责
 
-| 文件                             | 职责                                                              |
-| -------------------------------- | ----------------------------------------------------------------- |
-| [styles.css](./styles.css)       | 页面、卡片、控件、表格、提示和日志的统一外观                      |
-| [browser.js](./browser.js)       | 浏览器 `globalThis.Demo.createLogger`；经典脚本与模块脚本均可调用 |
-| [server.ts](./server.ts)         | 白名单公共资源路由、端口参数、真实监听、关闭服务与英文 HTTP 日志  |
-| [validation.md](./validation.md) | 本轮接入的实测环境、结果与限制                                    |
+| 文件 | 职责 |
+| --- | --- |
+| [styles.css](./styles.css) | 页面、卡片、控件、表格、提示和日志的统一外观 |
+| [browser.js](./browser.js) | 浏览器 `globalThis.Demo.createLogger`；经典脚本与模块脚本均可调用 |
+| [server.ts](./server.ts) | 白名单公共资源路由、端口参数、真实监听、关闭服务与英文 HTTP 日志 |
+| [validation.md](./validation.md) | 本轮接入的实测环境、结果与限制 |
 
 [Node HTTP](../node/http/README.md) 也使用本模块；其专用薄封装接口维护在该组 README。CSS 知识点采用[文字与 CSS 片段](../css/README.md)说明，不依赖本模块。
 
@@ -90,18 +90,18 @@ log("已注册监听；等待真实事件")
 
 从实验目录使用带 `.ts` 扩展名的相对 import，保证 Node 原生运行；根 `tsconfig.json` 的 `allowImportingTsExtensions` 与 `noEmit` 配合进行检查。
 
-| 接口                                            | 行为与边界                                                                                                               |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `demoHead`                                      | 公共 link + classic script 的 HTML 字符串；在实验脚本之前插入 head                                                       |
-| `demoStyles`                                    | 与 styles.css 完全相同的字符串，仅供时序敏感页面内联                                                                     |
-| `serveDemoAsset(req, res)`                      | 最先处理 `/demo/`；命中该前缀即结束响应并返回 true；仅两个已知文件可读取，未知文件 404，非 GET/HEAD 为 405，HEAD 无 body |
-| `readPort(name, fallback, allowZero = false)`   | 读取环境变量；仅接受十进制整数字符串，范围 1..65535；显式 allowZero 才接受 0                                             |
-| `assertDistinctPorts(...ports)`                 | 多源实验启动前拒绝相同端口                                                                                               |
-| `listenOnLoopback(server, port)`                | 真实绑定 `127.0.0.1`；成功才 resolve 实际端口，失败 reject；临时监听器随结果移除                                         |
-| `startServer(server, port, ready)`              | 单服务快捷入口：监听后执行 ready，英文报告错误并设置退出码，SIGINT/SIGTERM 关闭服务                                      |
-| `closeServers(...servers)`                      | 停止接受新连接并关闭空闲 HTTP 连接；已进行的请求等待完成，不强制中断                                                     |
-| `logHttpRequest(req, status, label, note = "")` | 英文 HTTP 日志，包含标签、method、原始 URL、状态和可选证据说明                                                           |
-| `ascii(value)`                                  | 转义非 ASCII 和控制字符，避免外部输入打断终端日志或混入中文 CLI 输出                                                     |
+| 接口 | 行为与边界 |
+| --- | --- |
+| `demoHead` | 公共 link + classic script 的 HTML 字符串；在实验脚本之前插入 head |
+| `demoStyles` | 与 styles.css 完全相同的字符串，仅供时序敏感页面内联 |
+| `serveDemoAsset(req, res)` | 最先处理 `/demo/`；命中该前缀即结束响应并返回 true；仅两个已知文件可读取，未知文件 404，非 GET/HEAD 为 405，HEAD 无 body |
+| `readPort(name, fallback, allowZero = false)` | 读取环境变量；仅接受十进制整数字符串，范围 1..65535；显式 allowZero 才接受 0 |
+| `assertDistinctPorts(...ports)` | 多源实验启动前拒绝相同端口 |
+| `listenOnLoopback(server, port)` | 真实绑定 `127.0.0.1`；成功才 resolve 实际端口，失败 reject；临时监听器随结果移除 |
+| `startServer(server, port, ready)` | 单服务快捷入口：监听后执行 ready，英文报告错误并设置退出码，SIGINT/SIGTERM 关闭服务 |
+| `closeServers(...servers)` | 停止接受新连接并关闭空闲 HTTP 连接；已进行的请求等待完成，不强制中断 |
+| `logHttpRequest(req, status, label, note = "")` | 英文 HTTP 日志，包含标签、method、原始 URL、状态和可选证据说明 |
+| `ascii(value)` | 转义非 ASCII 和控制字符，避免外部输入打断终端日志或混入中文 CLI 输出 |
 
 端口检测直接使用 [Node server.listen](https://nodejs.org/docs/latest-v22.x/api/net.html#serverlistenport-host-backlog-callback) 的绑定结果，不先探测再释放端口，也不自动换端口。固定 origin 是跨源通信、cookie 和持久化实验的条件。仅原本支持动态端口的单源实验传入 `allowZero=true`，启动 URL 从 `server.address()` 获取；需要预先构造双源 URL 的实验必须使用非零端口。
 

@@ -19,7 +19,7 @@ Use `packages/<topic>` and `internals/play-<topic>`, with `__test__/*.test.ts` b
 
 ## Git and package versions
 
-Husky runs [lint-staged](../lint-staged.config.mjs) before commits and [commitlint](../commitlint.config.mjs) on commit messages. Installation sets up the local hooks; commit conventions are in the [shared rule](../.agents/rules/commit.md).
+Husky runs [lint-staged](../lint-staged.config.mjs) before commits and [commitlint](../commitlint.config.mjs) on commit messages. Installation sets up the local hooks; commit conventions are in the [shared rule](../.agents/prompts/conduct-of-commit.md).
 
 ```bash
 pnpm changeset

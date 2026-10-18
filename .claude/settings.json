@@ -14,5 +14,10 @@
       "Bash(pnpm exec eslint *)",
       "Bash(pnpm exec prettier *)"
     ]
+  },
+  "skillOverrides": {
+    "learn": "user-invocable-only",
+    "handwrite": "user-invocable-only",
+    "ask": "user-invocable-only"
   }
 }

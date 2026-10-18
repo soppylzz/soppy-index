@@ -2,4 +2,4 @@
 
 @AGENTS.md
 
-Read the task-specific rules/skills linked there before editing. `.claude/rules` and `.claude/skills` link to the shared directories; client details are in `.agents/README.md`.
+Read task-specific prompts and roles through the entry guide; `.claude/prompts` links to their shared source. Discover shared skills through `.claude/skills/`. Load only guidance relevant to the current task.
