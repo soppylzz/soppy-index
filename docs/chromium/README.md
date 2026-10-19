@@ -1,7 +1,5 @@
 # Chromium 官方文档选读
 
-[返回仓库首页](../../README.md) · [前端开发者学习路线](learning-path.md) · [浏览器渲染](../browser/rendering/README.md)
-
 本目录收录精选 Chromium 官方文档，提供中文翻译与固定版本的官方原文链接，便于对照学习浏览器实现。
 
 - 中文文档按主题组织，页首保留固定提交的官方来源。

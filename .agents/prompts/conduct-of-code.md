@@ -20,6 +20,8 @@ Record enough evidence to explain the result without flooding output. Response c
 
 ## Checks
 
+Use Vitest for project tests. The `docs/node/testing` lesson intentionally uses `node:test` to teach Node's native test runner and runs independently. Use Vite to build JavaScript in `packages/*`; TypeScript handles type checking and declaration generation.
+
 Teaching packages, including the compiler, need behavior-focused tests for their meaningful contracts and failure cases. Keep the implementation as readable as other demos; package structure does not justify unnecessary production infrastructure.
 
 For browser labs, verify endpoints and central behavior in a real browser when available. Check startup URLs, response types, cleanup, and relevant failure paths. Bind explicit localhost ports and report conflicts; print success only after listening. Keep startup guidance concise. For CLI demos, inspect the complete trace. Report unverified behavior honestly.

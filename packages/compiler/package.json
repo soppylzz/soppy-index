@@ -16,10 +16,10 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "vite build && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm --filter @soppy-index/test run test compiler",
-    "test:built": "node __test__/built.ts"
+    "test": "vitest run",
+    "test:built": "vitest run --mode built"
   },
   "dependencies": {
     "@jridgewell/gen-mapping": "catalog:",
@@ -28,6 +28,9 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:",
-    "@soppy-index/test": "workspace:*"
+    "@soppy-index/test": "workspace:*",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "execa": "catalog:"
   }
 }

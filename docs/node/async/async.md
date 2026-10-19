@@ -1,7 +1,5 @@
 # 异步组合、容量与真正取消
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 callback常用error-first(err,value)，Promise用状态表达一次完成，async/await只改书写方式。promisify适合标准error-first签名和一个主要成功值，多成功参数、this依赖或自定义协议需专门适配。
 
 | 组合       | 何时settle                       | 是否自动取消其他操作 |

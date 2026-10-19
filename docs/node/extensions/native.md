@@ -1,7 +1,5 @@
 # Node-API、WASM 与隔离取舍
 
-[本组导航](../testing/README.md) · [实验走查](../testing/index.md)
-
 Node-API提供相对稳定的C ABI，降低直接绑定V8 ABI的跨Node版本成本，但二进制仍受OS、架构、libc和所需Node-API版本影响。不能把“ABI稳定”理解为一个.node可在所有平台通用。
 
 node-gyp调用本地编译工具链；prebuild按平台发布减少安装时编译，但下载、签名、回退构建和安装脚本都有供应链与环境成本。发布需覆盖x64/arm64、glibc/musl等目标，并给无匹配产物环境明确失败或JS/WASM回退。

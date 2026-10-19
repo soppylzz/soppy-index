@@ -52,6 +52,6 @@ controller 发出信号，fetch 等支持 signal 的 API 才负责响应取消�
 
 ## 对照延迟、取消与 404
 
-可在 [HTTP 实验](../../node/http/README.md)发送慢响应、取消与错误请求，关联 request ID 判断观察属于哪次操作。该实验不覆盖此处所有 API 组合；旧请求取消也不代表新请求失败。
+可在 [HTTP 实验](../../node/http/index.md)发送慢响应、取消与错误请求，关联 request ID 判断观察属于哪次操作。该实验不覆盖此处所有 API 组合；旧请求取消也不代表新请求失败。
 
 发送字段或文件时，下一步是选择请求体格式，见 [FormData](./form-data.md)。

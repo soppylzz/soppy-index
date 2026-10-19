@@ -42,7 +42,7 @@ modulepreload 默认 destination 是 script，并按模块的 CORS 获取规则�
 
 ## 4. 本目录对照实验
 
-运行 [实验服务](./README.md)，比较 `/hints` 中的 classic 和 module 两组页面。服务先发送 head，600ms 后才发送消费标签所在的 HTML 尾部；未提前发送的字节无法被 preload scanner 扫描，因此能清楚观察提前发现的作用。
+运行 [实验服务](experiment.md)，比较 `/hints` 中的 classic 和 module 两组页面。服务先发送 head，600ms 后才发送消费标签所在的 HTML 尾部；未提前发送的字节无法被 preload scanner 扫描，因此能清楚观察提前发现的作用。
 
 实验每次导航使用新的资源 URL，避免上次缓存影响；同次导航中 hint 与消费者使用完全一致的 URL。hint 资源允许缓存复用，其他普通顺序实验则使用 `no-store`。在 DevTools 中取消 Disable cache 后比较：
 

@@ -1,7 +1,5 @@
 # CommonJS 与 ESM：身份和状态
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 CJS包装函数提供require、module、exports、__filename等。exports初始是module.exports的引用，重赋exports不会替换最终导出。第一次成功加载后通常按解析文件身份缓存；循环依赖可拿到未初始化完整的导出，因此应避免在初始化阶段互相读取完成状态。
 
 ESM有静态依赖结构与live binding，加载/链接/求值分阶段。模块namespace只读不代表导出的状态永不变化；本例通过导出函数更新绑定。ESM身份基于解析URL，query/fragment不同可能重复实例；不能为“刷新缓存”随意加随机查询造成长期泄漏。

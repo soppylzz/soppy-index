@@ -1,7 +1,5 @@
 # 文件生命周期、路径与 URL
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 fs同步接口阻塞调用线程，适合启动和小CLI；服务请求优先Promise/callback或Stream。readFile整体分配适合受限小文件，大上传下载应流式。文件handle所有成功/失败路径都要close，临时目录在finally移除。
 
 join拼接规范化，resolve按片段生成绝对路径，不能承担授权检查。cwd由启动位置与chdir决定；模块资源用new URL("./asset",import.meta.url)。pathToFileURL/fileURLToPath处理编码、平台根与特殊字符，不手动剥file://或用decodeURIComponent替代。

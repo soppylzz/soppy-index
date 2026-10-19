@@ -1,6 +1,18 @@
 # History 与 Location 实验走查
 
-按 [运行说明](./README.md)启动共享服务，再打开 `/history` 或 `/navigation`。先打开 `/loading` 观察新文档的 executionId，再比较导航时文档身份是否变化；页面日志、实际事件与 HTTP 请求是不同证据。
+本实验复用生命周期服务，打开 `/history` 或 `/navigation`。先打开 `/loading` 观察新文档的 executionId，再比较导航时文档身份是否变化；页面日志、实际事件与 HTTP 请求是不同证据。
+
+## 运行导航实验
+
+导航需要观察文档加载与恢复，因此复用[生命周期实验服务](../lifecycle/demo/lib/handler.ts)，不另外复制服务器。在仓库根目录运行：
+
+```bash
+pnpm --filter lifecycle-next-lab dev
+```
+
+打开 <http://127.0.0.1:5006/history> 或 <http://127.0.0.1:5006/navigation>，按下文操作。需要 Node >= 22.18；端口占用时用 `pnpm --filter lifecycle-next-lab exec next dev -H 127.0.0.1 -p 5007` 指定新端口，按 `Ctrl+C` 停止。
+
+服务仅对 `/history/view/a` 和 `/history/view/b` 提供 History fallback，未知子路径、脚本和 API 不回退为 HTML。保持 host 与端口一致，避免把 origin 变化混入导航实验。
 
 ## 1. History 与同文档路由
 

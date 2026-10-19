@@ -14,7 +14,7 @@
     "build": "node --conditions=development node_modules/vite/bin/vite.js build --config vite/vite.config.ts",
     "preview": "node --conditions=development node_modules/vite/bin/vite.js preview --config vite/vite.config.ts --host 127.0.0.1 --port 5179 --strictPort",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm --filter @soppy-index/test run test play-compiler",
+    "test": "vitest run",
     "check": "node --conditions=development src/check.ts",
     "inspect": "node --conditions=development src/inspect.ts",
     "errors": "node --conditions=development src/errors.ts"
@@ -28,6 +28,7 @@
     "@soppy-index/test": "workspace:*",
     "@jridgewell/trace-mapping": "catalog:",
     "fs-extra": "catalog:",
-    "@types/fs-extra": "catalog:"
+    "@types/fs-extra": "catalog:",
+    "vitest": "catalog:"
   }
 }

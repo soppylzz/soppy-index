@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
-import { test } from "node:test"
+import { test } from "vitest"
 import { runInNewContext } from "node:vm"
 import { analyze, compile } from "@soppy-index/compiler/compiler"
 import { scan } from "@soppy-index/compiler/lexer"

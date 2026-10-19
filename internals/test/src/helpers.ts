@@ -3,13 +3,13 @@ import { execa } from "execa"
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
-import type { TestContext } from "node:test"
+import type { TestContext } from "vitest"
 export async function fixture(
   context: TestContext,
   files: Record<string, string>
 ): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "mini-compiler-"))
-  context.after(() => rm(root, { recursive: true, force: true }))
+  context.onTestFinished(() => rm(root, { recursive: true, force: true }))
   for (const [name, text] of Object.entries(files)) {
     await mkdir(dirname(join(root, name)), { recursive: true })
     await writeFile(join(root, name), text)

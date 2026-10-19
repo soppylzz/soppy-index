@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "dev:evil": "LAB_ROLE=evil next dev -H 127.0.0.1 -p 3001",
     "start:evil": "LAB_ROLE=evil next start -H 127.0.0.1 -p 3001",
-    "test": "node --test __test__/*.test.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "next": "catalog:",
@@ -22,6 +22,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

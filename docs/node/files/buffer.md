@@ -1,7 +1,5 @@
 # Buffer：字节、视图与编码
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 Buffer是Uint8Array子类，主要表示字节。JS字符串length按UTF-16 code unit计数，Unicode code point、grapheme和UTF-8字节数还不同；协议body长度和文件偏移必须按字节算。
 
 alloc清零；allocUnsafe可能复用未清零内存，必须完整覆盖后再读/发送。from(string/array/Buffer)通常创建并填充新字节，而from(ArrayBuffer,offset,length)可共享底层内存。小Buffer可能来自池，buffer.byteLength不一定等于当前视图byteLength，转移/暴露底层时还需考虑byteOffset与池中其他数据。

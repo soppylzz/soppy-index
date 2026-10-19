@@ -93,3 +93,5 @@ reset 恢复默认状态。checked / defaultChecked 也区分当前与默认值�
 innerText 也不是统一的“去掉隐藏节点的 textContent”；未渲染元素有特定读取规则。[HTML innerText](https://html.spec.whatwg.org/multipage/dom.html#the-innertext-idl-attribute)
 
 节点存在、样式声明和实际几何是三个层次。下一步可阅读[样式与几何读取](./geometry.md)，理解为什么尺寸不能仅从 DOM 属性推断。
+
+事件传播见 [DOM 事件](./dom-events.md)，尺寸与坐标见[样式与几何读取](./geometry.md)。框架如何复用原生监听可继续读 [Vue invoker](./supplement/vue-event-invoker.md)。

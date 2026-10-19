@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { createHash, randomBytes } from "node:crypto"
-import { test } from "node:test"
+import { test } from "vitest"
 
 const app = "http://127.0.0.1:3000"
 const issuer = "http://127.0.0.1:3001"

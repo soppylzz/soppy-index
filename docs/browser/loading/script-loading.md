@@ -1,6 +1,6 @@
 # Script Loading：解析、加载与执行
 
-[渲染流水线](../rendering/rendering.md) 已说明 HTML parser、CSS 与普通脚本的基本关系。本文进一步追踪：一个 script 被发现后，资源何时就绪、何时允许执行，以及它如何影响后续 DOM 和页面事件。实验入口见 [README](./README.md)，资源提示见 [Resource Hint](./resource-hints.md)。
+[渲染流水线](../rendering/rendering.md) 已说明 HTML parser、CSS 与普通脚本的基本关系。本文进一步追踪：一个 script 被发现后，资源何时就绪、何时允许执行，以及它如何影响后续 DOM 和页面事件。实验入口见 [实验走查](experiment.md)，资源提示见 [Resource Hint](./resource-hints.md)。
 
 ## 1. 先分清三个过程
 

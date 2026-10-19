@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { readFile, access, writeFile } from "node:fs/promises"
 import { join, resolve } from "node:path"
-import { test } from "node:test"
+import { test } from "vitest"
 import { loadGraph } from "@soppy-index/compiler"
 import { writeGraph } from "../src/writer.ts"
 import { fixture, execute } from "@soppy-index/test"

@@ -1,6 +1,22 @@
 # Worker 与进程隔离：实验走查
 
-[知识导航与运行命令](./README.md) · [完整实现](./index.ts)
+CPU 密集工作为什么不能只多写几个 Promise？
+
+先判断瓶颈在计算还是等待。再比较 Worker 的独立执行、消息复制与 transfer、共享内存，以及子进程的故障隔离边界。
+
+- [并行与隔离](./parallelism.md)：消息确认、共享内存与任务结束。
+
+## 运行
+
+在仓库根目录使用 Node >= 22.18：
+
+```bash
+node docs/node/parallelism/index.ts
+```
+
+成功以 `lab-complete` 和退出码 0 结束；完整实现见 [index.ts](./index.ts)。
+
+## 观察重点
 
 先读相应笔记并预测，再运行完整入口。下表的“应看到”是这个实验控制条件下的检查点，具体结果以当前运行输出为准。
 

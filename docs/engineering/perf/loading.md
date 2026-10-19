@@ -6,7 +6,7 @@
 
 HTML 可以直接暴露图片和样式；如果先下载 JS，再请求数据，再生成图片，便多了串行依赖。图片类 LCP 可按首字节等待、资源加载延迟、资源传输、元素渲染延迟拆解，逐段判断。
 
-普通经典 script 会阻塞解析；defer 在解析后按序执行；async 就绪后尽快执行、顺序不保证；module 默认延后执行并加载依赖图。详细机制见[浏览器加载](../../browser/loading/README.md)。
+普通经典 script 会阻塞解析；defer 在解析后按序执行；async 就绪后尽快执行、顺序不保证；module 默认延后执行并加载依赖图。详细机制见[浏览器加载](../../browser/loading/experiment.md)。
 
 Preload 提前取当前页面必要资源，modulepreload 面向模块，preconnect 提前建连，prefetch 面向可能的后续使用。Fetchpriority 只是提示，过多高优先级会让资源互相竞争；URL、CORS 模式等不匹配还可能重复下载。
 

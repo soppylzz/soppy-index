@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
-import { test } from "node:test"
+import { test } from "vitest"
 import { fileURLToPath } from "node:url"
 import { CompileError } from "@soppy-index/compiler/model"
 import { loadGraph, emitGraph } from "@soppy-index/compiler/modules"

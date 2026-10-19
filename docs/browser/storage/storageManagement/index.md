@@ -5,10 +5,11 @@
 在仓库根目录使用 Node >= 22.18 运行，按 `Ctrl+C` 停止服务：
 
 ```bash
+pnpm install --frozen-lockfile
 pnpm --filter storage-management-next-lab dev
 ```
 
-在浏览器打开 <http://localhost:5001>。刷新和停止服务不会自动清除已存数据；需要重置时使用页面操作或 DevTools 清理当前 origin。
+在浏览器打开 <http://127.0.0.1:5001>。刷新和停止服务不会自动清除已存数据；需要重置时使用页面操作或 DevTools 清理当前 origin。
 
 Next CLI 输出服务地址；操作步骤见本文，结果在页面与浏览器 Console 观察。生产服务不保证逐条打印访问日志。服务只监听本机，HTML 使用 `no-store`。端口被占用时可切换：
 
@@ -57,3 +58,12 @@ log("OPFS written: " + name)
 ```
 
 `log` 来自页面脚本，按钮外层的 `runExperiment` 捕获异常。配额压力测试沿用 getFileHandle / createWritable，但每次写独立前缀的 10MB 文件、最多 200MB；失败时尝试 abort writable，并在 finally 清理本次文件。它测试实际写入结果，不拿 estimate 的近似 quota 代替成功证据；完整清理分支见源码。
+
+## 构建后运行
+
+```bash
+pnpm --filter storage-management-next-lab build
+pnpm --filter storage-management-next-lab start
+```
+
+停止服务或重新构建不会清理浏览器数据。比较实验结果时保持相同的 host 与端口；修改端口会改变 origin。

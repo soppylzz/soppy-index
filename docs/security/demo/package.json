@@ -8,9 +8,9 @@
     "start": "next start -H 127.0.0.1 -p 3000",
     "typecheck": "tsc --noEmit",
     "dev:provider": "LAB_ROLE=provider next dev -H 127.0.0.1 -p 3001",
-    "test": "node --test __test__/tokens.test.ts",
-    "test:http": "node --test __test__/http.test.mjs",
-    "test:ui": "node --test __test__/ui.test.mjs"
+    "test": "vitest run",
+    "test:http": "vitest run --mode http",
+    "test:ui": "vitest run --mode ui"
   },
   "dependencies": {
     "next": "catalog:",
@@ -23,7 +23,8 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "type": "module"
 }

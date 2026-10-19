@@ -1,8 +1,21 @@
 # HTTP 实验：传输、业务确认和取消
 
-[运行与知识导航](./README.md) · [完整服务](demo/lib/handler.ts) · [浏览器实现](demo/public/assets/lab.js)
+[完整服务](demo/lib/handler.ts) · [浏览器实现](demo/public/assets/lab.js)
 
 先按“发送字节 → 服务端验证 → 客户端核对确认”的顺序读[HTTP 机制](./server.md)，再操作页面。每次点击只说明本次请求的观察，取消后的远端状态仍需另行确认。
+
+## 运行
+
+在仓库根目录使用 Node >= 22.18：
+
+```bash
+pnpm install
+pnpm --filter node-http-next-lab dev
+```
+
+打开 <http://127.0.0.1:5030/>，按 `Ctrl+C` 停止。构建后运行使用同一 filter 的 `build`、`start`。端口由 Next CLI 管理；需要覆盖时执行 `pnpm --filter node-http-next-lab exec next dev -H 127.0.0.1 -p 5031`。
+
+[完整 Route Handler](./demo/lib/handler.ts)使用 Web Request/Response 与 ReadableStream；它运行在 Node runtime，监听与 socket 生命周期交给 Next.js。页面资源与 HTTP 工具位于本实验内部。
 
 ## 操作顺序
 

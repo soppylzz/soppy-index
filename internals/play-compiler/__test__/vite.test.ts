@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
-import { test } from "node:test"
+import { test } from "vitest"
 import { fileURLToPath } from "node:url"
 import { build, createServer } from "vite"
 import { TraceMap, originalPositionFor } from "@jridgewell/trace-mapping"
@@ -19,7 +19,7 @@ function config(evidence: PluginEvidence[]) {
 test("real Vite dev transform sees raw TS before core transforms and composes returned map", async (context) => {
   const evidence: PluginEvidence[] = []
   const server = await createServer({ ...config(evidence), server: { port: 0, host: "127.0.0.1" } })
-  context.after(() => server.close())
+  context.onTestFinished(() => server.close())
   await server.listen()
   const address = server.httpServer!.address()
   assert.ok(address && typeof address !== "string")

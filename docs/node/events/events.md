@@ -1,7 +1,5 @@
 # EventEmitter：同步分发与错误通道
 
-[本组导航](../async/README.md) · [实验走查](../async/index.md)
-
 EventEmitter是进程内事件机制，不是DOM冒泡模型或跨线程通信。emit按注册顺序同步调用监听器，返回是否存在相应监听器；它不等待async listener返回的Promise，也不以监听器返回值表达业务成功。
 
 on持续订阅，once一次后移除，off需要同一个函数引用。所有权明确的局部emitter可集中dispose；对共享emitter不要随意removeAllListeners删除别人的订阅。默认监听数警告是泄漏线索，不是硬容量上限，也可能是合法扇出，先查生命周期再调阈值。

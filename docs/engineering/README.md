@@ -51,4 +51,4 @@
 
 ## 与其他目录的边界
 
-语言与运行时细节可继续读 [Node 模块与包](../node/modules/README.md)；渲染机制见[浏览器渲染](../browser/rendering/README.md)，资源更新见 [CDN](../network/delivery-optimization/cdn.md)，权限边界见[安全工程](../security/engineering/testing-response.md)。本目录关注这些机制如何参与工程决策，避免重复展开底层知识。
+语言与运行时细节可继续读 [Node 模块与包](../node/modules/index.md)；渲染机制见[浏览器渲染](../browser/rendering/rendering.md)，资源更新见 [CDN](../network/delivery-optimization/cdn.md)，权限边界见[安全工程](../security/engineering/testing-response.md)。本目录关注这些机制如何参与工程决策，避免重复展开底层知识。

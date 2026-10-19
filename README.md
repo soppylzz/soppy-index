@@ -23,8 +23,8 @@ Frontend learning notes, runnable experiments, and coding exercises. This projec
 
 | Area | Entry |
 | --- | --- |
-| Browser | [Rendering](docs/browser/rendering/README.md) · [Event Loop](docs/browser/event-loop/README.md) · [Loading](docs/browser/loading/README.md) · [Lifecycle](docs/browser/lifecycle/README.md) · [Navigation](docs/browser/navigation/README.md) · [Storage](docs/browser/storage/webStorage/README.md) · [Cache](docs/browser/cache/README.md) · [Communication](docs/browser/communication/README.md) · [Observers](docs/browser/observer/README.md) |
-| Browser APIs | [Network](docs/browser/network/fetch.md) · [Files](docs/browser/files/files.md) · [Environment](docs/browser/environment/environment.md) · [Web Components](docs/browser/web-components/web-components.md) · [iframe](docs/browser/iframe/iframe.md) · [DOM](docs/browser/dom/README.md) · [PWA](docs/browser/pwa/README.md) · [Chromium](docs/chromium/README.md) |
+| Browser | [Rendering](docs/browser/rendering/rendering.md) · [Event Loop](docs/browser/event-loop/event-loop.md) · [Loading](docs/browser/loading/experiment.md) · [Lifecycle](docs/browser/lifecycle/experiment.md) · [Navigation](docs/browser/navigation/experiment.md) · [Storage](docs/browser/storage/webStorage/index.md) · [Cache](docs/browser/cache/experiment.md) · [Communication](docs/browser/communication/cross-context-communication.md) · [Observers](docs/browser/observer/index.md) |
+| Browser APIs | [Network](docs/browser/network/fetch.md) · [Files](docs/browser/files/files.md) · [Environment](docs/browser/environment/environment.md) · [Web Components](docs/browser/web-components/web-components.md) · [iframe](docs/browser/iframe/iframe.md) · [DOM](docs/browser/dom/dom.md) · [PWA](docs/browser/pwa/serviceWorker.md) · [Chromium](docs/chromium/README.md) |
 | Languages and runtime | [Node.js labs](docs/node/run.ts) |
 | Web foundations | [CSS](docs/css/box/box-model.md) · [Network](docs/network/README.md) · [Security](docs/security/foundations/trust-boundaries.md) |
 | Engineering | [Build, architecture, performance, and monitoring](docs/engineering/README.md) |

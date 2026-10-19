@@ -120,3 +120,7 @@ Push、Notification、Background Sync 等有各自权限、支持和调度条件
 排查时分别看 Application 中注册 / state / controller、Cache Storage 内容、Network 响应来源以及服务器请求。Disable cache 通常针对 HTTP cache，不是关闭 Cache Storage 代理；Update on reload、Bypass for network 等开发工具设置会改变路径，不应当作生产默认。
 
 以下为复核场景，不是本仓库本次实测：首次在线加载是否受控；受控后的离线导航；已有 v1 多标签时发布 v2；新版本关键资源失败；旧标签动态导入旧 chunk；账号切换；配额失败；数据清理后再次离线。每项记录 worker / 页面 / 资源版本及请求证据，不能只记录一条“注册成功”。
+
+## 离线应用中的其他能力
+
+Service Worker 负责请求代理，[Cache Storage](./cacheStorage.md)保存脚本管理的请求与响应，[Web App Manifest](./webAppManifest.md)描述应用身份与启动方式。安装状态、页面是否受控和离线数据是否就绪需要分别判断。

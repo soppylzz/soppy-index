@@ -5,10 +5,11 @@
 在仓库根目录使用 Node >= 22.18 运行，按 `Ctrl+C` 停止服务：
 
 ```bash
+pnpm install --frozen-lockfile
 pnpm --filter web-storage-next-lab dev
 ```
 
-在浏览器打开 <http://localhost:4000>。刷新和停止服务不会自动清除已存数据；需要重置时使用页面操作或 DevTools 清理当前 origin。
+在浏览器打开 <http://127.0.0.1:4000>。刷新和停止服务不会自动清除已存数据；需要重置时使用页面操作或 DevTools 清理当前 origin。
 
 Next CLI 输出服务地址；操作步骤见本文，结果在页面与浏览器 Console 观察。生产服务不保证逐条打印访问日志。服务只监听本机，HTML 使用 `no-store`。端口被占用时可切换：
 
@@ -55,3 +56,12 @@ window.addEventListener("storage", (event) => {
 ```
 
 `log` 和 `render` 是源码中的有界日志与表格辅助函数；新页通过 sessionStorage 生成自己的 tabId。监听会记录真正的 storage 事件，写入页的表格则由操作函数主动更新，两者不能混为一谈。request id / ack 的设计边界见[通信机制](../../communication/cross-context-communication.md)。
+
+## 构建后运行
+
+```bash
+pnpm --filter web-storage-next-lab build
+pnpm --filter web-storage-next-lab start
+```
+
+停止服务或重新构建不会清理浏览器数据。比较实验结果时保持相同的 host 与端口；修改端口会改变 origin。

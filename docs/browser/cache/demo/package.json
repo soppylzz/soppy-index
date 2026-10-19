@@ -8,8 +8,8 @@
     "build": "next build",
     "start": "next start -H 127.0.0.1 -p 5003",
     "typecheck": "tsc --noEmit",
-    "test": "node --test __test__/cache.test.ts",
-    "test:ui": "node --test __test__/ui.test.mjs"
+    "test": "vitest run",
+    "test:ui": "vitest run --mode ui"
   },
   "dependencies": {
     "next": "catalog:",
@@ -22,6 +22,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

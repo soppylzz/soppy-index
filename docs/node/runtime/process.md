@@ -1,7 +1,5 @@
 # Process：配置与生命周期
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 process.env 是字符串或缺失，Boolean("false") 仍为true。启动时显式校验整数范围、布尔枚举和必需项，再传配置对象；不要反复在业务路径解析，也不记录密钥原值。argv 包含 Node与脚本路径，cwd 是进程工作目录，不是模块目录。
 
 beforeExit 在循环将空时触发，可再次安排异步工作并多次触发；exit 只能同步收尾。显式 process.exit、致命错误和信号不应假定均会经过相同 beforeExit 路径。exitCode 设置自然退出状态，避免直接 exit 截断仍在排出的异步输出。

@@ -10,6 +10,7 @@
 在仓库根目录使用 Node >= 22.18 运行，按 `Ctrl+C` 停止服务：
 
 ```bash
+pnpm install --frozen-lockfile
 pnpm --filter cookie-next-lab dev
 ```
 
@@ -82,3 +83,12 @@ return sendRedirect("/")
 实际模板从 `BANK` 配置生成地址，不能只改 form 而忽略双源配置。HttpOnly 对照则在 bank 页面中运行 `document.cookie` 并回传可读结果；它限制读取，不阻止脚本发起已认证请求。预期与观察位置见走查，不把生成了表单当成转账已执行的证据。
 
 源码的 sessionOf 仅根据请求中的 sid 及其前缀选择实验变体，没有真实会话库；transfer 与 gift 分支展示教学响应或日志，没有真实转账、余额变更或持久账本。因此本 demo 能观察实际 Cookie 收发、脚本读取与服务端分支选择，不用于证明金融业务提交成功，也不是生产认证实现。两个登录变体同时改变 SameSite 与 HttpOnly，分析时按跨站请求和同源脚本读取分别归因；两者都有 Secure，不能用这组对照验证 Secure 的独立效果。
+
+## 构建后运行
+
+```bash
+pnpm --filter cookie-next-lab build
+pnpm --filter cookie-next-lab start
+```
+
+银行与攻击者使用独立构建目录。先构建银行，再执行 `LAB_ROLE=evil pnpm --filter cookie-next-lab build` 构建攻击者；分别在两个终端用 `start` 和 `start:evil` 启动。换端口时继续保持两个进程的 `BANK_PORT/EVIL_PORT` 与 Next CLI 监听端口一致。

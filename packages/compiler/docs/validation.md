@@ -4,6 +4,20 @@
 
 初次 monorepo 迁移于 2026-10-14 在 macOS、Node **22.23.2** 上验证。2026-10-15 调整测试布局、移除命令行包后，在 Node **26.5.1** 上重新验证测试、类型检查、构建入口和锁文件。迁移开始时 pnpm 为 **11.18.0**；根清单的当前 devEngines 声明为 `^11.18.0`，当前 frozen install 与脚本使用 **11.28.5**。所有命令从仓库根目录运行。浏览器与 Auth 记录来自初次迁移；结果属于实际观察，不扩大受限语言范围。
 
+## 当前测试与构建入口
+
+2026-10-19 在 Node 22.23.2、pnpm 11.28.5 上迁移至 Vitest 4.1.12 和 Vite 7.3.1。测试继续放在各 workspace 的 `__test__/`；`internals/test` 仅提供 fixture helpers。
+
+- `pnpm test`：compiler / playground 的 48 项和 10 个 Next.js demo 的 21 项，共 69 项通过。
+- `node docs/node/testing/index.ts`：原生 `node:test` 教学实验单独运行，3 项通过，不纳入 Vitest projects。
+- `pnpm test:built`：Vite 构建 ESM，tsc 仅生成声明；真实 Node 子进程验证默认入口和子路径导出通过。
+- cache 与 security 的 `test:ui`：2 项生产 HTML / 样式检查通过，不覆盖真实浏览器交互。
+- security 的 `test:http`：启动应用与提供方后，5 项协议集成测试通过；测试后关闭两个进程。
+- `pnpm typecheck`、`pnpm lint` 及本次修改文件的 Prettier 检查通过。
+- `pnpm test:watch`：监听包括所有 demo 在内的 Vitest projects；demo 也可在自身目录运行 `pnpm exec vitest`。
+
+以下表格保留此前迁移时的验证结果，测试数量与覆盖范围以本节当前入口为准。
+
 ## monorepo 迁移后的验证
 
 | 命令 | 实际结果 |
@@ -27,21 +41,21 @@
 | `pnpm exec prettier --check <本次修改的支持文件>` | 本次迁移涉及的包、内部目录、根配置、共享指导与 Auth 运行说明格式通过；不格式化无关文件 |
 | 本地 Markdown 链接检查 | compiler 与 internals 中的相对链接全部存在 |
 
-诊断现在通过 `pnpm compiler:errors` 的固定实验观察；脚本直接调用 `analyze`，展示缺少分号与组合类型/名称错误。源码测试传入 `--conditions=development`，默认 dist 导出单独验证。
+诊断现在通过 `pnpm compiler:errors` 的固定实验观察；脚本直接调用 `analyze`，展示缺少分号与组合类型/名称错误。源码测试由 Vitest 的 `resolve.conditions` 选择 `development`，默认 dist 导出单独验证。
 
 ## 按包归属的测试布局
 
-测试现在位于各包的 `__test__/`；`internals/test` 只提供共享发现、临时文件和子进程 helpers，不依赖 compiler 或 playground。
+测试现在位于各包的 `__test__/`；`internals/test` 只提供临时文件和子进程 helpers，不依赖 compiler 或 playground。
 
 | 归属与入口 | 当前实测 |
 | --- | --- |
 | `packages/compiler/__test__/`；`pnpm test:compiler` | 核心、映射和模块分析共 42 项通过；fixtures 由本包维护 |
 | `internals/play-compiler/__test__/`；`pnpm test:play-compiler` | 文件输出与真实 Vite 集成共 6 项通过；`pnpm test:vite` 单独选择 3 项 Vite 测试 |
 | `pnpm test:maps` | 按包选择 maps 文件，3 项通过 |
-| `pnpm test` | 自动发现上述 5 个测试文件，48 项全部通过 |
-| `pnpm test:built` | 构建后运行 compiler 自己的 `__test__/built.ts`，默认 dist 入口通过；测试与 fixtures 不进入 dist |
+| `pnpm test` | Vitest 通过 projects 统一运行 compiler、playground 和各 demo 的单元测试；生产 HTML 与 HTTP 集成测试单独运行 |
+| `pnpm test:built` | 构建后运行 compiler 自己的 `__test__/built.test.ts`，默认 dist 入口通过；测试与 fixtures 不进入 dist |
 
-各包可直接运行 `pnpm --filter @soppy-index/<包名> test`；compiler 可追加 `maps` 或 `modules`。不存在的选择、超过规定数量的参数都会失败。包的类型检查包含测试，声明产物的构建仅包含 `src`。
+各包可直接运行 `pnpm --filter @soppy-index/<包名> test`；compiler 可追加 `maps` 或 `modules`。文件过滤、watch 等参数由 Vitest 处理；无匹配的测试选择会失败。包的类型检查包含测试，声明产物的构建仅包含 `src`。
 
 安装期间 npm registry 出现短暂 ECONNRESET；pnpm 的自动重试与锁文件策略验证最终通过。没有因此关闭策略检查。当前 lockfile 还记录了 devEngines 所选择的包管理器，这是同一根锁文件中的工具管理信息。
 
@@ -73,5 +87,5 @@ P0–P7 的语义链路保持可运行。未完成的完整工具能力仍明确
 - Tree Shaking 保守保留未知调用与空模块求值壳，输出文件集合，不生成单文件 bundle。
 - 声明只打印基本类型和直接导出的简单箭头；复杂返回类型、函数别名、声明合并/bundling 明确拒绝。声明仍表示原公开 API，不是裁剪后的发布集合。
 - Vite 插件只预检查自包含 `.mini.ts`；跨文件手写检查用 `loadGraph` API，最终 bundle 不承诺整体 ES5。
-- 没有实现未来的 bundler、React 或 JSX 包，没有 watch/coverage 测试入口、跨平台 CI、性能基准或包发布流程。
+- 没有实现未来的 bundler、React 或 JSX 包，Vitest 支持 watch；尚未配置覆盖率 provider、跨平台 CI、性能基准或包发布流程。
 - Auth demo 此次只验证迁移安装与类型检查，没有重复其完整浏览器登录/生产部署测试。

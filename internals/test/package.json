@@ -3,14 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --conditions=development src/run.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "execa": "catalog:",
-    "tinyglobby": "catalog:"
+    "vitest": "catalog:"
   },
   "exports": "./src/helpers.ts"
 }

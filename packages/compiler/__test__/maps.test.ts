@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { test } from "node:test"
+import { test } from "vitest"
 import { TraceMap, originalPositionFor } from "@jridgewell/trace-mapping"
 import { analyze, compile } from "@soppy-index/compiler/compiler"
 import { emitDeclarations } from "@soppy-index/compiler/declarations"

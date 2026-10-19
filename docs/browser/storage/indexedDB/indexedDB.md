@@ -167,7 +167,7 @@ IndexedDB 按存储用途序列化值，不需要先转 JSON。通用类型与�
 - 页面长时间运行时监听 `versionchange`，避免阻塞其他标签页升级。
 - `database.close()` 只关闭连接，不删除数据。
 - `indexedDB.deleteDatabase(name)` 会请求删除整个数据库，也可能被其他连接阻塞。
-- 写入仍受 origin 配额和回收策略影响，详见[存储管理](../storageManagement/README.md)。
+- 写入仍受 origin 配额和回收策略影响，详见[存储管理](../storageManagement/storageManagement.md)。
 
 数据库迁移必须考虑中断：一次升级失败时 transaction 会回滚，但应用仍要能处理旧 schema、损坏数据或用户清空数据后的首次启动。
 

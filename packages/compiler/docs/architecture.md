@@ -29,7 +29,7 @@ flowchart LR
 
 | 阶段 | 核心输入 → 输出 | 保证与教学简化 | 测试 |
 | --- | --- | --- | --- |
-| P0 | 公共协议 → workspace 主体 | 直接 Node 执行可擦除 TS，开发构建另用 tsc | 根与各包 typecheck/build |
+| P0 | 公共协议 → workspace 主体 | 直接 Node 执行可擦除 TS，Vite 构建 JS，tsc 检查类型并生成声明 | 根与各包 typecheck/build |
 | P1 | UTF-16 → Token → AST | 递归下降、首个语法错误停止，无完整 JS 词法上下文 | core 中范围/优先级/非法输入 |
 | P2 | AST → Scope/Symbol → Type | 顺序激活、闭包/遮蔽、精确基本类型，无 CFG | core 中名称/初始化/调用/返回错误 |
 | P3 | 已检查 AST → 独立 pass → JS | 不可变 rewrite，不允许绕开 Binder 的安全前提 | core 中实际输出和原树保留 |

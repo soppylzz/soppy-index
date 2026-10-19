@@ -68,8 +68,8 @@ window.addEventListener("message", (event) => {
 
 ## 4. 存储、性能与生命周期
 
-不同端口是跨源但不必然跨站；本地双源实验不能验证真实第三方 Cookie 与跨站存储分区。相关策略见 [Cookie](../storage/cookie/README.md)、[Web Storage](../storage/webStorage/README.md)与 [存储配额与隔离](../storage/storageManagement/storageManagement.md)。
+不同端口是跨源但不必然跨站；本地双源实验不能验证真实第三方 Cookie 与跨站存储分区。相关策略见 [Cookie](../storage/cookie/cookie.md)、[Web Storage](../storage/webStorage/webStorage.md)与 [存储配额与隔离](../storage/storageManagement/storageManagement.md)。
 
 每个 iframe 带来独立解析、脚本和渲染成本。非首屏内容可考虑 loading="lazy" 并预留尺寸，但浏览器懒加载策略不等于固定延迟，本 demo 为明确实验顺序采用正常加载。父页生命周期监听也不能替代子文档自己的资源清理。
 
-当前实验父页离开会移除 message / load / click 监听并清理 pending 超时；子页离开会移除自身监听。BFCache 恢复时重新建立监听。实际恢复受浏览器策略影响，不能假定页面关闭必达某个事件；详见 [生命周期](../lifecycle/README.md)。
+当前实验父页离开会移除 message / load / click 监听并清理 pending 超时；子页离开会移除自身监听。BFCache 恢复时重新建立监听。实际恢复受浏览器策略影响，不能假定页面关闭必达某个事件；详见 [生命周期](../lifecycle/page-lifecycle.md)。

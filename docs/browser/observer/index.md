@@ -5,6 +5,7 @@
 Node >= 22.18，在仓库根目录运行：
 
 ```bash
+pnpm install --frozen-lockfile
 pnpm --filter observer-next-lab dev
 ```
 
@@ -109,3 +110,12 @@ root 高 220px；目标前有 320px 空白，目标高 100px。两个观察器�
 - 未覆盖竖排文字、分栏碎片、SVG、隐藏目标与高 DPI 变化；本次 devicePixel 值来自普通 DPR=1 目标的 entry，未以 device-pixel-content-box 建立观察。
 - 只对 resize 页实测 BFCache 恢复；Mutation / Intersection 使用相同清理入口，但未分别验证恢复后的回调。可连接后离开再后退，比较身份与回调；强制关闭进程不能验证 pagehide 必达。
 - 不运行无限尺寸循环，也不以三次 next-frame 对照宣称真实业务永远不会出现 resize loop。生产代码需要另外证明写入幂等或尺寸收敛。
+
+## 构建后运行
+
+```bash
+pnpm --filter observer-next-lab build
+pnpm --filter observer-next-lab start
+```
+
+停止服务或重新构建不会清理浏览器数据。比较实验结果时保持相同的 host 与端口；修改端口会改变 origin。

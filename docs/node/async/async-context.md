@@ -1,7 +1,5 @@
 # 异步上下文：AsyncLocalStorage 与边界
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 AsyncLocalStorage沿异步资源关系传播store，用于requestId、trace等关联信息。run限定调用及其派生异步任务的上下文，不是把一个全局变量反复改成当前请求。并发请求使用不同store对象，避免对象引用被意外共享修改。
 
 getStore在作用域外可为undefined，下游必须能处理缺少关联信息。enterWith会影响当前同步执行后续路径，事件监听场景容易让上下文超出预期；请求入口通常run更清楚。disable使实例退出所有上下文，适合整个工具停用，而不是每个并发请求结束都调用。

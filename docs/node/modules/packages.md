@@ -1,7 +1,5 @@
 # 包解析、条件与封装
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 bare specifier通常沿importer位置向上解析node_modules；不是按终端cwd搜索所有依赖。包管理器链接布局、symlink选项和exports条件也影响身份。node:前缀明确内置模块。
 
 | 字段    | 职责                                       |

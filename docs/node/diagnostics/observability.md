@@ -1,7 +1,5 @@
 # 从信号到原因：日志、指标与 Trace
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 metrics看趋势/阈值，logs记录离散事件，traces描述请求的跨阶段因果链。结构化字段time/service/requestId/traceId应稳定，密钥、Cookie和个人数据在进入日志前脱敏。不要为调试直接输出整个process.env或report。
 
 event loop delay是采样回调被推迟的程度，ELU是事件循环活跃/空闲占比，不是系统CPU利用率。delay高可来自主线程阻塞、GC或调度；线程池饱和与网络等待可能表现不同。CPU profile找热点，heap profile找保留/分配，不能只靠单个指标判根因。

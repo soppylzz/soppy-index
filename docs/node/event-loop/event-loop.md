@@ -1,7 +1,5 @@
 # Node 事件循环与微任务上下文
 
-[本组导航](../runtime/README.md) · [实验走查](../runtime/index.md)
-
 libuv 可概括为 timers、pending callbacks、poll、check、close callbacks 等阶段；check 执行 setImmediate。Node20起随 libuv 调整 timer 运行时机，解释顺序时必须注明版本和注册位置。
 
 nextTick 队列不是 libuv 阶段。普通 native 回调返回到 Node 边界后，通常先处理 nextTick，再处理 V8 Promise/queueMicrotask；递归填队列会饿死I/O。但 ESM 顶层执行本身已处于模块异步求值/微任务上下文，不能套“所有场景 nextTick 总在 Promise 前”。

@@ -49,7 +49,7 @@ Cache-Control: private, max-age=60
 
 先判断响应能否存，再判断是否新鲜，过期后才考虑验证。`Cache-Control: max-age=60` 给出新鲜期；`no-cache` 允许存储但使用前要验证；`no-store` 要求不存储。`private` 限制共享缓存，不等于加密。`ETag` 配合 `If-None-Match`；`Last-Modified` 配合 `If-Modified-Since`。`Vary` 告诉缓存哪些请求字段影响表示；例如按 `Accept-Encoding` 变化。
 
-不要以为请求头写了 `Cache-Control: no-cache` 就能控制所有层的缓存行为；CDN、浏览器 HTTP 缓存、Service Worker Cache Storage 和应用内缓存各有规则。浏览器实测见 [缓存实验](../../browser/cache/README.md)。
+不要以为请求头写了 `Cache-Control: no-cache` 就能控制所有层的缓存行为；CDN、浏览器 HTTP 缓存、Service Worker Cache Storage 和应用内缓存各有规则。浏览器实测见 [缓存实验](../../browser/cache/experiment.md)。
 
 ## 字段沿着什么方向传递
 

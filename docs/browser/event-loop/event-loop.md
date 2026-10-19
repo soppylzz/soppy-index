@@ -263,3 +263,13 @@ void MessagePumpDefault::ScheduleWork() {
 可以把第 4 节的长循环拆成连续的 Promise 回调，再问：它是否给渲染让出了机会？microtask checkpoint 会继续处理新加入的回调，所以只把代码写成异步形式仍可能阻塞画面。真正的分片与让步见[调度笔记](./scheduling.md)。
 
 需要逐步观察队列变化时，可运行[配套模拟器](./supplement/simulator.md)。它使用虚拟时钟和人为设定的策略帮助走查，不能证明真实浏览器在竞争任务之间会作出相同选择。
+
+## 补充：模拟时间线
+
+[模拟器说明](./supplement/simulator.md)与[实现](./supplement/simulator.ts)用于演示简化模型，不作为真实浏览器调度的证据。需要 Node >= 22.18，在仓库根目录运行：
+
+```bash
+node docs/browser/event-loop/supplement/simulator.ts
+```
+
+真实页面的渲染流水线见[渲染模块](../rendering/rendering.md)。

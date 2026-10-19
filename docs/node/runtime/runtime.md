@@ -1,7 +1,5 @@
 # Node 运行时：V8、libuv 与系统
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 Node 把 V8 的 JavaScript 执行、libuv 的事件循环与系统 I/O、原生绑定和核心库组合起来。一个 isolate 的 JS 通常串行执行，但进程还有 V8 辅助线程、libuv worker pool 和应用创建的 Worker，因此“Node进程只有一条线程”不成立。
 
 网络连接通常使用操作系统非阻塞通知，不是每个连接分配一个线程池线程。文件系统、dns.lookup、部分crypto/zlib可使用共享池；改变 UV_THREADPOOL_SIZE 不会让主线程 CPU 计算或所有 socket 自动并行，池竞争和机器核数也会限制收益。

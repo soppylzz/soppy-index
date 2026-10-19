@@ -111,7 +111,7 @@ document.addEventListener("visibilitychange", () => {
 
 不是每次隐藏都会冻结，也不是每次冻结都会丢弃。BFCache 与冻结有关，但收到 freeze 不等于命中 BFCache；恢复身份仍看 pageshow.persisted。应检测扩展属性，缺失时提供常规恢复路径。Chromium 的实现说明及调试方法见 [Page Lifecycle API](https://developer.chrome.com/docs/web-platform/page-lifecycle-api)。
 
-丢弃后的恢复需要依靠已保存的状态。实验把草稿备份进本标签 sessionStorage，重建后可读回，但该存储可能被限制，标签关闭等也不属于持久业务保证。重要草稿可结合 [IndexedDB](../storage/indexedDB/README.md) 与服务端同步，明确“已备份”“待同步”“已确认”的边界。
+丢弃后的恢复需要依靠已保存的状态。实验把草稿备份进本标签 sessionStorage，重建后可读回，但该存储可能被限制，标签关闭等也不属于持久业务保证。重要草稿可结合 [IndexedDB](../storage/indexedDB/indexedDB.md) 与服务端同步，明确“已备份”“待同步”“已确认”的边界。
 
 对应 demo 的 Chromium 扩展事件监听：
 

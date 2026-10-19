@@ -1,7 +1,5 @@
 # Stream：背压、结束与失败传播
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 Readable提供数据，Writable消费，Duplex两侧独立，Transform连接输入与变换输出。字节模式水位按字节计，objectMode按对象数计；对象本身可很大，所以水位不是内存硬上限。
 
 write返回false表示本次chunk已被接受进入缓冲，但达到背压阈值，应等drain再继续；不是“写入失败，重试同一块”。如果end之后不会再写，就不应盲等drain。真实生产者还需处理error/close，不能只等永不发生的drain。

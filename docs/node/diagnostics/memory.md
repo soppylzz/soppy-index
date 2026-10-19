@@ -1,7 +1,5 @@
 # V8、Buffer 与进程内存
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 heapUsed是当前JS堆使用，heapTotal是V8申请的堆范围；external包含与JS对象关联的外部内存，arrayBuffers通常计入external；rss包含驻留代码、堆、栈、映射等，不能把几项简单相加或直接当JS泄漏量。
 
 Buffer主要字节常在堆外，但JS对象引用仍受GC管理。视图保留底层大缓冲、无界Map、未解除listener/timer、闭包和native资源都可长期持有内存。释放引用只是让对象有机会被回收，GC时机、allocator碎片与OS归还策略会影响RSS。

@@ -1,7 +1,9 @@
 # @soppy-index/test
 
-Shared test discovery and fixture helpers for the learning workspaces.
+Shared fixture helpers for Vitest tests in the learning workspaces. Tests stay in each workspace's `__test__/` directory. Helpers create temporary files, register cleanup with `onTestFinished`, and bound subprocess execution. This workspace does not depend on the packages under test.
 
-Tests live in each workspace's `__test__/` directory. Uses tinyglobby to discover `packages/*/__test__/**/*.test.ts` and `internals/*/__test__/**/*.test.ts`, then execa to run Node's native test runner with the `development` condition. Helpers bound subprocess execution, write fixtures, and clean up resources. This workspace has no dependency on the packages under test.
+Run `pnpm test` for the compiler, playground, and demo unit tests. Use `pnpm test:compiler`, `pnpm test:maps`, or `pnpm test:next-labs` to narrow the run. The root config discovers demo projects with `docs/**/demo/vitest.config.ts`. `pnpm test:watch` watches all configured projects. Production HTML and HTTP suites use each demo's `test:ui` and `test:http` scripts and require the setup described by that demo. The Node native-testing lesson runs independently with `node docs/node/testing/index.ts` and intentionally uses `node:test`.
 
-From the repository root, run `pnpm test`, `pnpm test:compiler`, or `pnpm --filter @soppy-index/compiler test maps` for a focused suite. The runner accepts a workspace directory name and optional suite prefix. No match fails explicitly. `pnpm test:built` builds the compiler and runs its own `__test__/built.ts` without the development condition. Watch and coverage modes are not implemented. See the [validation notes](../../packages/compiler/docs/validation.md).
+`pnpm test:built` builds the compiler with Vite and runs `__test__/built.test.ts`; a fresh Node subprocess verifies the default package and subpath exports without the development condition.
+
+学习工作区共用 Vitest fixture helpers，测试保留在各自的 `__test__/`。临时目录通过 `onTestFinished` 清理，子进程设有超时；根命令与独立集成测试的范围见上文。验证记录见[编译器说明](../../packages/compiler/docs/validation.md)。

@@ -1,7 +1,5 @@
 # Node 原生 TypeScript：执行与类型检查分离
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 Node22.18默认支持可擦除TS类型语法：类型标注、interface、type与type-only import被去掉，保留JavaScript执行语义。它不调用TypeScript compiler、不做类型检查，也不按tsconfig paths解析或按target降级。
 
 enum、参数属性、需要运行时生成的namespace等不属于单纯擦除。部分版本/选项提供实验性transform，不能拿该能力当本仓库默认运行前提。JSX、装饰器转换和bundle仍需相应工具链。

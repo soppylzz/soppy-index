@@ -1,6 +1,24 @@
-# 模块、包边界与原生 TypeScript：实验走查
+# 模块与包边界：实验走查
 
-[知识导航与运行命令](./README.md) · [完整实现](./index.ts)
+一个文件为什么执行一次，导入的值又为什么会变化？
+
+先读 CJS 与 ESM 的模块身份和求值，再读包公开入口，最后看 TypeScript 类型擦除。模块格式、包解析与类型检查是三个不同问题。
+
+- [CJS 与 ESM](./modules.md)：缓存、求值与 live binding。
+- [包解析](./packages.md)：exports、条件入口与内部映射。
+- [原生 TypeScript](./typescript.md)：执行与类型检查分离。
+
+## 运行
+
+在仓库根目录使用 Node >= 22.18：
+
+```bash
+node docs/node/modules/index.ts
+```
+
+成功以 `lab-complete` 和退出码 0 结束；完整实现见 [index.ts](./index.ts)。
+
+## 观察重点
 
 先读相应笔记并预测，再运行完整入口。下表的“应看到”是这个实验控制条件下的检查点，具体结果以当前运行输出为准。
 

@@ -1,7 +1,5 @@
 # HTTP：请求流、确认与取消
 
-[本组导航](./README.md) · [实验走查](./index.md)
-
 HTTP 传递字节和状态，业务是否接受需要应用协议，不能只靠“服务端打印了请求”推断。当前实验使用 Next.js Route Handler，运行在 Node runtime，但应用入口采用 Web Request/Response。
 
 ## 从请求字节到业务确认
@@ -20,7 +18,7 @@ POST /echo 先检查 Content-Type，再累计字节并限制为 512 bytes，解�
 
 客户端 AbortSignal 取消等待后，Route Handler 通过 request.signal 终止尚未完成的延迟工作，响应流也清理取消状态。已经提交的业务不会因断线回滚，写操作仍需幂等键与结果查询。服务端创建 Response 或打印业务日志，都不证明客户端已经读完。
 
-Next CLI 管理服务生命周期；数据库、队列与其他业务资源仍需按部署方式设计退出协议。本地实验不作为生产服务模板。HTTP 缓存与 Cookie 见[缓存](../../browser/cache/README.md)和 [Cookie](../../browser/storage/cookie/README.md)。
+Next CLI 管理服务生命周期；数据库、队列与其他业务资源仍需按部署方式设计退出协议。本地实验不作为生产服务模板。HTTP 缓存与 Cookie 见[缓存](../../browser/cache/experiment.md)和 [Cookie](../../browser/storage/cookie/index.md)。
 
 ## 依据与边界
 
