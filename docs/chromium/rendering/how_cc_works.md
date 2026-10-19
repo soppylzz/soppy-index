@@ -292,7 +292,7 @@ Pass 列表是依赖树的扁平表示。如果 pass 1 的 RenderPassDrawQuad �
 
 ## 术语表
 
-见 [cc/README.md](cc_readme.md#glossaries)。
+见 [上游 cc 术语表](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/cc/README.md#glossaries)（译注：保留固定版本原文入口，避免与本地概览相互引用）。
 
 <a id="other-resources"></a>
 

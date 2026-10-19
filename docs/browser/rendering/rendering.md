@@ -44,24 +44,13 @@ parser-inserted、没有 `async` 或 `defer` 的经典外部脚本通常会暂�
 
 > 图中的资源加载泳道只表示获取工作可与主解析解耦；脚本的实际获取、编译与执行还涉及更多组件。
 
-`async`、`defer` 与 module script 的差异详见 [Script Loading](../loading/script-loading.md)。
+`async`、`defer` 与 module script 的差异详见 Script Loading。
 
 ## 2. Style
 
 浏览器根据 UA 样式、用户样式、作者样式、层叠、继承和选择器匹配，为需要渲染的节点计算 computed style。层叠规则由 [CSS Cascading and Inheritance](https://drafts.csswg.org/css-cascade/) 定义。
 
-一个 CSS 属性从样式声明到实际显示，大致会经过以下值阶段：
-
-| 阶段            | 含义                                               |
-| --------------- | -------------------------------------------------- |
-| declared values | 元素上所有可能参与层叠的声明值                     |
-| cascaded value  | 根据来源、重要性、层、specificity 和顺序选出的结果 |
-| specified value | 补上继承值或初始值后，属性确定的指定值             |
-| computed value  | 解析继承和部分相对值后得到的结果，可供后代继承     |
-| used value      | 结合包含块、字体度量和布局约束后实际用于布局的值   |
-| actual value    | 考虑像素取整、设备和实现限制后最终使用的值         |
-
-这些阶段是 CSS 规范的值处理模型，不等于 Blink 必须依次创建六份对象。computed value 也不一定是最终用于布局的数值：部分百分比尺寸需要在 Layout 阶段知道可用空间后才能确定 used value。因此，不应把 Style 理解成“所有 CSS 属性都已经转换成最终像素值”。
+这里的关键边界是：Style 选择声明并求出计算值，Layout 再结合包含块和内容求尺寸。部分百分比在样式阶段仍需要保留，不能把 Style 理解成“所有属性都已变为最终像素”。完整的六阶段模型、计算时失效和继承规则集中在 [CSS 值处理专题](../../css/properties/processing.md)，不在渲染流程中重复维护。
 
 Style 的输出仍要交给 Layout 确定几何结果。`getComputedStyle()` 如何暴露这些值，以及读取是否会提前触发计算，放在[完整流程之后](#7-javascript-读取如何影响更新时机)讨论。
 
@@ -228,7 +217,7 @@ const width = box.offsetWidth // May force a synchronous style/layout update.
 
 渲染不是每轮 Event Loop 都必然发生，后台页面、没有视觉变化或主线程繁忙时都可能跳过或推迟。反过来，在 JavaScript 中读取必须反映最新几何状态的 API，又可能要求浏览器在当前 task 内同步更新样式或布局。
 
-任务、微任务、`requestAnimationFrame` 与渲染机会的具体关系见 [Browser Event Loop](../event-loop/event-loop.md)。
+任务、微任务、`requestAnimationFrame` 与渲染机会的具体关系见 Browser Event Loop。
 
 ## 用一次修改串起整个过程
 

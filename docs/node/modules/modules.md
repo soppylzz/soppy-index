@@ -8,12 +8,6 @@ ESM有静态依赖结构与live binding，加载/链接/求值分阶段。模块
 
 在本项目最低Node22.18，require(ESM)可载入满足约束的同步图，不是“CJS永远不能加载ESM”；含TLA的图必须异步import。CJS的named export互操作常依赖静态分析，动态改module.exports不保证映射为可靠ESM named binding；库要分别验证消费方式。
 
-## 用两次导入看“身份”
-
-第一次加载时，Node 先解析到具体模块，再求值并保存该身份对应的结果。再次用同一身份加载，通常复用它：CJS 观察到同一导出对象；ESM 观察到同一模块实例，导出函数修改的 `count` 可通过 live binding 读到。两种格式都能复用，但导出机制不同。
-
-接着看能否同步完成求值。CJS 的 `require()` 需要同步拿到结果；若整个 ESM 依赖图含顶层 `await`，它不能在这条同步路径中完成。此时改用异步 `import()`，而不是把“CJS 与 ESM 完全不能互通”当成规则。
-
 ## 对应源码与实验
 
 以下片段来自 [index.ts](./index.ts) 或同目录辅助文件；完整断言和清理路径见源码。

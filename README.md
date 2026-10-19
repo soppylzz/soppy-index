@@ -11,36 +11,57 @@
 
 </div>
 
-Frontend learning notes, runnable experiments, and coding exercises. This project is under active development.
+Frontend learning notes, runnable browser and Node.js labs, and coding exercises for understanding mechanisms and preparing for interviews. The teaching notes are in Simplified Chinese; demo interfaces, source comments, and console output use English.
 
 ## Features
 
-- **Study notes** — Chinese explanations of frontend concepts and their underlying mechanisms.
-- **Observable experiments** — browser and Node.js labs connecting theory to actual behavior.
-- **Coding practice** — data structures, algorithms, and TypeScript type exercises.
+- Learn how CSS layout, browser scheduling, networking, security, and delivery work through focused explanations.
+- Compare predictions with observable browser behavior and bounded Node.js experiments.
+- Practice algorithms, TypeScript types, JavaScript utilities, React, and Vue alongside local demos and tests.
 
-## Learning material
+## Installation
+
+Use Node.js **>= 22.18** and the pnpm version declared in the root [package manifest](package.json) (`^11.18.0`). Install dependencies once at the repository root:
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+## Start learning
+
+Start with the [tutorial directory](docs/README.md) for prerequisites and topic order, or the [coding practice directory](coding/README.md) for exercise entry points.
+
+Choose a question, read the mechanism, predict an example, then run the matching experiment or test. Topic notes explain the concepts; experiment guides provide setup and observations. Chromium readings describe fixed implementation snapshots, while Web-platform notes distinguish specification guarantees from browser behavior.
+
+Run a short Node.js experiment from the repository root:
+
+```bash
+node docs/node/run.ts runtime
+```
+
+The runner checks its assertions and prints `lab-complete` on success. Use `node docs/node/run.ts --list` to list the CLI lessons. Browser labs have separate startup commands, URLs, and shutdown instructions in their experiment guides; they are not part of this runner.
 
 | Area | Entry |
 | --- | --- |
-| Browser | [Rendering](docs/browser/rendering/rendering.md) · [Event Loop](docs/browser/event-loop/event-loop.md) · [Loading](docs/browser/loading/experiment.md) · [Lifecycle](docs/browser/lifecycle/experiment.md) · [Navigation](docs/browser/navigation/experiment.md) · [Storage](docs/browser/storage/webStorage/index.md) · [Cache](docs/browser/cache/experiment.md) · [Communication](docs/browser/communication/cross-context-communication.md) · [Observers](docs/browser/observer/index.md) |
-| Browser APIs | [Network](docs/browser/network/fetch.md) · [Files](docs/browser/files/files.md) · [Environment](docs/browser/environment/environment.md) · [Web Components](docs/browser/web-components/web-components.md) · [iframe](docs/browser/iframe/iframe.md) · [DOM](docs/browser/dom/dom.md) · [PWA](docs/browser/pwa/serviceWorker.md) · [Chromium](docs/chromium/README.md) |
-| Languages and runtime | [Node.js labs](docs/node/run.ts) |
-| Web foundations | [CSS](docs/css/box/box-model.md) · [Network](docs/network/README.md) · [Security](docs/security/foundations/trust-boundaries.md) |
-| Engineering | [Build, architecture, performance, and monitoring](docs/engineering/README.md) |
-| Coding practice | [Structures](coding/structure/) · [Algorithms](coding/algorithm/) · [Hot 100](coding/hot100/) · [Type challenges](coding/type-challenges/README.md) |
-| Handwritten JavaScript | [Functions](coding/function/) · [Objects](coding/object/README.md) · [Arrays](coding/array/README.md) · [Utilities](coding/utils/README.md) |
-| Async and events | [Promise](coding/promise/README.md) · [Scheduling](coding/schedule/README.md) · [Frontend design patterns](coding/design-pattern/README.md) |
-| CSS practice | [Layouts, text, shapes and interactions](coding/css/README.md) |
-
-Lab READMEs provide prerequisites, run commands, observations, and shutdown instructions. Each demo keeps its UI assets, route handlers, and tests locally.
+| CSS and browser fundamentals | [CSS](docs/README.md#css) · [Browser](docs/README.md#browser) |
+| Runtime and protocols | [Node.js](docs/README.md#node) · [Networking](docs/network/README.md) |
+| Application boundaries | [Security](docs/README.md#security) · [Engineering](docs/engineering/README.md) |
+| Browser implementation | [Chromium reading guide](docs/chromium/README.md) |
+| Coding and local demos | [Practice directory](coding/README.md) |
+| Compiler stages | [Compiler walkthrough](packages/compiler/index.md) |
 
 ## Workspace commands
 
-Install dependencies at the repository root with `pnpm install --frozen-lockfile`. Run project-specific tasks inside their workspace, such as `pnpm test` in `coding/utils/` or `pnpm build` in `packages/compiler/`. The root keeps repository-wide checks and version-management scripts.
+Run project tasks inside their workspace, for example `pnpm test` in `coding/utils/` or `pnpm build` in `packages/compiler/`. Run these repository-wide checks from the root:
 
-All top-level `coding/` directories are workspace packages and reuse the root `tsconfig.json`. Run `pnpm typecheck` at the repository root; coding packages do not duplicate that script. Workspaces with separate TypeScript configurations keep their own type checks, which the root command also runs.
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+```
+
+The root type check covers source using the shared TypeScript configuration, then invokes workspaces with their own `typecheck` script, including React, Vue, and streaming demos. Vitest runs the configured unit-test projects; HTTP integration tests and built-entry checks use the commands in their respective guides. Passing unit tests does not establish browser layout, focus, or production behavior.
 
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE). Referenced upstream material retains its own notices; Chromium translations document their sources and versions separately.

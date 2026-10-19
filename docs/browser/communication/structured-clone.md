@@ -37,9 +37,9 @@ console.log(new Uint8Array(result.buffer)[0])
 
 ## 克隆成功与消息送达是两件事
 
-`structuredClone()` 的本地调用成功，只说明这次复制或转移完成。通过 postMessage 交付数据，还要满足消息接口的参数、目标上下文和接收条件；需要业务确认时仍要设计 ack。相关边界见[跨上下文通信](./cross-context-communication.md#数据如何过去克隆编码与转移)。
+`structuredClone()` 的本地调用成功，只说明这次复制或转移完成。通过 postMessage 交付数据，还要满足消息接口的参数、目标上下文和接收条件；发送方若需要确认业务完成，必须等待接收方处理后返回的 ack，而非只看 postMessage 是否抛错。
 
-保存到数据库还涉及存储序列化及事务结果，见 [IndexedDB](../storage/indexedDB/indexedDB.md#5-structured-clone-不等于任意值)。不要用一次本地克隆成功证明消息已经处理或数据已经提交。
+IndexedDB 还要等待写入事务完成：request 成功不等于事务已提交。本地克隆、消息处理和数据提交分别有自己的完成条件。
 
 ## 无法克隆时会怎样
 

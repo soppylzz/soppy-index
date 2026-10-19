@@ -103,4 +103,4 @@ DevTools 中的 memory cache / disk cache 描述实现上的存储来源，不�
 
 面试中若被问“服务器更新后为什么还是旧资源”，先说明当前请求能否直接复用，再讨论验证器和 URL 版本。若追问“304 是否更快”，应区分节省正文与节省网络往返，而不是将所有命中都当成零网络成本。
 
-最后还要分清缓存对象：HTTP 缓存按协议复用响应；[Cache Storage](../pwa/cacheStorage.md)由脚本管理 Request / Response；[BFCache](../lifecycle/bfcache.md)恢复页面运行状态。它们不会因为都叫缓存，就具有相同的失效与恢复行为。
+最后还要分清缓存对象：HTTP 缓存按协议复用响应；Cache Storage 由脚本管理 Request / Response；[BFCache](../lifecycle/bfcache.md)恢复页面运行状态。它们不会因为都叫缓存，就具有相同的失效与恢复行为。

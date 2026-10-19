@@ -8,10 +8,6 @@ enum、参数属性、需要运行时生成的namespace等不属于单纯擦除�
 
 发布给老Node或需.js/.d.ts产物时应选择编译/打包流程。Node不会因为TS写了number就自动验证外部JSON，运行时仍需结构校验，见 [HTTP](../http/server.md)。
 
-## 两道互不替代的检查
-
-`node file.ts` 在这个版本能去掉可擦除类型并执行剩下的 JavaScript；`tsc --noEmit` 则检查类型但不运行程序。把 `value` 写成 `number` 不会在收到 JSON 时自动验证它；输入边界仍需运行时检查。遇到 `enum` 或 JSX 这类需要转换的语法时，也不能期待单纯擦除产生可执行代码。
-
 ## 对应源码与实验
 
 以下片段来自 [index.ts](./index.ts) 或同目录辅助文件；完整断言和清理路径见源码。

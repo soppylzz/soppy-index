@@ -63,7 +63,7 @@ customElements.define("lab-counter", Counter)
 
 template.content 是 DocumentFragment，初始不直接渲染，克隆后再插入。slot 在组合后的呈现中接纳 light DOM 节点，节点的 parentNode 仍是宿主，组件可通过 assignedElements 读取分发结果。slotchange 反映分配变化，不能当作对所有内部文本变化的通用监听。
 
-实验替换宿主的外部 span，记录实际 slotchange，同时验证 child.parentNode === host。DOM 移动与 fragment 插入细节见 [DOM 笔记](../dom/dom.md)。
+实验替换宿主的外部 span，记录实际 slotchange，同时验证 child.parentNode === host。slot 分配改变的是组合后的显示位置，不会把外部节点的 parentNode 改成内部 ShadowRoot。
 
 ## 5. 事件边界与组件契约
 

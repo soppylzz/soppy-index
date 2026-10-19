@@ -1,33 +1,39 @@
-# EventEmitter：同步分发与错误通道
+# EventEmitter：同步通知与异步错误分开处理
 
-EventEmitter是进程内事件机制，不是DOM冒泡模型或跨线程通信。emit按注册顺序同步调用监听器，返回是否存在相应监听器；它不等待async listener返回的Promise，也不以监听器返回值表达业务成功。
+`emit()` 调用了一个 async 监听器，是否意味着它会等待任务完成？不会。EventEmitter 是进程内的同步通知机制，监听器返回 Promise 并不会把 emit 变成异步确认协议。
 
-on持续订阅，once一次后移除，off需要同一个函数引用。所有权明确的局部emitter可集中dispose；对共享emitter不要随意removeAllListeners删除别人的订阅。默认监听数警告是泄漏线索，不是硬容量上限，也可能是合法扇出，先查生命周期再调阈值。
+## 从一次分发追踪两个错误通道
 
-error事件无监听通常会抛出。captureRejections可把async listener拒绝导向错误处理，但不是自动吞错；error监听器本身不应再返回未处理拒绝。events.once的Promise应在可能同步emit之前建立，否则事件可能已错过。
+下面的独立示例保留了 [index.ts](index.ts) 的关键顺序：先建立监听和错误等待，再发出事件。
 
-源码 [v22.18 lib/events.js](https://github.com/nodejs/node/blob/v22.18.0/lib/events.js) 中emit同步调用handler，并在启用捕获时处理返回的thenable；不要用“基于事件驱动”推断emit自动异步。Promise适合一次结果，Stream适合有背压的数据序列。
+```js
+import { EventEmitter, once } from "node:events"
 
-## 把 `emit` 看成一次同步调用
-
-执行 `emit("task")` 时，监听器按注册顺序在当前调用栈运行；若监听器是 `async` 函数，它很快返回一个 Promise，`emit` 不会等待这个 Promise 完成。该 Promise 后续拒绝时，需要独立错误路径。本例启用 `captureRejections` 并先订阅 `error`，因此拒绝能被明确接住。
-
-## 对应源码与实验
-
-以下片段来自 [index.ts](../async/index.ts) 或同目录辅助文件；完整断言和清理路径见源码。
-
-```ts
 const emitter = new EventEmitter({ captureRejections: true })
 const failure = once(emitter, "error")
-emitter.on("task", async () => {
+const onTask = async () => {
+  console.log("listener")
   throw new Error("Expected task rejection")
-})
+}
+
+emitter.on("task", onTask)
+console.log("before-emit")
 emitter.emit("task")
+console.log("after-emit")
+
 const [error] = await failure
+console.log(error.message)
+emitter.off("task", onTask)
 ```
 
-先注册error等待再emit，实际观察拒绝而不制造全局未处理异常。前一个message实验用数组精确检查同步分发，不用定时器伪造事件。
+`listener` 出现在 before/after 之间，因为 emit 在当前调用栈内按注册顺序调用监听器。async 函数随后产生的拒绝则进入另一个时间点：这里启用 `captureRejections`，并通过 error 监听接住。emit 的 boolean 返回值只表示是否有对应监听器，监听器返回值不代表业务成功。
 
-## 依据与版本
+没有 error 监听器时发出 error 通常会抛错。`captureRejections` 负责转送拒绝，不负责吞错；error 监听器自身也不应再产生无人处理的拒绝。`events.once()` 应在可能同步 emit 之前建立，否则会错过事件。
 
-以 [Node 22.18 官方 events 文档](https://nodejs.org/download/release/v22.18.0/docs/api/events.html) 核对 API 合约；实际输出与运行环境需在执行时核对。
+## 订阅必须有明确所有者
+
+`on` 持续订阅，`once` 在一次调用后移除，`off` 需要原函数引用。示例的 emitter 只归本实验所有，源码可以在结束时 `removeAllListeners()`；共享 emitter 应只解除自己建立的订阅。
+
+监听数警告提示可能泄漏，不是硬容量上限。先检查重复订阅与生命周期，再考虑合法扇出是否需要调整阈值。它没有 DOM 冒泡或跨线程消息语义；一次结果可用 Promise，有背压的数据序列应使用 Stream。
+
+依据：[Node 22.18 events](https://nodejs.org/download/release/v22.18.0/docs/api/events.html)。

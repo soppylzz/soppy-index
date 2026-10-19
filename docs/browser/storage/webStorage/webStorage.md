@@ -107,9 +107,9 @@ Web Storage 的基础 API 已广泛支持，但第三方上下文、用户禁用
 
 同源标签页 A 写入 localStorage，B 可以读取相同存储区域，并可能收到 storage 事件；写入方 A 不会因此收到自己的 storage 事件。如果页面界面也需要立即更新，应由写入逻辑更新本页状态，不能等待这条跨文档通知。
 
-再把容器换成 sessionStorage：普通独立标签页不再共享同一个页面会话下的存储区域。因此“换一种存储 API”同时改变了共享范围，而不只是改变关闭后是否保留。按[双标签实验](./index.md)观察；保留 opener 的新页还需考虑初始复制语义。
+再把容器换成 sessionStorage：普通独立标签页不再共享同一个页面会话下的存储区域。因此“换一种存储 API”同时改变了共享范围，而不只是改变关闭后是否保留。按双标签实验观察；保留 opener 的新页还需考虑初始复制语义。
 
 ## 9. 参考资料
 
-- [HTML Standard：Web storage](https://html.spec.whatwg.org/multipage/webstorage.html)
-- [MDN：Storage event](https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event)
+- [HTML 标准：Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html)
+- [MDN：storage 事件](https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event)

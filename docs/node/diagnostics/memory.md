@@ -10,10 +10,6 @@ V8分代回收基于许多对象短命的假设，算法有增量/并行/并发�
 
 本例缓存容量2，逐出最老引用，但Buffer释放不自动清零以前暴露出去的视图，也不强制GC。
 
-## 先判断哪个数字在涨
-
-`heapUsed` 上涨先查 JS 对象的保留链；`external` 或 `arrayBuffers` 上涨要考虑 Buffer 与原生内存；`rss` 是整个进程驻留量，不能直接指向某个 JS 对象。即使 `cache.clear()` 已断开引用，GC 何时运行、分配器何时归还内存都不固定。因此看持续趋势和快照路径，不能用一次清理前后的 RSS 差值判泄漏。
-
 ## 对应源码与实验
 
 以下片段来自 [index.ts](./index.ts) 或同目录辅助文件；完整断言和清理路径见源码。
@@ -25,8 +21,8 @@ const after = process.memoryUsage()
 cache.clear()
 ```
 
-保留容量可确定为4MiB，进程memoryUsage变化不固定。本次清引用后external/RSS未立即下降是实际观测，不能反向声称clear无效或已证明泄漏。
+保留容量可确定为4MiB，进程memoryUsage变化不固定。清引用后 external/RSS 可能不会立即下降；应查看本轮输出，不能据此声称 clear 无效或已证明泄漏。
 
 ## 依据与版本
 
-以 [Node 22.18 官方 process 文档](https://nodejs.org/download/release/v22.18.0/docs/api/process.html) 核对 API 合约；实际输出与运行环境需在执行时核对。
+各指标的包含关系见 [Node 22.18 memoryUsage](https://nodejs.org/download/release/v22.18.0/docs/api/process.html#processmemoryusage)。采样值需要保留版本、负载与采样时点，不把单次波动写成固定结果。

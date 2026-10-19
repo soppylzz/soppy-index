@@ -1,38 +1,52 @@
-# Stream：背压、结束与失败传播
+# Stream：消费者来不及处理时，生产者怎样停
 
-Readable提供数据，Writable消费，Duplex两侧独立，Transform连接输入与变换输出。字节模式水位按字节计，objectMode按对象数计；对象本身可很大，所以水位不是内存硬上限。
+把文件分块读取，只解决了“不一次读进全部内容”。若生产者不断写、消费者处理很慢，内存仍会增长。背压让消费者通过接口反馈容量，生产者必须配合暂停。
 
-write返回false表示本次chunk已被接受进入缓冲，但达到背压阈值，应等drain再继续；不是“写入失败，重试同一块”。如果end之后不会再写，就不应盲等drain。真实生产者还需处理error/close，不能只等永不发生的drain。
+## 先分清两侧和水位
 
-Readable可通过data flowing、readable/read或async iterator消费；不要混用多套读取方式竞争数据。pipeline连接多段、传播错误并销毁，Promise完成表示该流水线的完成合约，不证明远端业务处理或磁盘断电持久性。
+Readable 提供数据，Writable 消费数据，Duplex 有独立的读写两侧，Transform 将输入变成输出。字节模式的 `highWaterMark` 按字节计，objectMode 按对象数计；一个对象可以很大，水位也不是内存硬上限。
 
-| 事件/动作              | 意义                               |
-| ---------------------- | ---------------------------------- |
-| end（Readable事件）    | 可读数据已消费完                   |
-| finish（Writable事件） | end后所有写已由Writable处理        |
-| close                  | 底层资源已关闭，可能正常也可能异常 |
-| destroy(error)         | 终止并走错误/清理路径              |
+`write(chunk)` 返回 false 时，这个 chunk 已被接受，只是缓冲达到暂停阈值。重试同一块会重复写入；继续无限写则失去背压作用。Readable 可用 data、readable/read 或异步迭代消费，不要让多种方式竞争同一份数据。
 
-Node/Web Stream桥接要检查对象模式、取消与编码，而不是只转换类型。源码 [v22.18 writable.js](https://github.com/nodejs/node/blob/v22.18.0/lib/internal/streams/writable.js) 中水位/needDrain与写回调推进状态，说明false和真正错误是两条路径。
+## 用三块数据走通写入过程
 
-## 按三块数据推导背压
+下面是 [index.ts](index.ts) 中慢消费者实验的独立版本。每次写 4 字节，异步消费者的水位也是 4 字节：
 
-设 Writable 水位为 4 字节，每块也为 4 字节。第一次 `write()` 返回 `false`，意思是这一块已进入处理路径，但缓冲已达到需要暂停的条件；若把它重试，会重复写入。生产者应等 `drain` 后再送下一块。最后一块后调用 `end()`，等待 `finish` 确认 Writable 处理完输入；如果中途报错，改走 `pipeline` 的拒绝与销毁路径。
+```js
+import assert from "node:assert/strict"
+import { once } from "node:events"
+import { Writable } from "node:stream"
 
-## 对应源码与实验
-
-以下片段来自 [index.ts](./index.ts) 或同目录辅助文件；完整断言和清理路径见源码。
-
-```ts
-const accepted = sink.write(Buffer.alloc(4, index))
-if (!accepted) await once(sink, "drain")
+let consumed = 0
+const sink = new Writable({
+  highWaterMark: 4,
+  write(chunk, _encoding, callback) {
+    setTimeout(() => {
+      consumed += chunk.length
+      callback()
+    }, 2)
+  },
+})
+const completed = once(sink, "finish")
+for (let index = 0; index < 3; index++) {
+  if (!sink.write(Buffer.alloc(4, index))) await once(sink, "drain")
+}
 sink.end()
 await completed
-await assert.rejects(pipeline(source, broken, destination), /Expected transform failure/)
+assert.equal(consumed, 12)
 ```
 
-本例固定3块且消费端不会意外报错，简化drain等待是受控实验条件；真实通用循环还要把结束/错误/取消纳入等待。pipeline另设失败与取消对照，日志来自实际destroyed状态。
+这里的消费者受控且不会报错。通用生产代码还要处理 error、提前 close 与取消，不能只等一个可能永不到来的 drain；end 后也不应继续盲等 drain 再写数据。连接多段流优先使用 `node:stream/promises` 的 `pipeline`，由它协调背压与失败传播，避免逐段手工监听漏掉错误。
 
-## 依据与版本
+## 完成信号各自说明什么
 
-以 [Node 22.18 官方 stream 文档](https://nodejs.org/download/release/v22.18.0/docs/api/stream.html) 核对 API 合约；实际输出与运行环境需在执行时核对。
+| 信号               | 含义                                  |
+| ------------------ | ------------------------------------- |
+| Readable 的 end    | 可读数据已消费完                      |
+| Writable 的 finish | 调用 end 后，写入已由 Writable 处理完 |
+| close              | 底层资源已关闭，可能正常也可能异常    |
+| destroy(error)     | 主动终止并进入错误、清理路径          |
+
+finish 或 pipeline 的 Promise 完成，不证明磁盘断电持久性或远端业务已提交。Node/Web Stream 桥接还需检查对象模式、编码和取消规则；只转换类型不足以建立同一合约。
+
+完整实验另设失败 Transform 与 AbortController 取消，检查 pipeline 拒绝及各段 destroyed 状态，没有测生产吞吐。依据：[Node 22.18 stream](https://nodejs.org/download/release/v22.18.0/docs/api/stream.html)。

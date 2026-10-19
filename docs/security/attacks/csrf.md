@@ -6,7 +6,7 @@
 
 ## Cookie 属性分别限制读取、发送与作用范围
 
-`Secure` 限制在安全连接上传输；`HttpOnly` 阻止页面脚本直接读取；`SameSite` 控制部分跨站请求附带 Cookie 的情形；`Path`/`Domain` 决定发送范围，不能当作可靠的访问隔离。`__Host-` 前缀要求 Secure、Path=/、无 Domain，可缩小子域覆盖风险。host-only Cookie 不设置 Domain，仅发往设置它的主机；设置 Domain 会扩大子域发送范围。Path 只筛选请求路径，不是同源脚本间的安全隔离。
+防 CSRF 时重点看“请求会不会自动附带凭据”：SameSite 约束部分跨站发送条件，HttpOnly 只限制脚本读取，不能阻止浏览器带上 Cookie。Domain、Path、Secure 与名称前缀的完整规则集中在[Cookie 专题](../../browser/storage/cookie/cookie.md)，这里不再维护第二套属性说明。
 
 Cookie 只是凭据载体。即使换成 `Authorization: Bearer`，令牌泄漏、XSS、存储、刷新与撤销仍要处理；无论凭据放哪里，服务端都要逐请求检查授权。
 

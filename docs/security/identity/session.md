@@ -14,7 +14,7 @@ POST /logout -> revoke session -> expire Cookie
 
 服务端验证密码后生成不可预测的不透明随机值，将其关联到用户、过期时间等状态。浏览器保存 Cookie；后续符合发送条件的请求自动携带它。服务端看到的是会话凭据，不会每次重新验证密码。若把用户 ID 直接当 session ID，攻击者猜出别人的 ID 就可能冒充对方。
 
-会话 ID 通常是 bearer 凭据：持有有效值的一方就可能使用它。`HttpOnly` 降低脚本直接读取的风险，无法让被复制的值失效；Cookie 属性的具体边界见 [Cookie 与 CSRF](../attacks/csrf.md)。
+会话 ID 通常是 bearer 凭据：持有有效值的一方就可能使用它。`HttpOnly` 降低脚本直接读取的风险，无法让被复制的值失效；Cookie 的读取、发送与作用范围见[浏览器 Cookie 专题](../../browser/storage/cookie/cookie.md)。
 
 ## 会话何时失效，由服务端决定
 

@@ -1,7 +1,5 @@
 # 固定 Vite 7.3.1 的真实集成
 
-[返回 README](../README.md) · [插件源码](../../../internals/play-compiler/src/vite-plugin.ts)
-
 ## 原始输入确实经过手写链路
 
 插件 `enforce: "pre"`，仅处理 `vite/` 下且不在 `node_modules` 的 `.mini.ts`；query 不影响后缀识别。配置额外将 `.mini.ts` 从内置 esbuild transform 排除。该扩展名仍以 `.ts` 结束，但插件先接收原始标注，调用手写 scanner/parser/binder/checker/transform/printer，返回 `{ code, map }`，其中 map 序列化为标准 JSON 字符串供 Vite 接收。

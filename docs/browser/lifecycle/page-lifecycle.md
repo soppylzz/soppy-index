@@ -2,7 +2,7 @@
 
 页面完成加载之后，还可能隐藏、冻结、进入 BFCache，或被浏览器丢弃。理解生命周期的目的，是在能运行时保存必要状态，在恢复时重新判断数据是否仍然有效。
 
-下文代码摘自 [Route Handler](demo/lib/handler.ts) 中嵌入页面的浏览器脚本，省略 UI 渲染和重复日志。`record` 记录真实事件，`checkpoint` 保存草稿，`syncPolling` 根据页面状态启停应用轮询；完整辅助函数、错误处理与操作入口见[实验走查](./experiment.md)。
+下文代码摘自 [Route Handler](demo/lib/handler.ts) 中嵌入页面的浏览器脚本，省略 UI 渲染和重复日志。`record` 记录真实事件，`checkpoint` 保存草稿，`syncPolling` 根据页面状态启停应用轮询；辅助函数、错误处理与页面操作均保留在该文件中；以下摘录只突出状态转换。
 
 ## 加载完成只描述文档准备程度
 

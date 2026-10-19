@@ -77,7 +77,7 @@ beforeinstallprompt 是部分浏览器提供的安装入口能力，不是所有
 | 哪些功能可离线 | 数据已就绪后实际断网访问、业务失败反馈 | standalone 模式、Cache 中有几个条目 |
 | 新版本是否生效 | 页面 / worker / 缓存 / 服务端版本一致性 | 改了 Manifest 或刷新一次 |
 
-安装后的 Manifest 元数据、图标与系统集成更新有各自平台流程，不应承诺改 JSON 就立即更新系统图标。应用内容更新则通常仍走 Web 资源与 Service Worker 生命周期，详见 [更新机制](./serviceWorker.md)。
+安装后的 Manifest 元数据、图标与系统集成更新有各自平台流程，不应承诺改 JSON 就立即更新系统图标。应用内容更新则通常仍走 Web 资源与 Service Worker 生命周期，详见 更新机制。
 
 ## 5. 渐进增强与适用范围
 

@@ -94,4 +94,4 @@ Of-type 按标签类型计数，不按类名；`.note:nth-of-type(2)` 本例无�
 
 `.card:not(:has(img))` 表示没有 img 后代；`.card:has(:not(img))` 表示有非 img 后代。含 h2 和 img 的卡片只满足后者。
 
-函数伪类的权重规则见[specificity](./matching.md#specificity匹配之后怎样比较权重)。
+匹配含义与权重是两个问题：`:where()` 及其参数不增加 specificity，`:is()`、`:not()`、`:has()` 则按参数规则计权；不能按冒号数量简单相加。

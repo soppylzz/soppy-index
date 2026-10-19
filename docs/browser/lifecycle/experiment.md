@@ -20,7 +20,7 @@ pnpm --filter lifecycle-next-lab start
 
 端口由 Next CLI 管理；需要覆盖时执行 `pnpm --filter lifecycle-next-lab exec next dev -H 127.0.0.1 -p 另一个端口`。使用稳定 origin，避免改变浏览器存储与页面身份的实验条件。
 
-页面和接口由 [Next.js Route Handler](./demo/lib/handler.ts) 提供，浏览器机制由原生脚本执行。加载与生命周期页面使用独立 HTML 响应，避免 React hydration、客户端路由和热更新脚本改变被测时序。开发首次编译会影响耗时比较，时序实验优先使用构建后的生产模式。
+[Route Handler](./demo/lib/handler.ts) 为各模式返回独立 HTML，页面事件由原生脚本记录。这里刻意不使用 React hydration 和客户端路由，避免把框架挂载、卸载误认成 Document 生命周期。首次开发编译会增加加载耗时；比较事件时序时优先使用生产构建，并保持同一地址与实验参数。
 
 ## 生命周期路由
 

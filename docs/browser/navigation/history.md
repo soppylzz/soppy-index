@@ -21,7 +21,7 @@
 
 这两种调用本身不会立即获取新文档，也不会触发 popstate。即使只改 hash，也不会因调用本身触发 hashchange。源码中的按钮在调用返回后主动更新 UI；后退则由真实事件回调恢复视图。
 
-以下为 [index.ts](../lifecycle/demo/lib/handler.ts) 的 `setupHistory` 核心流程节选，`record` 和 `renderRoute` 是页面辅助函数：
+以下为 [handler.ts](../lifecycle/demo/lib/handler.ts) 的 `setupHistory` 核心流程节选，`record` 和 `renderRoute` 是页面辅助函数：
 
 ```js
 history.pushState({ view: "a", step: ++sequence }, "", "/history/view/a")
@@ -82,7 +82,7 @@ if (path === "/history/view/a" || path === "/history/view/b") {
 }
 ```
 
-`send`、`page` 来自 [index.ts](../lifecycle/demo/lib/handler.ts)；入口加载后根据当前 pathname / hash 恢复 UI。state 未必存在，因此刷新子路径的渲染不能只依赖此前内存里的路由状态。
+`send`、`page` 来自 [handler.ts](../lifecycle/demo/lib/handler.ts)；入口加载后根据当前 pathname / hash 恢复 UI。state 未必存在，因此刷新子路径的渲染不能只依赖此前内存里的路由状态。
 
 ## 5. Location 对照代码
 
@@ -112,4 +112,4 @@ reload 与 `go(0)` 各提供独立按钮，观察新的 executionId。普通导�
 
 ## 7. 阅读与实验顺序
 
-先运行 `/loading` 确认新文档加载与 ID，再用 `/history` 对照同文档记录，最后比较 `/navigation` 和 `/bfcache`。页面上的“调用返回”、真实事件与 HTTP 请求属于三类证据；规范结论、浏览器策略和实测记录在[实验走查](./experiment.md)中分别说明。
+先运行 `/loading` 确认新文档加载与 ID，再用 `/history` 对照同文档记录，最后比较 `/navigation` 和 `/bfcache`。页面上的“调用返回”、真实事件与 HTTP 请求属于三类证据；规范结论、浏览器策略和实测记录在实验走查中分别说明。

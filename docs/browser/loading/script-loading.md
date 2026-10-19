@@ -1,6 +1,6 @@
 # Script Loading：解析、加载与执行
 
-[渲染流水线](../rendering/rendering.md) 已说明 HTML parser、CSS 与普通脚本的基本关系。本文进一步追踪：一个 script 被发现后，资源何时就绪、何时允许执行，以及它如何影响后续 DOM 和页面事件。实验入口见 [实验走查](experiment.md)，资源提示见 [Resource Hint](./resource-hints.md)。
+[渲染流水线](../rendering/rendering.md) 已说明 HTML parser、CSS 与普通脚本的基本关系。本文进一步追踪：一个 script 被发现后，资源何时就绪、何时允许执行，以及它如何影响后续 DOM 和页面事件。资源提前获取的问题见 [Resource Hint](./resource-hints.md)。
 
 ## 1. 先分清三个过程
 
@@ -194,4 +194,4 @@ container.innerHTML = "<script>console.log('does not run')<" + "/script>"
 | 动态脚本怎么保持先后？ | 外部 classic 插入前 `.async = false`；模块依赖用 import 表达 | dynamic-ordered |
 | preload 是否提前执行 JS？ | 它提前获取资源；执行仍由消费端决定 | hints 对照 |
 
-Network 用于看请求发现、响应与缓存；Console/页面日志用于看执行和事件；Performance 用于看主线程执行成本和渲染。不同面板的证据不能互相替代。完整操作与实际观察见 [实验说明](./experiment.md)。
+Network 用于看请求发现、响应与缓存；Console/页面日志用于看执行和事件；Performance 用于看主线程执行成本和渲染。不同面板的证据不能互相替代。实验应分别记录这三类证据，再判断哪个等待条件导致了当前顺序。

@@ -1,31 +1,39 @@
-# Buffer：字节、视图与编码
+# Buffer：文本长度为什么不是传输字节数
 
-Buffer是Uint8Array子类，主要表示字节。JS字符串length按UTF-16 code unit计数，Unicode code point、grapheme和UTF-8字节数还不同；协议body长度和文件偏移必须按字节算。
+“中😀”有两个 Unicode code point、3 个 UTF-16 code unit，编码成 UTF-8 则占 7 字节。字符串 `.length`、可见字素数和协议正文长度不是同一个量；文件偏移与 HTTP 限额应按字节判断。
 
-alloc清零；allocUnsafe可能复用未清零内存，必须完整覆盖后再读/发送。from(string/array/Buffer)通常创建并填充新字节，而from(ArrayBuffer,offset,length)可共享底层内存。小Buffer可能来自池，buffer.byteLength不一定等于当前视图byteLength，转移/暴露底层时还需考虑byteOffset与池中其他数据。
+## Buffer 持有字节，视图不一定复制
 
-subarray和Buffer历史slice都是视图共享；TypedArray.slice的一般复制语义不能直接套给Buffer.slice。小视图还可能保留大底层缓冲的生命周期，需要真正小副本时显式复制。
+Buffer 是 Uint8Array 的子类。`Buffer.alloc()` 清零；`allocUnsafe()` 可能使用未清零内存，必须完整覆盖后才能读取或发送。`Buffer.from(string/array/Buffer)` 创建并填充新字节；`Buffer.from(arrayBuffer, offset, length)` 则可共享底层内存。
 
-网络chunk边界任意，多字节字符可被拆开。逐块toString会为不完整序列产生replacement字符；StringDecoder或流setEncoding保留边界状态。hex/base64是字节的文本表示，不是原始文本的字符编码；二进制文件不要盲目toString再写回。
+`subarray()` 和 Buffer 历史上的 `slice()` 都返回共享视图，不能套用普通 TypedArray.slice 的复制语义。改写视图会影响原 Buffer；需要独立副本时使用 `Buffer.from(view)`。一个很小的视图也可能让很大的底层缓冲继续存活。
 
-## 同一段文字的三种长度
+小 Buffer 可能来自池，`.buffer.byteLength` 不一定等于当前视图的 `.byteLength`。暴露或转移底层 ArrayBuffer 前，还要考虑 byteOffset、长度和其他池数据，不能把整个底层都当作当前切片。
 
-“中😀”包含两个 Unicode code point，却占 3 个 UTF-16 code unit；编码成 UTF-8 后占 7 字节。JS 字符串的 `.length` 得到的是第二个数，HTTP body 上限需要第三个数。若网络在“😀”的 UTF-8 字节中间切块，逐块解码会损失原字符，增量解码器才会保留尚未完整的字节。
+## 网络块可以从字符中间断开
 
-## 对应源码与实验
+下面是 [index.ts](index.ts) 中编码实验的独立版本，使用 Unicode 转义保证终端示例输出为英文或数字：
 
-以下片段来自 [index.ts](./index.ts) 或同目录辅助文件；完整断言和清理路径见源码。
+```js
+import assert from "node:assert/strict"
+import { StringDecoder } from "node:string_decoder"
 
-```ts
-const shared = bytes.subarray(0, 3)
-const copy = Buffer.from(shared)
-shared[0] = 65
+const text = "\u4e2d\ud83d\ude00"
+const bytes = Buffer.from(text, "utf8")
+const chunks = [bytes.subarray(0, 2), bytes.subarray(2)]
+const naive = chunks.map((chunk) => chunk.toString("utf8")).join("")
 const decoder = new StringDecoder("utf8")
 const decoded = chunks.map((chunk) => decoder.write(chunk)).join("") + decoder.end()
+
+assert.equal(text.length, 3)
+assert.equal(bytes.length, 7)
+assert.notEqual(naive, text)
+assert.equal(decoded, text)
+console.log("Incremental decoding preserved the text")
 ```
 
-显式调用decoder.end排出尾部状态；最终不完整字节仍会按编码规则替换，不是任意损坏数据都能恢复。CLI将非ASCII数据转为JSON转义，使终端标签与输出保持英文/ASCII，值本身没有被更改。
+逐块 toString 会把尚未完整的序列当成损坏输入；StringDecoder 保留尾部字节，等下一块补齐。`end()` 处理最后状态，但最终仍不完整的字节只能按编码规则替换，不能恢复任意损坏数据。流上的 `setEncoding()` 也可进行增量解码。
 
-## 依据与版本
+hex/base64 是字节的文本表示，不是原文本的字符编码。处理二进制文件时，不要先盲目 toString 再写回。
 
-以 [Node 22.18 官方 buffer 文档](https://nodejs.org/download/release/v22.18.0/docs/api/buffer.html) 核对 API 合约；实际输出与运行环境需在执行时核对。
+依据：[Node 22.18 Buffer](https://nodejs.org/download/release/v22.18.0/docs/api/buffer.html)、[StringDecoder](https://nodejs.org/download/release/v22.18.0/docs/api/string_decoder.html)。

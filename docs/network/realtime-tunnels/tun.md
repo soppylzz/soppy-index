@@ -53,4 +53,4 @@ NAT 改地址和端口；TUN 提供虚拟接口；TURN 为 WebRTC 等客户端�
 
 资料：[Linux Kernel：Universal TUN/TAP device driver](https://docs.kernel.org/networking/tuntap.html)。
 
-Cloudflare Tunnel 采用 connector 出站建立的连接来发布服务，与这里的 TUN 接口名称相近但职责不同；具体路径见 [Cloudflare](../delivery-optimization/cloudflare.md)。
+Cloudflare Tunnel 采用 connector 出站建立的连接来发布服务，它发布的是服务访问路径，不等于在访客设备上创建一张 TUN 网卡来接管其 IP 包。

@@ -1,15 +1,13 @@
 # 真实源码参考索引
 
-[返回 README](../README.md) · [架构](architecture.md)
+以下索引在 2026-10-14 对照相应 tag 的 checkout 整理，链接固定到 commit，避免随默认分支移动。先在本项目解释一个阶段，再沿对应入口查看真实实现；表中行号属于该快照，不表示最新版本位置。源码可自行克隆到任意目录，不依赖作者机器路径。
 
-2026-10-14 核实可用 tag，浅克隆到 `~/code/reference/` 的新目录，检查文件与关键符号；没有覆盖已有参考目录，也没有向当前仓库提交源码。以下链接全部固定 commit，表中的行号通过对应 checkout 的 `rg -n` 验证。
-
-| 仓库 URL | 固定 tag | checkout commit | 本机参考目录 |
+| 仓库 URL | 固定 tag | checkout commit | 建议 checkout 目录名 |
 | --- | --- | --- | --- |
-| https://github.com/microsoft/TypeScript | v6.0.3 | `050880ce59e30b356b686bd3144efe24f875ebc8` | `~/code/reference/typescript-v6.0.3` |
-| https://github.com/babel/babel | v7.28.5 | `61647ae2397c82c3c71f077b5ab109106a5cac0f` | `~/code/reference/babel-v7.28.5` |
-| https://github.com/vitejs/vite | v7.3.1 | `95e8923f35d0252c9f6eb2d5e358c084542706f1` | `~/code/reference/vite-v7.3.1` |
-| https://github.com/rollup/rollup | v4.64.5 | `05a293809848a3d772e7ff2ba44adcbd23bd84b8` | `~/code/reference/rollup-v4.64.5` |
+| https://github.com/microsoft/TypeScript | v6.0.3 | `050880ce59e30b356b686bd3144efe24f875ebc8` | `typescript-v6.0.3` |
+| https://github.com/babel/babel | v7.28.5 | `61647ae2397c82c3c71f077b5ab109106a5cac0f` | `babel-v7.28.5` |
+| https://github.com/vitejs/vite | v7.3.1 | `95e8923f35d0252c9f6eb2d5e358c084542706f1` | `vite-v7.3.1` |
+| https://github.com/rollup/rollup | v4.64.5 | `05a293809848a3d772e7ff2ba44adcbd23bd84b8` | `rollup-v4.64.5` |
 
 Babel/Vite tag 是 annotated tag，`ls-remote` 的 tag object SHA 与 checkout commit 不同；上表记录实际 commit。TypeScript 参考的是 6.x 的 TS 源码，未用默认分支或 Go 实现代替。Vite 直接版本固定为 7.3.1；其 Rollup 传递依赖由本项目 lockfile 固定为 4.64.5，因此额外对照这个确切版本。
 

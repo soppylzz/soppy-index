@@ -6,12 +6,12 @@ Event Loop 和调度解决的是相邻但不同的问题：Event Loop 描述 tas
 
 | 层次 | 主要问题 | 本文关注点 |
 | --- | --- | --- |
-| Event Loop 规范模型 | callback 在 task、microtask 还是渲染步骤中运行？ | 见 [Browser Event Loop](./event-loop.md) |
+| Event Loop 规范模型 | callback 在 task、microtask 还是渲染步骤中运行？ | 见 Browser Event Loop |
 | 浏览器内部调度 | 多个可运行 task queue 中先选择哪一个？ | Blink 队列属性和动态优先级 |
 | Web 调度 API | 页面应把工作安排到什么时候，以什么紧急程度执行？ | rAF、rIC、`postTask()`、`yield()` |
 | 应用层分片 | 长工作如何切分、让步并恢复？ | 时间预算、continuation 与 fallback |
 
-本文中的 Chromium 源码摘录最后核对于 2026-09-19，对应 commit `39cea72b3a158dda6cd7c951611b3da13bef600b`。固定版本用于保证摘录与链接一致，`main` 链接用于观察后续变化；浏览器兼容性最后核对于 2026-09-20。
+本文中的 Chromium 源码摘录最后核对于 2026-09-19，对应 commit `39cea72b3a158dda6cd7c951611b3da13bef600b`。固定版本用于保证摘录与链接一致，`main` 链接用于观察后续变化。兼容性不固定为一张浏览器版本表，以下示例通过具体方法检测能力。
 
 ## 1. 调度不等于抢占
 
@@ -50,7 +50,7 @@ microtask 也不是“优先级最高的普通 task”。它在 microtask checkp
 
 rAF 与 `setTimeout(fn, 16)` 的核心区别不是数字 `16`：timer 只在 delay 到期后获得运行资格，不理解显示刷新节奏；rAF 由浏览器结合 rendering opportunity 安排，而且后台页面通常会暂停或显著降低调用频率。
 
-如果一次 rAF callback 自身执行过久，仍然会占用主线程并错过帧。rAF 解决“何时提交视觉更新”，不负责自动切分计算工作。渲染阶段的详细关系见 [Browser Event Loop：渲染时机](./event-loop.md#5-渲染时机)和 [Browser Rendering](../rendering/rendering.md)。
+如果一次 rAF callback 自身执行过久，仍然会占用主线程并错过帧。rAF 解决“何时提交视觉更新”，不负责自动切分计算工作。rAF 回调之后浏览器仍需完成必要的布局与绘制；这些阶段见[渲染流水线](../rendering/rendering.md)。
 
 ### 怎么用
 
@@ -78,7 +78,7 @@ requestAnimationFrame(animate)
 
 ### 兼容性与 shims
 
-rAF 已在现代主流浏览器中广泛支持；当前兼容性数据记录 Chrome 24、Firefox 23、Safari 7 起支持无前缀版本，通常不需要 shim，详见 [MDN：requestAnimationFrame compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame#browser_compatibility)。
+rAF 已在现代主流浏览器中广泛支持，通常不需要 shim；目标环境的支持范围见 [MDN：requestAnimationFrame compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame#browser_compatibility)。
 
 若项目确实需要兼容更旧环境，可以用 timer 提供近似 fallback，但它无法获得浏览器的真实 rendering opportunity：
 
@@ -142,7 +142,7 @@ requestIdleCallback(runWhenIdle, { timeout: 1000 })
 
 ### 兼容性与 shims
 
-rIC 不是 Baseline 功能。当前兼容性数据记录 Chrome 47、Firefox 55 起支持，而 Safari 稳定版尚未启用；Safari Technology Preview 仅能通过偏好设置开启，详见 [MDN：requestIdleCallback compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback#browser_compatibility)。
+不要把 rAF 可用推断成 rIC 也可用。部署时检测 `globalThis.requestIdleCallback`，并为缺失能力选择可接受的任务降级；目标版本支持情况见 [MDN：requestIdleCallback compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback#browser_compatibility)。
 
 timer shim 无法知道浏览器是否真的空闲，也不能生成可信的时间预算。下面的 fallback 只保证工作最终推进，并通过 `didTimeout: true` 明确表示它不是真实 idle period：
 
@@ -213,7 +213,7 @@ microtask 不能替代 `yield()`：递归添加 microtask 会让 checkpoint 持�
 
 ### 兼容性与 shims
 
-当前兼容性数据记录 `postTask()` 从 Chrome 94、Firefox 142 起支持，`yield()` 从 Chrome 129、Firefox 142 起支持；Safari 尚未实现二者。分别参见 [MDN：postTask compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/postTask#browser_compatibility)和 [MDN：yield compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield#browser_compatibility)。生产代码必须分别检测两个方法，不能只检测 `globalThis.scheduler`。
+`postTask()` 与 `yield()` 不是同一次能力检测：浏览器可能只支持其中一项。目标版本支持情况分别见 [MDN：postTask compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/postTask#browser_compatibility)和 [MDN：yield compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield#browser_compatibility)。生产代码必须分别检测两个方法，不能只检测 `globalThis.scheduler`。
 
 timer 或 `MessageChannel` fallback 可以保留“进入新 task”的让步边界，但无法完整模拟任务优先级、动态改优先级、取消信号和 continuation 排序：
 

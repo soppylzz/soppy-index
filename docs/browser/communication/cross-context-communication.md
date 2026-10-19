@@ -78,7 +78,7 @@ function disconnect() {
 
 localStorage 通知共享该存储区的其他同源窗口；sessionStorage 的通知限于同一顶层浏览上下文内共享存储区的文档，例如同源 iframe，不会用于独立标签页之间广播。[HTML Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html#the-storage-interface)
 
-存储写入是同步操作，值只能是字符串，还可能因配额或访问策略失败。把消息不断写进同一个 key，会覆盖旧值，也没有跨窗口读改写事务保证，不能把它当消息队列。存储本身的语义见 [Web Storage](../storage/webStorage/webStorage.md)。
+存储写入是同步操作，值只能是字符串，还可能因配额或访问策略失败。把消息不断写进同一个 key，会覆盖旧值，也没有跨窗口读改写事务保证，不能把它当消息队列。存储本身的语义见 Web Storage。
 
 ## 指定窗口通信：window.postMessage
 

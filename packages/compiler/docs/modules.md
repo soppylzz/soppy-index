@@ -1,7 +1,5 @@
 # 模块图、格式转换与 Tree Shaking
 
-[返回 README](../README.md)
-
 ## 静态模块与路径
 
 [modules.ts](../src/modules.ts) 从入口递归解析静态导入，依赖先于引用它的模块检查。导出的 BindingSymbol 持有 Type；导入方绑定为 import symbol 并获得同一签名，因此 `greet(123)` 的跨文件错误仍由 Checker 定位。

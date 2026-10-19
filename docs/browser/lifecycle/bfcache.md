@@ -33,7 +33,7 @@ window.addEventListener("pagehide", (event) => {
 
 BFCache 恢复后，内存中的数据可能已经过时。例如库存、登录状态和协作数据都可能在页面冻结期间改变。应在 `pageshow` 的 BFCache 分支中重新验证时效性强的数据，而不是无条件重建整个应用。
 
-更完整的页面状态转换见 [页面生命周期](./page-lifecycle.md)。
+可见性、冻结和 BFCache 不是同一个状态：页面隐藏不保证被冻结，冻结也不证明未来一定从 BFCache 恢复。
 
 ## 3. 不要依赖 unload
 
@@ -97,7 +97,7 @@ pnpm --filter lifecycle-next-lab dev
 3. 再刷新或通过中转页的普通链接返回，对比执行 ID 改变、初始化重新发生。草稿仍可能从 sessionStorage 读回，因此草稿保留本身不能证明命中。
 4. 恢复后实验会请求新的服务端时间，网络仍可能出现请求；不能用“终端零请求”定义 BFCache 命中。
 
-本实验不注册 unload；离开提醒使用仅在待确认修改时注册的 beforeunload。DevTools 与浏览器策略可能影响资格，应结合诊断工具复核，完整步骤和实际验证见 [实验走查](./experiment.md)。
+本实验不注册 unload；离开提醒使用仅在待确认修改时注册的 beforeunload。DevTools 与浏览器策略可能影响资格；用上述 persisted、执行身份和初始化事件复核，并保留未命中时的正常加载路径。
 
 ## 7. 兼容性
 
@@ -109,6 +109,6 @@ pnpm --filter lifecycle-next-lab dev
 
 ## 9. 参考资料
 
-- [web.dev：Back/forward cache](https://web.dev/articles/bfcache)
-- [HTML Standard：the `pageshow` event](https://html.spec.whatwg.org/multipage/browsing-the-web.html#event-pageshow)
-- [Chrome Developers：Back/forward cache](https://developer.chrome.com/docs/web-platform/bfcache)
+- [web.dev：前进后退缓存](https://web.dev/articles/bfcache)
+- [HTML 标准：pageshow 事件](https://html.spec.whatwg.org/multipage/browsing-the-web.html#event-pageshow)
+- [Chrome：前进后退缓存](https://developer.chrome.com/docs/web-platform/bfcache)

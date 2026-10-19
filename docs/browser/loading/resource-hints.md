@@ -1,6 +1,6 @@
 # Resource Hint：提前准备资源
 
-script 属性决定执行模式，resource hint 影响资源准备。提前拿到文件，不会把 defer 改成 async，也不会自动执行一个尚未被消费的脚本。script 的完整流程见 [Script Loading](./script-loading.md)。
+script 属性决定执行模式，resource hint 影响资源准备。提前拿到文件，不会把 defer 改成 async，也不会自动执行一个尚未被消费的脚本。本文只展开资源准备与复用，不重复讲解各类脚本的执行条件。
 
 ## 1. 各种提示解决什么问题
 
@@ -42,7 +42,7 @@ modulepreload 默认 destination 是 script，并按模块的 CORS 获取规则�
 
 ## 4. 本目录对照实验
 
-运行 [实验服务](experiment.md)，比较 `/hints` 中的 classic 和 module 两组页面。服务先发送 head，600ms 后才发送消费标签所在的 HTML 尾部；未提前发送的字节无法被 preload scanner 扫描，因此能清楚观察提前发现的作用。
+按统一教程目录中的加载实验说明启动服务，比较 `/hints` 中的 classic 和 module 两组页面。服务先发送 head，600ms 后才发送消费标签所在的 HTML 尾部；未提前发送的字节无法被 preload scanner 扫描，因此能清楚观察提前发现的作用。
 
 实验每次导航使用新的资源 URL，避免上次缓存影响；同次导航中 hint 与消费者使用完全一致的 URL。hint 资源允许缓存复用，其他普通顺序实验则使用 `no-store`。在 DevTools 中取消 Disable cache 后比较：
 
@@ -50,7 +50,7 @@ modulepreload 默认 destination 是 script，并按模块的 CORS 获取规则�
 2. 有 hint 时，资源请求可以从 head 开始；入口代码仍要等消费标签对应的执行条件。
 3. 检查 Network 请求数量、Initiator 与时间线；modulepreload 是否同时提前请求依赖属于实现观察。
 
-这组实验验证发现与消费关系，没有模拟跨 origin 连接建立、未来导航缓存策略或真实拥塞，因此不据此推导 preconnect/prefetch 的生产收益。操作细节见 [demo 走查](./experiment.md)。
+这组实验验证发现与消费关系，没有模拟跨 origin 连接建立、未来导航缓存策略或真实拥塞，因此不据此推导 preconnect/prefetch 的生产收益。这组页面只用于资源发现对照，不覆盖其余提示的所有行为。
 
 ### 核心实现：先发送 hint，后发送消费者
 

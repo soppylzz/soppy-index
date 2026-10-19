@@ -183,10 +183,10 @@ IndexedDB 在现代浏览器中已广泛支持。复杂度主要来自 event API
 
 假设一个 readwrite transaction 先更新笔记，再写入关联记录。第一个 put request 成功，只说明这个请求执行成功；后续错误仍可能让整个事务回滚。因此界面应根据 transaction complete 确认这组修改已经提交，不能在第一个 request 的 onsuccess 中宣布全部保存完成。
 
-再考虑保存前需要获取远端数据：应先在事务之外完成无关网络等待，再建立短事务写入结果。把 API 包装成 Promise，并不会延长浏览器事务的活动期。[实验走查](./index.md)提供 request 与 transaction 的两阶段日志，以及事务失活和升级阻塞的观察方式。
+再考虑保存前需要获取远端数据：应先在事务之外完成无关网络等待，再建立短事务写入结果。把 API 包装成 Promise，并不会延长浏览器事务的活动期。实验走查提供 request 与 transaction 的两阶段日志，以及事务失活和升级阻塞的观察方式。
 
 ## 9. 参考资料
 
 - [Indexed Database API specification](https://w3c.github.io/IndexedDB/)
 - [MDN：IDBTransaction](https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction)
-- [MDN：The structured clone algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm)
+- [MDN：结构化克隆算法](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm)

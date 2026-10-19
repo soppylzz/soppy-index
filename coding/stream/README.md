@@ -22,7 +22,7 @@ pnpm --filter @soppy-index/stream dev
 ```dotenv
 GLM_API_KEY=your-api-key
 GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
-GLM_MODEL=glm-4.7
+GLM_MODEL=your-model-id
 PORT=3100
 WS_PORT=3101
 ```

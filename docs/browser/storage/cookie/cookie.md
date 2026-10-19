@@ -123,7 +123,7 @@ document.cookie = ["theme=", "Max-Age=0", "Path=/", "SameSite=Lax", "Secure"].jo
 
 常见做法是把随机 session ID 放入 HttpOnly Cookie。把 access token 放在 `localStorage` 可避免浏览器自动携带，但同源 JavaScript 和成功执行的 XSS 可以读取它；放入 HttpOnly Cookie 可以阻止脚本直接读取，却需要设计 CSRF 防护。不存在脱离威胁模型的"绝对安全存储位置"。
 
-Cookie 在 HTTP 状态管理中的使用见 [MDN：Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)。
+Cookie 在 HTTP 状态管理中的使用见 [MDN：使用 HTTP Cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)。
 
 ## 7. 第三方 Cookie 与分区
 
@@ -151,7 +151,7 @@ Cookie 会随所有匹配请求发送，因此它更适合小型状态标识，�
 
 ## 11. 参考资料
 
-- [RFC 6265bis：Cookies](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html)
-- [MDN：Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)
-- [MDN：Secure cookie configuration](https://developer.mozilla.org/en-US/docs/Web/Security/Practical_implementation_guides/Cookies)
-- [web.dev：SameSite cookies explained](https://web.dev/articles/samesite-cookies-explained)
+- [RFC 6265bis：Cookie 规则](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html)
+- [MDN：使用 HTTP Cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)
+- [MDN：Cookie 安全配置](https://developer.mozilla.org/en-US/docs/Web/Security/Practical_implementation_guides/Cookies)
+- [web.dev：SameSite Cookie 解释](https://web.dev/articles/samesite-cookies-explained)

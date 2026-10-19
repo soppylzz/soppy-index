@@ -9,27 +9,27 @@
 
 | 主题 | 中文版本 | 英文原文 |
 | --- | --- | --- |
-| 源码目录 | [源码目录概览](overview/source_tree_overview.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/source_tree_overview.md) |
-| 进程与安全 | [进程模型与站点隔离](overview/process_model_and_site_isolation.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/process_model_and_site_isolation.md) |
-| 线程与任务 | [线程与任务](overview/threading_and_tasks.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/threading_and_tasks.md) |
-| 跨进程通信 | [Mojo 与服务](overview/mojo_and_services.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/mojo_and_services.md) |
-| 导航结构 | [FrameTree](navigation/frame_trees.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/frame_trees.md) |
-| 导航过程 | [一次导航的生命周期](navigation/navigation.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/navigation.md) |
-| 会话历史 | [会话历史](navigation/session_history.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/session_history.md) |
-| 页面恢复 | [BFCache](navigation/bfcache.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/bfcache.md) |
+| 源码目录 | [源码目录概览](overview/source_tree_overview.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/source_tree_overview.md) |
+| 进程与安全 | [进程模型与站点隔离](overview/process_model_and_site_isolation.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/process_model_and_site_isolation.md) |
+| 线程与任务 | [线程与任务](overview/threading_and_tasks.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/threading_and_tasks.md) |
+| 跨进程通信 | [Mojo 与服务](overview/mojo_and_services.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/mojo_and_services.md) |
+| 导航结构 | [FrameTree](navigation/frame_trees.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/frame_trees.md) |
+| 导航过程 | [一次导航的生命周期](navigation/navigation.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/navigation.md) |
+| 会话历史 | [会话历史](navigation/session_history.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/session_history.md) |
+| 页面恢复 | [BFCache](navigation/bfcache.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/bfcache.md) |
 | Blink 总览 | [How Blink works PDF](rendering/how-blink-works.pdf) | [PDF，17 页](rendering/how-blink-works.pdf) |
-| 渲染核心 | [Core](rendering/renderer-readme/core.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/README.md) |
-| 节点与树 | [DOM](rendering/renderer-readme/dom.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/dom/README.md) |
-| 样式入口 | [CSS](rendering/renderer-readme/css.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/css/README.md) |
-| 布局 | [Layout](rendering/renderer-readme/layout.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/layout/README.md) |
-| 绘制 | [Paint](rendering/renderer-readme/paint.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/paint/README.md) |
-| Blink 合成 | [合成算法](rendering/compositing_readme.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/platform/graphics/compositing/README.md) |
-| cc 入口与术语 | [cc README](rendering/cc_readme.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/cc/README.md) |
-| cc 内部机制 | [cc 的工作原理](rendering/how_cc_works.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/how_cc_works.md) |
-| 帧流水线 | [一帧的生命周期](rendering/life_of_a_frame.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/life_of_a_frame.md) |
-| Chrome 内部页面 | [WebUI 详解](webui_explainer.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_explainer.md) |
-| WebUI 组件 | [Lit 用法与迁移](webui_using_lit.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_using_lit.md) |
-| WebUI 编码约定 | [Lit 风格指南](webui_lit_style_guide.md) | [English](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_lit_style_guide.md) |
+| 渲染核心 | [Core](rendering/renderer-readme/core.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/README.md) |
+| 节点与树 | [DOM](rendering/renderer-readme/dom.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/dom/README.md) |
+| 样式入口 | [CSS](rendering/renderer-readme/css.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/css/README.md) |
+| 布局 | [Layout](rendering/renderer-readme/layout.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/layout/README.md) |
+| 绘制 | [Paint](rendering/renderer-readme/paint.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/paint/README.md) |
+| Blink 合成 | [合成算法](rendering/compositing_readme.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/platform/graphics/compositing/README.md) |
+| cc 入口与术语 | [cc README](rendering/cc_readme.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/cc/README.md) |
+| cc 内部机制 | [cc 的工作原理](rendering/how_cc_works.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/how_cc_works.md) |
+| 帧流水线 | [一帧的生命周期](rendering/life_of_a_frame.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/life_of_a_frame.md) |
+| Chrome 内部页面 | [WebUI 详解](webui_explainer.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_explainer.md) |
+| WebUI 组件 | [Lit 用法与迁移](webui_using_lit.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_using_lit.md) |
+| WebUI 编码约定 | [Lit 风格指南](webui_lit_style_guide.md) | [官方原文](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_lit_style_guide.md) |
 
 ## 来源与版本
 

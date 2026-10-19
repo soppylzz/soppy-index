@@ -1,7 +1,5 @@
 # JS 映射、声明输出与声明跳转
 
-[返回 README](../README.md)
-
 ## 三个坐标来源
 
 [emitter.ts](../src/emitter.ts) 的 Writer 维护生成行、列。调用 `write(text, origin, name)` 时记录：生成坐标、原始坐标和可选标识符名，再推进生成位置；编码库只把这些片段变成标准 v3 Source Map。它不知道 Token、AST、箭头转换或类型擦除的意义。

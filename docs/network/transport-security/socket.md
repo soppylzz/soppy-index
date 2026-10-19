@@ -74,6 +74,6 @@ const localEndpoint = net.createConnection({ path: "/tmp/app.sock" })
 
 这两行仅对比 Node 接口，要求各自已有服务监听。Unix domain socket 的流类型同样没有业务消息边界；它无需经过 IP 路由、TCP 握手和公网 NAT。路径对应的 socket 节点也不是拿来保存消息的普通文件，访问权限与对端身份应按平台机制管理。
 
-[WebSocket](../realtime-tunnels/websocket.md) 是应用层消息协议，给 Web 应用提供类似持久双向端点的能力。它的名称不表示浏览器可以直接调用系统任意 socket，也不表示它基于 Unix domain socket。
+WebSocket 是应用层消息协议，给 Web 应用提供类似持久双向端点的能力。它的名称不表示浏览器可以直接调用系统任意 socket，也不表示它基于 Unix domain socket。
 
 资料：[Linux socket(2)](https://man7.org/linux/man-pages/man2/socket.2.html)、[accept(2)](https://man7.org/linux/man-pages/man2/accept.2.html)、[listen(2)](https://man7.org/linux/man-pages/man2/listen.2.html)、[unix(7)](https://man7.org/linux/man-pages/man7/unix.7.html)、[Node net](https://nodejs.org/api/net.html)。队列和资源限制属于平台实现，不应当成所有操作系统的统一协议规定。

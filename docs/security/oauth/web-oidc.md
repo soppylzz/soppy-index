@@ -23,13 +23,11 @@ Browser -> BFF -> Resource server: session Cookie -> access token
 
 state 不能只存在 URL 中，要与发起浏览器安全关联；回调还要处理拒绝授权、过期、缺 code 与重放。最终返回地址应独立限制，不能把任意 `next` 值混进 redirect URI 或开放跳转。
 
-外部用户通常以 `(issuer, sub)` 标识，不能看到同名邮箱就自动合并账号。实验只信任一个固定本地 issuer，将它的 alice/bob 主体映射到固定演示用户；生产中应保存外部标识映射并处理明确的绑定确认。
-
 ## 第三方账号怎样映射到本地用户
 
 外部身份标识通常用 `(issuer, sub)`：`sub` 只在签发者命名空间内有意义。不能仅凭同名邮箱自动合并账号，邮箱可能未验证、变化或被重新分配。绑定已有本地账号时，应验证用户对相关账号的控制权并明确确认，数据库还需唯一约束防止并发重复绑定。
 
-第三方认证成功后，本站通常仍建立自己的会话；外部身份说明“谁完成了认证”，本地角色和资源规则决定“能做什么”。
+实验只信任一个固定本地 issuer，将 alice/bob 主体映射到固定演示用户，没有实现任意提供方的账号绑定。第三方认证成功后，本站仍建立自己的会话；外部身份说明“谁完成了认证”，本地角色和资源规则决定“能做什么”。
 
 ## BFF 减少什么暴露，又增加什么责任
 
@@ -55,6 +53,4 @@ SSO 复用的是 IdP 会话，各应用仍有自己的客户端、token 和本�
 
 “退出全部设备”还需要服务端维护并撤销相应会话集合。通知 UI、删除本地 Cookie、撤销 refresh token 与拒绝已有 access token 是不同动作，不能用一个按钮文案替代这些契约。
 
-参考：[OIDC UserInfo](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)、[RP-Initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html)、[Back-Channel Logout](https://openid.net/specs/openid-connect-backchannel-1_0.html)。
-
-参考：[OIDC Authorization Code Flow](https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth)、[RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html)。
+参考：[OIDC UserInfo](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)、[RP-Initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html)、[Back-Channel Logout](https://openid.net/specs/openid-connect-backchannel-1_0.html)、[OIDC Authorization Code Flow](https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth)、[RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html)。

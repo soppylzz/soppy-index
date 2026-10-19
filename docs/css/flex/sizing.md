@@ -61,7 +61,7 @@ Basis 为 auto 时参考主尺寸属性：row 通常看 width，column 看 heigh
 
 最终第一项为 150px，第二项继续吸收空间至 350px。算法会约束检查、冻结受限项目并重新分配，不是末尾简单截断。
 
-这种共同求解属于布局中使用值的确定，不是 max-width 声明覆盖 flex-grow。阶段区别见[值处理](../properties/processing.md)。
+这种共同求解属于布局中使用值的确定，不是 max-width 声明覆盖 flex-grow。flex-grow、min/max 约束共同参与使用值求解，层叠胜出只是此前选择声明的步骤。
 
 ## Flex: 1 为什么仍然可能溢出
 

@@ -8,10 +8,6 @@ event loop delay是采样回调被推迟的程度，ELU是事件循环活跃/空
 
 本例monitorEventLoopDelay单位为纳秒，展示时除1e6换毫秒；先等待采样建立，再有界忙循环。performance mark/measure记录JS区间，不是完整系统调度trace。生产监测要控制采样与日志成本，验证告警能关联release、实例与请求。
 
-## 从“请求慢”缩小范围
-
-先用日志的 requestId/traceId 确认是哪条请求，再看延迟与错误指标是否随版本或实例变化。若 event loop delay 高，说明采样回调被推迟；这可能是主线程计算、GC 或调度，尚不能直接归因。随后用 CPU profile 或 trace 找具体阶段；若主要在等下游，就应查超时、连接池与对端指标。
-
 ## 对应源码与实验
 
 以下片段来自 [index.ts](./index.ts) 或同目录辅助文件；完整断言和清理路径见源码。

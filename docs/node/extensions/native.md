@@ -10,13 +10,9 @@ Native段错误可能终止进程，无法像JS异常一样可靠catch，高风�
 
 本例仅执行内嵌已知add模块，无外部下载、编译器或原生发布流水线。
 
-## 按需求选择扩展方式
-
-若只是让 CPU 密集 JavaScript 离开主线程，先看 Worker；若有现成的跨平台计算模块，可评估 WASM；必须调用系统库或复用 C/C++ 代码时再考虑 native addon。Node-API 降低的是绑定对 Node/V8 版本的 ABI 变化成本，不能消除不同操作系统和架构的二进制差异。任何性能收益都要用实际负载测量。
-
 ## 对应源码与实验
 
-以下片段来自 [index.ts](../testing/index.ts) 或同目录辅助文件；完整断言和清理路径见源码。
+以下片段来自 [wasm.mjs](./wasm.mjs) 或同目录辅助文件；完整断言和清理路径见源码。
 
 ```ts
 const { instance } = await WebAssembly.instantiate(binary)

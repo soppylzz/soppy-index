@@ -1,6 +1,6 @@
 # Event Loop 综合示例（模拟）
 
-> 本文是 [Browser Event Loop](../event-loop.md) 的配套示例，用一个可运行的 TypeScript 模拟器把 task、microtask、渲染更新和空闲期串成一条完整时间线，回答三个常见追问。渲染流水线对应 [Browser Rendering](../../rendering/rendering.md) 的简化模型。
+> 本文是 Browser Event Loop 的配套示例，用一个可运行的 TypeScript 模拟器把 task、microtask、渲染更新和空闲期串成一条完整时间线，回答三个常见追问。渲染流水线对应 [Browser Rendering](../../rendering/rendering.md) 的简化模型。
 
 运行方式（Node >= 22.18 原生执行 `.ts`，纯模拟，不需要浏览器）：
 
@@ -57,7 +57,7 @@ node docs/browser/event-loop/supplement/simulator.ts
 
 简化声明：
 
-- 只有一条 FIFO task 队列，并采用“输入优先”的演示策略。真实浏览器是多个 task queue 与动态优先级（见 [Browser Scheduling](../scheduling.md)），跨 source 顺序是浏览器策略，不是规范保证。
+- 只有一条 FIFO task 队列，并采用“输入优先”的演示策略。真实浏览器是多个 task queue 与动态优先级（见 Browser Scheduling），跨 source 顺序是浏览器策略，不是规范保证。
 - 渲染机会固定为每 16.7ms 一次，且只在页面 dirty 或有 rAF 回调时才真正渲染。当前驱动器先处理就绪 task，再进入到期渲染；这是确定性演示策略，不能推导成真实浏览器一定排空所有 task 后才渲染。
 - 最多执行 500 个驱动步骤；超出时明确报错，避免把未完成的模拟误当作成功输出。
 - 不模拟 4ms 嵌套钳制、后台节流、Worker、ResizeObserver 循环、`scheduler.postTask()` 等。
@@ -143,7 +143,7 @@ trace:
 
 ## 6. 模拟器没有覆盖的内容
 
-- 多个 task queue 与 Blink 的动态优先级，见 [Browser Scheduling](../scheduling.md)。
-- 计时器 4ms 钳制、后台节流与系统调度，见 [Browser Event Loop](../event-loop.md) 第 6 节。
+- 多个 task queue 与 Blink 的动态优先级，见 Browser Scheduling。
+- 计时器 4ms 钳制、后台节流与系统调度，见 Browser Event Loop 第 6 节。
 - raster / composite 的线程与进程分工，见[渲染中的光栅化与合成](../../rendering/rendering.md#5-tilingrastercomposite-与-display)。
 - Worker 拥有独立 event loop；这里只模拟一个 Window event loop。

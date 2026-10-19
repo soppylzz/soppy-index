@@ -1,6 +1,6 @@
 # Documentation for Learning
 
-Write knowledge notes and demo explanations in natural Simplified Chinese for a job candidate who wants to understand and later recall the topic. Agent instructions remain English. Project READMEs are bilingual and use the global `project-readme` skill when available; do not impose a knowledge-note structure on them.
+Write knowledge notes and demo explanations in natural Simplified Chinese for a job candidate who wants to understand and later recall the topic. Agent instructions remain English. Only the root `README.md` and `README.zh-cn.md` use the global `project-readme` skill as an English/Chinese pair; other authored documentation, including module READMEs, is Chinese. Preserve generated files such as `.changeset/README.md` and respect audit exclusions in AGENTS.md.
 
 ## Explain the knowledge
 
@@ -9,6 +9,14 @@ Start with the question or phenomenon the reader wants to understand. Introduce 
 Connect each important example to what it reveals and why that matters. Use a small counterexample or comparison to expose a misconception. Add tradeoffs, limits, and interview follow-ups when they help this topic; do not append a generic checklist to every note.
 
 Use connected prose and purposeful headings. Prefer a table for genuine comparisons and code excerpts for decisive steps; link full implementations instead of reproducing plumbing. Avoid excessive bold text, slogans, repetitive summaries, and rigid question-answer lists unless the user requests that format.
+
+Keep one implementation example coherent, with its necessary context and comments together. Split code only to compare alternatives or develop explicit stages. Do not put long explanations or implementations in tables, or force every topic into the same template.
+
+## Organize ownership and references
+
+Learning directories describe prerequisites and link to topics; topics own complete explanations; experiment guides own setup, actions, and observations. Choose one primary home for each mechanism and link to it rather than maintaining parallel explanations.
+
+Keep document references acyclic. Direct overview links toward topics, and do not link topics back to their containing overview. Provide navigation through the learning directories instead. Order related-topic links by their explanatory dependency and check longer cycles, not only reciprocal pairs. The root README language switches are an intentional exception.
 
 ## Use demos as evidence
 

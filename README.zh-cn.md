@@ -11,36 +11,57 @@
 
 </div>
 
-前端学习笔记、可运行实验与编程练习。项目正在持续开发中。
+面向机制理解与面试准备的前端学习笔记、浏览器和 Node.js 实验，以及编程练习。教程使用简体中文，演示界面、源码注释与 Console 输出使用英文。
 
 ## 特性
 
-- **学习笔记** — 用中文解释前端概念及其底层机制。
-- **可观察实验** — 通过浏览器和 Node.js 实验，将理论与实际行为联系起来。
-- **编程练习** — 数据结构、算法与 TypeScript 类型练习。
+- 通过专题解释 CSS 布局、浏览器调度、网络、安全与工程交付的原理。
+- 用真实浏览器行为和有界的 Node.js 实验核对自己的预测。
+- 结合本地演示与测试，练习算法、TypeScript 类型、JavaScript 工具函数、React 和 Vue。
 
-## 学习材料
+## 安装
 
-| 领域 | 入口 |
-| --- | --- |
-| 浏览器 | [渲染](docs/browser/rendering/rendering.md) · [事件循环](docs/browser/event-loop/event-loop.md) · [加载](docs/browser/loading/experiment.md) · [生命周期](docs/browser/lifecycle/experiment.md) · [导航](docs/browser/navigation/experiment.md) · [存储](docs/browser/storage/webStorage/index.md) · [缓存](docs/browser/cache/experiment.md) · [通信](docs/browser/communication/cross-context-communication.md) · [观察器](docs/browser/observer/index.md) |
-| 浏览器 API | [网络请求](docs/browser/network/fetch.md) · [文件](docs/browser/files/files.md) · [环境能力](docs/browser/environment/environment.md) · [Web Components](docs/browser/web-components/web-components.md) · [iframe](docs/browser/iframe/iframe.md) · [DOM](docs/browser/dom/dom.md) · [PWA](docs/browser/pwa/serviceWorker.md) · [Chromium](docs/chromium/README.md) |
-| 语言与运行时 | [Node.js 实验](docs/node/run.ts) |
-| Web 基础 | [CSS](docs/css/box/box-model.md) · [网络](docs/network/README.md) · [安全](docs/security/foundations/trust-boundaries.md) |
-| 工程化 | [构建、架构、性能与监控](docs/engineering/README.md) |
-| 编程练习 | [数据结构](coding/structure/) · [算法](coding/algorithm/) · [Hot 100](coding/hot100/) · [类型挑战](coding/type-challenges/README.md) |
-| JavaScript 手写 | [函数](coding/function/) · [对象](coding/object/README.md) · [数组](coding/array/README.md) · [工具函数](coding/utils/README.md) |
-| 异步与事件 | [Promise](coding/promise/README.md) · [调度](coding/schedule/README.md) · [前端设计模式](coding/design-pattern/README.md) |
-| CSS 手写 | [布局、文本、图形与交互](coding/css/README.md) |
+使用 Node.js **>= 22.18**，以及根目录[包清单](package.json)声明的 pnpm 版本（`^11.18.0`）。在仓库根目录统一安装依赖：
 
-各实验 README 提供前置条件、运行命令、观察位置与停止方式。各 demo 自行维护页面资源、路由和测试。
+```bash
+pnpm install --frozen-lockfile
+```
+
+## 开始学习
+
+从[教程目录](docs/README.md)了解前置知识与阅读顺序，或从[编程练习目录](coding/README.md)选择练习入口。
+
+先选一个问题，阅读原理并预测示例结果，再运行对应实验或测试。专题文档负责完整解释，实验说明负责启动与观察。Chromium 选读描述固定版本的实现，Web 平台笔记则区分规范保证与浏览器行为。
+
+在仓库根目录运行一个简短的 Node.js 实验：
+
+```bash
+node docs/node/run.ts runtime
+```
+
+运行器执行断言，成功时输出 `lab-complete`。`node docs/node/run.ts --list` 列出 CLI 实验；浏览器实验另有启动命令、地址和停止说明，不在这个运行器中执行。
+
+| 领域             | 入口                                                                   |
+| ---------------- | ---------------------------------------------------------------------- |
+| CSS 与浏览器基础 | [CSS](docs/README.md#css) · [浏览器](docs/README.md#browser)           |
+| 运行时与协议     | [Node.js](docs/README.md#node) · [网络](docs/network/README.md)        |
+| 应用边界         | [安全](docs/README.md#security) · [工程化](docs/engineering/README.md) |
+| 浏览器实现       | [Chromium 阅读指南](docs/chromium/README.md)                           |
+| 编程与本地演示   | [练习目录](coding/README.md)                                           |
+| 编译阶段         | [编译器走查](packages/compiler/index.md)                               |
 
 ## 工作区命令
 
-在仓库根目录运行 `pnpm install --frozen-lockfile` 安装依赖。具体任务进入对应子包执行，例如在 `coding/utils/` 运行 `pnpm test`，在 `packages/compiler/` 运行 `pnpm build`。根目录保留全仓库检查和版本管理脚本。
+具体任务进入对应工作区执行，例如在 `coding/utils/` 运行 `pnpm test`，在 `packages/compiler/` 运行 `pnpm build`。以下全仓库检查在根目录执行：
 
-`coding/` 的所有一级目录均为 workspace 子包，统一复用根 `tsconfig.json`，不重复提供 typecheck 脚本。在仓库根目录运行 `pnpm typecheck` 即可；有独立 TypeScript 配置的工作区保留各自的检查脚本，由根命令一并调用。
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+```
+
+根类型检查先覆盖使用共享 TypeScript 配置的源码，再调用提供独立 `typecheck` 脚本的工作区，包括 React、Vue 与流式演示。Vitest 执行已配置的单元测试项目；HTTP 集成测试和构建产物入口检查使用各自说明中的命令。单元测试通过不能证明真实浏览器布局、焦点或生产行为。
 
 ## 许可证
 
-[MIT](LICENSE)。
+[MIT](LICENSE)。引用的上游材料保留各自声明；Chromium 译文另行标注来源与版本。

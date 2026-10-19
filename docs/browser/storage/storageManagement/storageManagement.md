@@ -137,6 +137,6 @@ const supportsOPFS = typeof navigator.storage?.getDirectory === "function"
 
 ## 9. 参考资料
 
-- [MDN：Storage quotas and eviction criteria](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)
+- [MDN：存储配额与回收条件](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)
 - [Storage Standard](https://storage.spec.whatwg.org/)
-- [File System Standard：Origin private file system](https://fs.spec.whatwg.org/#origin-private-file-system)
+- [文件系统标准：源私有文件系统](https://fs.spec.whatwg.org/#origin-private-file-system)

@@ -1,9 +1,9 @@
-# @soppy-index/test
+# 测试辅助工具：临时资源与子进程
 
-Shared fixture helpers for Vitest tests in the learning workspaces. Tests stay in each workspace's `__test__/` directory. Helpers create temporary files, register cleanup with `onTestFinished`, and bound subprocess execution. This workspace does not depend on the packages under test.
+[helpers.ts](src/helpers.ts) 为各学习工作区的 Vitest 用例提供临时文件和子进程工具。测试仍放在各工作区的 `__test__/`；这里不集中收纳测试，也不依赖编译器运行时。
 
-Run `pnpm test` from the repository root for all configured workspace unit tests, including coding exercises, the compiler, playground, and demos. Run `pnpm test` inside the relevant workspace to narrow the run; append `maps` in `packages/compiler/` for the mapping suite. The root config discovers demo projects with `docs/**/demo/vitest.config.ts`. `pnpm test:watch` watches all configured projects. Production HTML and HTTP suites use each demo's `test:ui` and `test:http` scripts and require the setup described by that demo. The Node native-testing lesson runs independently with `node docs/node/testing/index.ts` and intentionally uses `node:test`.
+临时文件工具通过 `onTestFinished` 注册清理；子进程工具限制执行时间与输出量，避免用例挂起或累积无限日志。它们只负责资源边界，结果是否正确仍由调用方断言。
 
-Inside `packages/compiler/`, `pnpm test:built` builds the compiler with Vite and runs `__test__/built.test.ts`; a fresh Node subprocess verifies the default package and subpath exports without the development condition.
+根目录运行 `pnpm test` 执行已配置的工作区单元测试。进入对应工作区运行 `pnpm test` 可缩小范围，追加文件名可筛选测试。需要真实 HTTP 服务的集成测试按各实验说明单独运行。
 
-学习工作区共用 Vitest fixture helpers，测试保留在各自的 `__test__/`。临时目录通过 `onTestFinished` 清理，子进程设有超时；根命令与独立集成测试的范围见上文。验证记录见[编译器说明](../../packages/compiler/docs/validation.md)。
+编译器的产物检查在 `packages/compiler/` 执行 `pnpm test:built`：先构建，再用新的 Node 子进程验证默认包入口与子路径导出，避免把 development 条件下的源码导入当成产物验证。

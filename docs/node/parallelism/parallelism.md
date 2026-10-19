@@ -14,12 +14,6 @@ spawn流式stdout适合大输出；exec通过shell并缓存结果，涉及注入
 
 Worker启动有成本，小任务应用复用池并限并发。多进程副本可由容器平台管理，cluster不是水平扩展必经步骤。每个worker/isolate的AsyncLocalStorage与模块状态独立，需显式传关联ID。
 
-## 从消息确认到任务完成
-
-主线程调用 `postMessage` 只完成发送阶段。Worker 收到消息、验证参数、计算结果并回传带 ID 的 ack 后，主线程才能确认该任务完成。若超时，只说明这次等待没有按期得到结果；CPU 任务可能还在运行，需要协作取消或显式 `terminate()`。
-
-传入 `ArrayBuffer` 时还要选所有权：普通消息克隆数据；transfer 把缓冲所有权交给 Worker，发送端立即脱离；`SharedArrayBuffer` 让双方共享字节，必须用 Atomics 等方式协调读写。
-
 ## 对应源码与实验
 
 以下片段来自 [index.ts](./index.ts) 或同目录辅助文件；完整断言和清理路径见源码。

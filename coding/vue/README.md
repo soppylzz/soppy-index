@@ -1,6 +1,4 @@
-# Vue 手写实现 / Vue interview implementations
-
-A Vue 3.5 + Vite workspace with a handwritten reactivity core and lifecycle-aware composables. The demo uses fixed local data and no backend.
+# Vue 手写实现：响应式核心与生命周期
 
 这里分为两个层次：[reactivity](reactivity/index.ts) 不依赖 Vue，手写响应式机制；[composables](composables/) 使用官方 Vue 3.5，练习把状态、异步任务和资源清理组合起来。两层通过演示页并排观察，避免把教学模型当作框架源码的完整复刻。
 
@@ -15,7 +13,7 @@ pnpm --filter @soppy-index/vue dev
 
 打开 <http://127.0.0.1:5174/>。端口被占用时启动会失败。构建使用 `pnpm --filter @soppy-index/vue build`，类型检查使用 `pnpm --filter @soppy-index/vue typecheck`，测试使用 `pnpm --filter @soppy-index/vue test`。
 
-[main.ts](main.ts) 使用 render function 组合页面，无需 SFC 编译插件。固定主题数组和本地 timeout 用来观察异步结果，不涉及真实 HTTP。建议按 effect → reactive → ref → computed → watch → composables 的顺序阅读。
+[main.ts](main.ts) 使用 render function 组合页面，无需 SFC 编译插件。基础请求演示使用固定主题数组和本地 timeout；扩展的 useFetch 演示通过真实 HTTP 读取同源静态 JSON。前者只能观察异步竞态，不能作为网络行为证据。建议按 effect → reactive → ref → computed → watch → composables 的顺序阅读。
 
 ## 对象怎么知道该更新谁
 

@@ -1,6 +1,6 @@
 # Deque（双端队列）
 
-> 两端都能入队、出队的队列（double-ended queue），四种端点操作都是 `O(1)`；滑动窗口类问题的标准载体
+> 两端都能入队、出队的队列（double-ended queue），出队为 `O(1)`，本例入队均摊为 `O(1)`；滑动窗口类问题的标准载体
 
 [查看实现与示例](./index.ts)
 
@@ -25,7 +25,7 @@ pnpm deque
 - 逻辑位置 `i` 对应物理下标 `(head + i) % capacity` —— 越过数组末尾就绕回开头，逻辑上是一个环
 - 队尾位置 = `(head + size - 1) % capacity`；两端操作只改 `head` 或 `size`，不搬动元素
 - 空间满了倍增扩容：按逻辑顺序平铺到新数组，`head` 归零（均摊 `O(1)`）
-- 对比 JS Array：`push` / `pop` 是 `O(1)`，但 `shift` / `unshift` 要整体挪动是 `O(n)` —— 这就是面试中自己实现 deque 的原因
+- 对比 JS Array：在常见动态数组模型中，push 均摊与 pop 为 `O(1)`，shift/unshift 可能需要 `O(n)` 次位置处理；ECMAScript 不为这些方法承诺统一的引擎复杂度 —— 这就是面试中自己实现 deque 的原因
 
 ## 3. 核心操作
 

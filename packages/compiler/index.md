@@ -1,8 +1,8 @@
 # 实验教程：同一段代码经过了什么
 
-[返回 README](README.md) · [语言边界](docs/language.md) · [实现计划](docs/plan.md)
+目标是跟踪同一段源码，解释文本、名字、类型和生成代码如何连接。先具备 JavaScript 函数、作用域与模块基础，再按 P0–P7 顺序走查；每步先预测，再运行命令核对。
 
-先预测中间结果，再执行。下面的输出结论来自本次验证，具体坐标约定、拒绝条件和版本见对应专题。
+主线只使用受限语言，不能拿成功示例推断完整 TypeScript 支持。精确输入范围见[语言子集](docs/language.md)，阶段职责见[分层架构](docs/architecture.md)；下文输出是示例预期，历史实测条件另列在验证记录中。
 
 ## P0：区分两套编译工具
 
@@ -61,7 +61,7 @@ var greet = function (name) {
 };
 ```
 
-实际两条 hello 命令都输出 `Hello, world`。JS 输入在 JS 模式下检查绑定、已知类型和转换前提，但不推断无标注参数类型；对比它与 TS 原始 AST 的差别。不能把这个例子的正确输出推论为任意箭头或任意 const 都可同样转换；[转换前提](docs/architecture.md#转换的前提)由语言限制与 Binder 拒绝路径共同保证。
+两条 hello 命令的预期输出都是 `Hello, world`。JS 输入在 JS 模式下检查绑定、已知类型和转换前提，但不推断无标注参数类型；对比它与 TS 原始 AST 的差别。不能把这个例子的正确输出推论为任意箭头或任意 const 都可同样转换；[转换前提](docs/architecture.md#转换的前提)由语言限制与 Binder 拒绝路径共同保证。
 
 ## P4：用查询验证映射
 
@@ -78,7 +78,7 @@ pnpm --dir internals/play-compiler modules
 pnpm --dir internals/play-compiler modules:cjs
 ```
 
-预测：greet 与 greeting 保留，unused 删除，noisy 和 effect 模块保留。实际报告与预测一致，两种格式都依次输出：
+预测：greet 与 greeting 保留，unused 删除，noisy 和 effect 模块保留。运行后核对保留报告，两种格式的预期输出顺序为：
 
 ```text
 library effect
@@ -108,4 +108,4 @@ pnpm --dir internals/play-compiler build
 
 打开 <http://127.0.0.1:5178>；页面从等待状态变为 `Hello, world`。终端 hook 日志证明调用，原始输入证据证明还存在类型标注，生成产物证明箭头确实降级，map 查询证明后续组合保留来源，浏览器 Console 证明执行。停止服务用 `Ctrl+C`。
 
-生产 build 的后续格式化可能移除多余括号或改变空格，不要用固定排版判断是不是同一段代码。浏览器中央行为已经实测；DevTools 手动断点跳转没有自动化点击验证。各环节的实测与限制集中在[验证记录](docs/validation.md)。
+生产 build 的后续格式化可能移除多余括号或改变空格，不要用固定排版判断是不是同一段代码。此前浏览器观察与未验证的断点交互分开记录，具体环境、证据和限制集中在[验证记录](docs/validation.md)。

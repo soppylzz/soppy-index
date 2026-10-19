@@ -1,7 +1,5 @@
 # 分层架构与编译概念
 
-[返回 README](../README.md) · [源码对照](references.md)
-
 ## 从输入到输出
 
 ```mermaid

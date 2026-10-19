@@ -1,6 +1,4 @@
-# React 手写实现 / React interview implementations
-
-A client-only React 19 + Vite workspace with fixed local data. Each implementation exposes an interview mechanism; no Next.js, backend, remote API, or component library is required.
+# React 手写实现：状态、更新与资源清理
 
 这里的重点是把状态归属、更新过程和资源清理讲清楚。演示页使用 React 19.2、Vite 和固定数据，组件与 Hooks 都可以单独阅读。页面和代码使用英文，以下说明使用中文。
 
