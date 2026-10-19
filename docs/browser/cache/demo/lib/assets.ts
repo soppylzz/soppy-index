@@ -1,5 +1,5 @@
 export const assets = [
-  { name: "fresh.svg", policy: "public, max-age=60", etag: true, lastModified: false },
+  { name: "fresh.svg", policy: "public, max-age=5", etag: true, lastModified: false },
   { name: "short-fresh.svg", policy: "max-age=1", etag: true, lastModified: true },
   { name: "no-cache.svg", policy: "no-cache", etag: true, lastModified: false },
   { name: "last-modified.svg", policy: "no-cache", etag: false, lastModified: true },
