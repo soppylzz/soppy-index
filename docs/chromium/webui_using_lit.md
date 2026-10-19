@@ -1,4 +1,4 @@
-> 英文原文：[本地副本](en/webui_using_lit.md) · [Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_using_lit.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
+> 英文原文：[Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_using_lit.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
 
 <a id="using-lit-in-chromium-webui-development"></a>
 
@@ -68,8 +68,7 @@ static override get properties() {
 父元素绑定并监听：
 
 ```html
-<foo-child ?foo="${this.foo}" on-foo-changed="${this.onFooChanged}">
-</foo-child>
+<foo-child ?foo="${this.foo}" on-foo-changed="${this.onFooChanged}"> </foo-child>
 <demo-child id="demo"></demo-child>
 ```
 
@@ -144,14 +143,8 @@ onSelectChange(e: Event) {
 
 ```html
 <select @change="${this.onSelectChange}">
-  <option value="${MyEnum.FIRST}"
-      ?selected="${this.isSelected(MyEnum.FIRST)}">
-    Option 1
-  </option>
-  <option value="${MyEnum.SECOND}"
-      ?selected="${this.isSelected(MyEnum.SECOND)}">
-    Option 2
-  </option>
+  <option value="${MyEnum.FIRST}" ?selected="${this.isSelected(MyEnum.FIRST)}">Option 1</option>
+  <option value="${MyEnum.SECOND}" ?selected="${this.isSelected(MyEnum.SECOND)}">Option 2</option>
 </select>
 ```
 
@@ -187,12 +180,12 @@ Lit 原生不支持双向绑定，CrLitElement 的 notify:true 提供基础兼�
 
 可在 [Lit playground 示例](https://lit.dev/playground/#project=W3sibmFtZSI6InRvcC1lbGVtZW50LnRzIiwiY29udGVudCI6ImltcG9ydCB7UG9seW1lckVsZW1lbnQsIGh0bWx9IGZyb20gJ0Bwb2x5bWVyL3BvbHltZXInO1xuaW1wb3J0IHtjdXN0b21FbGVtZW50LCBwcm9wZXJ0eX0gZnJvbSAnQHBvbHltZXIvZGVjb3JhdG9ycyc7XG5pbXBvcnQge0NyRHVtbXlQb2x5bWVyRWxlbWVudH0gZnJvbSAnLi9jcl9kdW1teV9wb2x5bWVyLmpzJztcbmltcG9ydCB7Q3JEdW1teUxpdEVsZW1lbnR9IGZyb20gJy4vY3JfZHVtbXlfbGl0LmpzJztcbmltcG9ydCAnLi9jcl9kdW1teV9saXQuanMnO1xuaW1wb3J0ICcuL2NyX2R1bW15X3BvbHltZXIuanMnO1xuXG5AY3VzdG9tRWxlbWVudCgndG9wLWVsZW1lbnQnKVxuY2xhc3MgVG9wRWxlbWVudCBleHRlbmRzIFBvbHltZXJFbGVtZW50IHtcbiAgc3RhdGljIGdldCB0ZW1wbGF0ZSgpIHtcbiAgICByZXR1cm4gaHRtbGBcbiAgICAgIDxzdHlsZT5cbiAgICAgICAgOmhvc3Qge1xuICAgICAgICAgIGNvbG9yOiBibHVlO1xuICAgICAgICAgIGRpc3BsYXk6YmxvY2s7XG4gICAgICAgICAgYm9yZGVyOiAycHggc29saWQgYmx1ZTtcbiAgICAgICAgfVxuICAgICAgICBcbiAgICAgICAgI2NoaWxkcmVuIHtcbiAgICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICAgIGdhcDogMTBweDtcbiAgICAgICAgfVxuICAgICAgPC9zdHlsZT5cbiAgICAgIDxkaXY-UE9MWU1FUiBQQVJFTlQ8L2Rpdj5cbiAgICAgIDxsYWJlbD5TZXQgUG9seW1lciBwYXJlbnQgdmFsdWU6IDxpbnB1dCB0eXBlPVwibnVtYmVyXCIgb24taW5wdXQ9XCJvbklucHV0X1wiPjwvaW5wdXQ-PC9sYWJlbD5cbiAgICAgIDxkaXYgaWQ9XCJjaGlsZHJlblwiPlxuICAgICAgPGNyLWR1bW15LXBvbHltZXIgdmFsdWU9XCJ7e3ZhbHVlUG9seW1lcn19XCIgb24tdmFsdWUtY2hhbmdlZD1cIm9uUG9seW1lclZhbHVlQ2hhbmdlZF9cIj48L2NyLWR1bW15LXBvbHltZXI-XG4gICAgICA8Y3ItZHVtbXktbGl0IHZhbHVlPVwie3t2YWx1ZUxpdH19XCIgb24tdmFsdWUtY2hhbmdlZD1cIm9uTGl0VmFsdWVDaGFuZ2VkX1wiPjwvY3ItZHVtbXktbGl0PlxuICAgICAgPC9kaXY-XG4gICAgICA8ZGl2IGlkPVwibG9nXCI-PC9kaXY-XG4gICAgYDtcbiAgfVxuICBcbiAgc3RhdGljIGdldCBwcm9wZXJ0aWVzKCkge1xuICAgIHJldHVybiB7XG4gICAgICB2YWx1ZVBvbHltZXI6IHt0eXBlOiBOdW1iZXJ9LFxuICAgICAgdmFsdWVMaXQ6IHt0eXBlOiBOdW1iZXJ9LFxuICAgIH07XG4gIH1cbiAgXG4gIHZhbHVlTGl0OiBudW1iZXI7XG4gIHZhbHVlUG9seW1lcjogbnVtYmVyO1xuICBcbiAgb25JbnB1dF8oKSB7ICAgIFxuICAgIHRoaXMudmFsdWVQb2x5bWVyID0gTnVtYmVyKHRoaXMuc2hhZG93Um9vdC5xdWVyeVNlbGVjdG9yKCdpbnB1dCcpLnZhbHVlKTtcbiAgICB0aGlzLnZhbHVlTGl0ID0gdGhpcy52YWx1ZVBvbHltZXI7XG4gIH1cbiAgXG4gIG9uUG9seW1lclZhbHVlQ2hhbmdlZF8oZSkge1xuICAgIGNvbnN0IGR1bW15ID0gdGhpcy5zaGFkb3dSb290IS5xdWVyeVNlbGVjdG9yKCdjci1kdW1teS1wb2x5bWVyJykgYXMgQ3JEdW1teVBvbHltZXJFbGVtZW50O1xuICAgIHRoaXMuJC5sb2cudGV4dENvbnRlbnQgKz0gJ3BvbHltZXItdmFsdWUtY2hhbmdlZCB0byAnICsgZS5kZXRhaWwudmFsdWUgKyAnLi4uICAnO1xuICB9XG4gICBvbkxpdFZhbHVlQ2hhbmdlZF8oZSkge1xuICAgIGNvbnN0IGR1bW15ID0gdGhpcy5zaGFkb3dSb290IS5xdWVyeVNlbGVjdG9yKCdjci1kdW1teS1saXQnKSBhcyBDckR1bW15TGl0RWxlbWVudDtcbiAgICB0aGlzLiQubG9nLnRleHRDb250ZW50ICs9ICdsaXQtdmFsdWUtY2hhbmdlZCB0byAnICsgZS5kZXRhaWwudmFsdWUgKyAnLi4uICAnO1xuICB9XG59O1xuXG4ifSx7Im5hbWUiOiJwYWNrYWdlLmpzb24iLCJjb250ZW50Ijoie1xuICBcImRlcGVuZGVuY2llc1wiOiB7XG4gICAgXCJsaXRcIjogXCJeMy4wLjBcIixcbiAgICBcIkBsaXQvcmVhY3RpdmUtZWxlbWVudFwiOiBcIl4yLjAuMFwiLFxuICAgIFwibGl0LWVsZW1lbnRcIjogXCJeNC4wLjBcIixcbiAgICBcImxpdC1odG1sXCI6IFwiXjMuMC4wXCJcbiAgfVxufSIsImhpZGRlbiI6dHJ1ZX0seyJuYW1lIjoiaW5kZXguaHRtbCIsImNvbnRlbnQiOiI8IURPQ1RZUEUgaHRtbD5cbjxoZWFkPlxuICA8c2NyaXB0IHR5cGU9XCJtb2R1bGVcIiBzcmM9XCIuL3RvcC1lbGVtZW50LmpzXCI-PC9zY3JpcHQ-XG4gIDxzY3JpcHQgdHlwZT1cIm1vZHVsZVwiIHNyYz1cIi4vdG9wLWVsZW1lbnQtbGl0LmpzXCI-PC9zY3JpcHQ-XG48L2hlYWQ-XG48Ym9keT5cbiAgPHRvcC1lbGVtZW50PjwvdG9wLWVsZW1lbnQ-XG4gIDx0b3AtZWxlbWVudC1saXQ-PC90b3AtZWxlbWVudC1saXQ-XG48L2JvZHk-XG4ifSx7Im5hbWUiOiJjcl9kdW1teV9wb2x5bWVyLnRzIiwiY29udGVudCI6ImltcG9ydCB7UG9seW1lckVsZW1lbnQsIGh0bWx9IGZyb20gJ0Bwb2x5bWVyL3BvbHltZXInO1xuaW1wb3J0IHtjdXN0b21FbGVtZW50LCBwcm9wZXJ0eX0gZnJvbSAnQHBvbHltZXIvZGVjb3JhdG9ycyc7XG5cbkBjdXN0b21FbGVtZW50KCdjci1kdW1teS1wb2x5bWVyJylcbmV4cG9ydCBjbGFzcyBDckR1bW15UG9seW1lckVsZW1lbnQgZXh0ZW5kcyBQb2x5bWVyRWxlbWVudCB7XG4gIHN0YXRpYyBnZXQgdGVtcGxhdGUoKSB7XG4gICAgcmV0dXJuIGh0bWxgXG4gICAgICAgPHN0eWxlPlxuICAgICAgICA6aG9zdCB7XG4gICAgICAgICAgYm9yZGVyOiAycHggc29saWQgYmx1ZTtcbiAgICAgICAgICBjb2xvcjogYmx1ZTtcbiAgICAgICAgICBkaXNwbGF5OiBibG9jaztcbiAgICAgICAgfVxuICAgICAgIDwvc3R5bGU-XG4gICAgICAgPGRpdj5Qb2x5bWVyIGNoaWxkIHZhbHVlIGlzOiBbW3ZhbHVlXV08L2Rpdj5cbiAgICBgO1xuICB9XG4gIFxuICBzdGF0aWMgZ2V0IHByb3BlcnRpZXMoKSB7XG4gICAgcmV0dXJuIHtcbiAgICAgIHZhbHVlOiB7dHlwZTogTnVtYmVyLCBub3RpZnk6IHRydWV9LFxuICAgIH07XG4gIH1cbiAgXG4gIHZhbHVlOiBudW1iZXIgPSAxO1xufSJ9LHsibmFtZSI6InRvcC1lbGVtZW50LWxpdC50cyIsImNvbnRlbnQiOiJpbXBvcnQge0xpdEVsZW1lbnQsIGh0bWwsIG5vdGhpbmd9IGZyb20gJ2xpdCc7XG5pbXBvcnQge2N1c3RvbUVsZW1lbnR9IGZyb20gJ2xpdC9kZWNvcmF0b3JzLmpzJztcblxuaW1wb3J0IHtDckR1bW15UG9seW1lckVsZW1lbnR9IGZyb20gJy4vY3JfZHVtbXlfcG9seW1lci5qcyc7XG5pbXBvcnQgJy4vY3JfZHVtbXlfcG9seW1lci5qcyc7XG5pbXBvcnQge0NyRHVtbXlMaXRFbGVtZW50fSBmcm9tICcuL2NyX2R1bW15X2xpdC5qcyc7XG5pbXBvcnQgJy4vY3JfZHVtbXlfbGl0LmpzJztcblxuQGN1c3RvbUVsZW1lbnQoJ3RvcC1lbGVtZW50LWxpdCcpXG5jbGFzcyBUb3BFbGVtZW50TGl0IGV4dGVuZHMgTGl0RWxlbWVudCB7XG4gIG92ZXJyaWRlIHJlbmRlcigpIHtcbiAgICByZXR1cm4gaHRtbGBcbiAgICAgIDxzdHlsZT5cbiAgICAgICAgOmhvc3Qge1xuICAgICAgICAgIGJvcmRlcjogMnB4IHNvbGlkIGdyZWVuO1xuICAgICAgICAgIGNvbG9yOiBncmVlbjtcbiAgICAgICAgICBkaXNwbGF5OiBibG9jaztcbiAgICAgICAgfVxuICAgICAgICBcbiAgICAgICAgI2NoaWxkcmVuIHtcbiAgICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICAgIGdhcDogMTBweDtcbiAgICAgICAgfVxuICAgICAgPC9zdHlsZT5cbiAgICAgIDxkaXY-TElUIFBBUkVOVDwvZGl2PlxuICAgICAgPGxhYmVsPlNldCBMaXQgcGFyZW50IHZhbHVlOiA8aW5wdXQgdHlwZT1cIm51bWJlclwiIEBpbnB1dD1cIiR7dGhpcy5vbklucHV0X31cIj48L2lucHV0PjwvbGFiZWw-XG4gICAgICA8ZGl2IGlkPVwiY2hpbGRyZW5cIj5cbiAgICAgIDxjci1kdW1teS1wb2x5bWVyIHZhbHVlPVwiJHt0aGlzLnZhbHVlUG9seW1lciB8fCBub3RoaW5nfVwiIEB2YWx1ZS1jaGFuZ2VkPVwiJHt0aGlzLm9uUG9seW1lclZhbHVlQ2hhbmdlZF99XCI-PC9jci1kdW1teS1wb2x5bWVyPlxuICAgICAgPGNyLWR1bW15LWxpdCB2YWx1ZT1cIiR7dGhpcy52YWx1ZUxpdCB8fCBub3RoaW5nfVwiIEB2YWx1ZS1jaGFuZ2VkPVwiJHt0aGlzLm9uTGl0VmFsdWVDaGFuZ2VkX31cIj48L2NyLWR1bW15LWxpdD5cbiAgICAgIDwvZGl2PlxuICAgICAgPGRpdiBpZD1cImxvZ1wiPjwvZGl2PlxuICAgIGA7XG4gIH1cblxuICBzdGF0aWMgb3ZlcnJpZGUgZ2V0IHByb3BlcnRpZXMoKSB7XG4gICAgcmV0dXJuIHtcbiAgICAgIHZhbHVlUG9seW1lcjoge3R5cGU6IE51bWJlcn0sXG4gICAgICB2YWx1ZUxpdDoge3R5cGU6IE51bWJlcn0sXG4gICAgfTtcbiAgfVxuICBcbiAgdmFsdWVQb2x5bWVyOiBudW1iZXI7XG4gIHZhbHVlTGl0OiBudW1iZXI7XG4gIFxuICBvbklucHV0XygpIHtcbiAgICB0aGlzLnZhbHVlUG9seW1lciA9IE51bWJlcih0aGlzLnNoYWRvd1Jvb3QucXVlcnlTZWxlY3RvcignaW5wdXQnKS52YWx1ZSk7XG4gICAgdGhpcy52YWx1ZUxpdCA9IHRoaXMudmFsdWVQb2x5bWVyO1xuICB9XG4gIFxuICBvblBvbHltZXJWYWx1ZUNoYW5nZWRfKGUpIHtcbiAgICBjb25zdCBkdW1teSA9IHRoaXMuc2hhZG93Um9vdCEucXVlcnlTZWxlY3RvcignY3ItZHVtbXktcG9seW1lcicpIGFzIENyRHVtbXlQb2x5bWVyRWxlbWVudDtcbiAgICB0aGlzLnNoYWRvd1Jvb3QhLnF1ZXJ5U2VsZWN0b3IoJyNsb2cnKS50ZXh0Q29udGVudCArPSAncG9seW1lci12YWx1ZS1jaGFuZ2VkIHRvICcgKyBlLmRldGFpbC52YWx1ZSArICcuLi4gICc7XG4gIH1cbiAgXG4gIG9uTGl0VmFsdWVDaGFuZ2VkXyhlKSB7XG4gICAgY29uc3QgZHVtbXkgPSB0aGlzLnNoYWRvd1Jvb3QhLnF1ZXJ5U2VsZWN0b3IoJ2NyLWR1bW15LWxpdCcpIGFzIENyRHVtbXlMaXRFbGVtZW50O1xuICAgIHRoaXMuc2hhZG93Um9vdCEucXVlcnlTZWxlY3RvcignI2xvZycpLnRleHRDb250ZW50ICs9ICdsaXQtdmFsdWUtY2hhbmdlZCB0byAnICsgZS5kZXRhaWwudmFsdWUgKyAnLi4uICAnO1xuICB9XG59XG4gIn0seyJuYW1lIjoiY3JfZHVtbXlfbGl0LnRzIiwiY29udGVudCI6ImltcG9ydCB7TGl0RWxlbWVudCwgaHRtbCwgUHJvcGVydHlWYWx1ZXN9IGZyb20gJ2xpdCc7XG5pbXBvcnQge2N1c3RvbUVsZW1lbnR9IGZyb20gJ2xpdC9kZWNvcmF0b3JzLmpzJztcblxuQGN1c3RvbUVsZW1lbnQoJ2NyLWR1bW15LWxpdCcpXG5leHBvcnQgY2xhc3MgQ3JEdW1teUxpdEVsZW1lbnQgZXh0ZW5kcyBMaXRFbGVtZW50IHtcbiAgb3ZlcnJpZGUgcmVuZGVyKCkge1xuICAgIHJldHVybiBodG1sYFxuICAgICAgPHN0eWxlPlxuICAgICAgICA6aG9zdCB7XG4gICAgICAgICAgYm9yZGVyOiAycHggc29saWQgZ3JlZW47XG4gICAgICAgICAgY29sb3I6IGdyZWVuO1xuICAgICAgICAgIGRpc3BsYXk6IGJsb2NrO1xuICAgICAgICB9XG4gICAgICA8L3N0eWxlPlxuICAgICAgPGRpdj5MaXQgY2hpbGQgdmFsdWUgaXM6ICR7dGhpcy52YWx1ZX08L2Rpdj5cbiAgICBgO1xuICB9XG5cbiAgc3RhdGljIG92ZXJyaWRlIGdldCBwcm9wZXJ0aWVzKCkge1xuICAgIHJldHVybiB7XG4gICAgICB2YWx1ZToge3R5cGU6IE51bWJlcn0sXG4gICAgfTtcbiAgfVxuICBcbiAgb3ZlcnJpZGUgY29ubmVjdGVkQ2FsbGJhY2soKSB7XG4gICAgc3VwZXIuY29ubmVjdGVkQ2FsbGJhY2soKTtcbiAgICBcbiAgICB0aGlzLnBlcmZvcm1VcGRhdGUoKTtcbiAgfVxuIFxuICB2YWx1ZTogbnVtYmVyID0gMTtcbiAgXG4gIC8vIEltcGxlbWVudGF0aW9uIG9mIG5vdGlmeTogdHJ1ZSBmcm9tIENyTGl0RWxlbWVudFxuICBvdmVycmlkZSB1cGRhdGVkKGNoYW5nZWRQcm9wZXJ0aWVzOiBQcm9wZXJ0eVZhbHVlczx0aGlzPikge1xuICAgIGlmIChjaGFuZ2VkUHJvcGVydGllcy5oYXMoJ3ZhbHVlJykpIHtcbiAgICAgIHRoaXMuZGlzcGF0Y2hFdmVudChuZXcgQ3VzdG9tRXZlbnQoJ3ZhbHVlLWNoYW5nZWQnLCB7IGJ1YmJsZXM6IHRydWUsIGNvbXBvc2VkOiB0cnVlLCBkZXRhaWw6IHsgdmFsdWU6IHRoaXMudmFsdWUgfX0pKTtcbiAgICB9XG4gIH1cbn0ifV0)中调整父子初始化值，观察差异。原文列出的初始化行为如下；“发事件”均指 -changed：
 
-| 父 / 子           | 两者都初始化       | 仅父初始化         | 仅子初始化                                                                              | 两者都不初始化      |
-| ----------------- | ------------------ | ------------------ | --------------------------------------------------------------------------------------- | ------------------- |
-| Polymer / Polymer | 父值传子，不发事件 | 父值传子，不发事件 | 子值传父，发事件                                                                        | undefined，不发事件 |
-| Polymer / Lit     | 父值传子，发事件   | 父值传子，发事件   | 子值传父，发事件                                                                        | undefined，不发事件 |
-| Lit / Polymer     | 父值传子，发事件   | 父值传子，发事件   | attribute 绑定时子值传父；property 绑定时父级 undefined 优先，发出值为 undefined 的事件 | undefined，不发事件 |
-| Lit / Lit         | 父值传子，发事件   | 父值传子，发事件   | attribute 绑定时子值传父；property 绑定时父级 undefined 优先，发出值为 undefined 的事件 | undefined，不发事件 |
+| 父 / 子 | 两者都初始化 | 仅父初始化 | 仅子初始化 | 两者都不初始化 |
+| --- | --- | --- | --- | --- |
+| Polymer / Polymer | 父值传子，不发事件 | 父值传子，不发事件 | 子值传父，发事件 | undefined，不发事件 |
+| Polymer / Lit | 父值传子，发事件 | 父值传子，发事件 | 子值传父，发事件 | undefined，不发事件 |
+| Lit / Polymer | 父值传子，发事件 | 父值传子，发事件 | attribute 绑定时子值传父；property 绑定时父级 undefined 优先，发出值为 undefined 的事件 | undefined，不发事件 |
+| Lit / Lit | 父值传子，发事件 | 父值传子，发事件 | attribute 绑定时子值传父；property 绑定时父级 undefined 优先，发出值为 undefined 的事件 | undefined，不发事件 |
 
 这里 attribute 语法为 `value="${this.childValue || nothing}"`，property 语法为 `.value="${this.value}"`。非布尔、字符串、数字的值必须使用 property 绑定。
 
@@ -206,26 +199,26 @@ WebUI 历史上大量依赖 Polymer 组件库。下表列出团队开始探索 L
 
 即使在 Polymer UI 中，也[不再推荐 iron-、paper- 元素](https://chromium.googlesource.com/chromium/src/+/HEAD/styleguide/web/web.md#Polymer)。
 
-| Polymer 元素                             | 替代方式                                                   |
-| ---------------------------------------- | ---------------------------------------------------------- |
-| iron-list                                | cr-infinite-list；小列表用 map，详见迁移章节               |
-| iron-icon                                | cr-icon                                                    |
-| iron-collapse                            | cr-collapse                                                |
-| paper-spinner                            | cr-spinner-style CSS，需更多定制时使用 throbber.svg        |
-| paper-styles                             | 不使用，属于 2023 refresh 前样式，已从非 ChromeOS 构建移除 |
-| iron-flex-layout                         | 标准 CSS                                                   |
-| iron-a11y-announcer                      | cr-a11y-announcer                                          |
-| iron-location / iron-query-params        | CrRouter 或自定义代码                                      |
-| iron-scroll-target-behavior              | 不使用                                                     |
-| paper-progress                           | cr-progress 或配合 CSS 的原生 progress                     |
-| iron-iconset-svg / iron-meta             | cr-iconset 与 IconsetMap                                   |
-| iron-media-query                         | window.matchMedia()                                        |
-| iron-pages                               | 条件渲染或 cr-page-selector                                |
-| iron-scroll-threshold                    | 不使用                                                     |
-| iron-resizable-behavior                  | ResizeObserver，在尺寸变化时触发必要更新                   |
-| paper-tooltip                            | cr-tooltip                                                 |
-| iron-a11y-keys                           | 不使用                                                     |
-| iron-selector / iron-selectable-behavior | CrSelectableMixin                                          |
+| Polymer 元素 | 替代方式 |
+| --- | --- |
+| iron-list | cr-infinite-list；小列表用 map，详见迁移章节 |
+| iron-icon | cr-icon |
+| iron-collapse | cr-collapse |
+| paper-spinner | cr-spinner-style CSS，需更多定制时使用 throbber.svg |
+| paper-styles | 不使用，属于 2023 refresh 前样式，已从非 ChromeOS 构建移除 |
+| iron-flex-layout | 标准 CSS |
+| iron-a11y-announcer | cr-a11y-announcer |
+| iron-location / iron-query-params | CrRouter 或自定义代码 |
+| iron-scroll-target-behavior | 不使用 |
+| paper-progress | cr-progress 或配合 CSS 的原生 progress |
+| iron-iconset-svg / iron-meta | cr-iconset 与 IconsetMap |
+| iron-media-query | window.matchMedia() |
+| iron-pages | 条件渲染或 cr-page-selector |
+| iron-scroll-threshold | 不使用 |
+| iron-resizable-behavior | ResizeObserver，在尺寸变化时触发必要更新 |
+| paper-tooltip | cr-tooltip |
+| iron-a11y-keys | 不使用 |
+| iron-selector / iron-selectable-behavior | CrSelectableMixin |
 
 <a id="anatomy-of-a-lit-based-element"></a>
 
@@ -241,29 +234,29 @@ Chromium WebUI 中一个 Lit custom element 使用三个文件：`.ts` 定义元
 // Copyright 2024 The Chromium Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import '//resources/cr_elements/cr_input/cr_input.js';
+import "//resources/cr_elements/cr_input/cr_input.js"
 
-import {CrLitElement} from '//resources/lit/v3_0/lit.rollup.js';
-import {getCss} from './my_example.css.js';
-import {getHtml} from './my_example.html.js';
+import { CrLitElement } from "//resources/lit/v3_0/lit.rollup.js"
+import { getCss } from "./my_example.css.js"
+import { getHtml } from "./my_example.html.js"
 
 export interface MyExampleElement {
   $: {
-    input: HTMLElement,
-  };
+    input: HTMLElement
+  }
 }
 
 export class MyExampleElement extends CrLitElement {
   static get is() {
-    return 'my-example';
+    return "my-example"
   }
 
   static override get styles() {
-    return getCss();
+    return getCss()
   }
 
   override render() {
-    return getHtml.bind(this)();
+    return getHtml.bind(this)()
   }
 
   static override get properties() {
@@ -272,26 +265,26 @@ export class MyExampleElement extends CrLitElement {
         type: Boolean,
         reflect: true,
       },
-      myValue: {type: String},
-    };
+      myValue: { type: String },
+    }
   }
 
-  accessor disabled: boolean = false;
-  accessor myValue: string = 'hello world';
+  accessor disabled: boolean = false
+  accessor myValue: string = "hello world"
 
   // Referenced from the template, so must be protected (not private).
   protected onInputValueChanged(e: CustomEvent<string>) {
-    this.myValue = e.detail.value;
+    this.myValue = e.detail.value
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'my-example': MyExampleElement;
+    "my-example": MyExampleElement
   }
 }
 
-customElements.define(MyExampleElement.is, MyExampleElement);
+customElements.define(MyExampleElement.is, MyExampleElement)
 ```
 
 CSS 示例：
@@ -313,7 +306,7 @@ CSS 示例：
 }
 
 :host([disabled]) #input {
-   background-color: gray;
+  background-color: gray;
 }
 ```
 
@@ -326,16 +319,18 @@ CSS 文件开头必须有 `#css_wrapper_metadata_start`、`#css_wrapper_metadata
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import {html} from '//resources/lit/v3_0/lit.rollup.js';
-import type {MyExampleElement} from './my_example.js';
+import { html } from "//resources/lit/v3_0/lit.rollup.js"
+import type { MyExampleElement } from "./my_example.js"
 
 export function getHtml(this: MyExampleElement) {
- return html`
-   <div>Input something</div>
-   <cr-input id="input" .value="${this.myValue}"
-       ?disabled="${this.disabled}"
-       @value-changed="${this.onInputValueChanged}">
-   </cr-input>`;
+  return html` <div>Input something</div>
+    <cr-input
+      id="input"
+      .value="${this.myValue}"
+      ?disabled="${this.disabled}"
+      @value-changed="${this.onInputValueChanged}"
+    >
+    </cr-input>`
 }
 ```
 
@@ -528,8 +523,7 @@ Polymer cr_toolbar.html：
 ```html
 <div id="content">
   <template is="dom-if" if="[[showMenu]]" restamp>
-    <cr-icon-button id="menuButton" class="no-overlap"
-        iron-icon="cr20:menu" on-click="onMenuClick">
+    <cr-icon-button id="menuButton" class="no-overlap" iron-icon="cr20:menu" on-click="onMenuClick">
     </cr-icon-button>
   </template>
   <h1>[[pageName]]</h1>
@@ -541,9 +535,14 @@ Lit cr_toolbar.html.ts：
 ```html
 <div id="content">
   ${this.showMenu ? html`
-    <cr-icon-button id="menuButton" class="no-overlap"
-        iron-icon="cr20:menu" @click="${this.onMenuClick}">
-    </cr-icon-button>` : ''}
+  <cr-icon-button
+    id="menuButton"
+    class="no-overlap"
+    iron-icon="cr20:menu"
+    @click="${this.onMenuClick}"
+  >
+  </cr-icon-button
+  >` : ''}
   <h1>${this.pageName}</h1>
 </div>
 ```
@@ -563,9 +562,7 @@ Polymer 模板：
 ```html
 <template is="dom-repeat" items="[[listItems]]">
   <div class="item-container [[getSelectedClass(item, selectedItem)]]">
-    <cr-button id="[[getItemId(index)]]" on-click="onItemClick">
-      [[item.name]]
-    </cr-button>
+    <cr-button id="[[getItemId(index)]]" on-click="onItemClick"> [[item.name]] </cr-button>
   </div>
 </template>
 ```
@@ -648,8 +645,7 @@ cr-lazy-list 在滚动到条目时才把它加入 DOM，还利用 CSS content-vi
 ```html
 <iron-list id="list" items="[[listItems]]" as="item">
   <template>
-    <custom-item description="[[item.description]]" name="[[item.name]]"
-        on-click="onListItemClick">
+    <custom-item description="[[item.description]]" name="[[item.name]]" on-click="onListItemClick">
     </custom-item>
   </template>
 </iron-list>
@@ -659,9 +655,7 @@ cr-lazy-list 在滚动到条目时才把它加入 DOM，还利用 CSS content-vi
 
 ```html
 <div class="name">${this.name}</div>
-<div class="description" ?hidden="${!this.description}">
-  ${this.description}
-</div>
+<div class="description" ?hidden="${!this.description}">${this.description}</div>
 ```
 
 Description 影响高度。如果不在渲染完成后通知 iron-list，可能测得错误高度，出现空隙或重叠。因此 description 变化时在 updated 发事件。
@@ -699,13 +693,16 @@ Lit 推荐直接提交 `.html.ts`。为了让 C++ `$i18n{}` 替换识别模板�
 
 ```ts
 export function getHtml(this: MyExampleElement) {
- return html`<!--_html_template_start_-->
-   <div>$i18n{inputLabel}</div>
-   <cr-input id="input" .value="${this.myValue}"
-       ?disabled="${this.disabled}"
-       @value-changed="${this.onInputValueChanged}">
-   </cr-input>
-<!--_html_template_end_-->`;
+  return html`<!--_html_template_start_-->
+    <div>$i18n{inputLabel}</div>
+    <cr-input
+      id="input"
+      .value="${this.myValue}"
+      ?disabled="${this.disabled}"
+      @value-changed="${this.onInputValueChanged}"
+    >
+    </cr-input>
+    <!--_html_template_end_-->`
 }
 ```
 
@@ -717,8 +714,8 @@ export function getHtml(this: MyExampleElement) {
 
 ```ts
 // Validate that the input is disabled when invalid is set.
-myTestElement.invalid = true;
-assertTrue(myTestElement.$.input.disabled);
+myTestElement.invalid = true
+assertTrue(myTestElement.$.input.disabled)
 ```
 
 它假定设置 invalid 后 DOM 同步更新。Lit 不满足此假定，需要等待渲染周期：推荐 `chrome://webui-test/test_util.js` 的 `await microtasksFinished()`，内部等待零延时 setTimeout，使多元素更新有机会完成；也可直接等待被测元素的 updateComplete。
@@ -727,9 +724,9 @@ assertTrue(myTestElement.$.input.disabled);
 
 ```ts
 // Validate that the input is disabled when invalid is set.
-myTestElement.invalid = true;
-await microtasksFinished();
-assertTrue(myTestElement.$.input.disabled);
+myTestElement.invalid = true
+await microtasksFinished()
+assertTrue(myTestElement.$.input.disabled)
 ```
 
 > 许多测试更适合等待操作应触发的具体事件或 BrowserProxy 调用，而非假定同步，或依赖 microtasksFinished、Polymer waitAfterNextRender / flushTasks 等辅助方法。后者并不保证某个具体业务行为已经发生。

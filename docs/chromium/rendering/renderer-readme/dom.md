@@ -1,4 +1,4 @@
-> 英文原文：[本地副本](../../en/rendering/renderer-readme/dom.md) · [Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/dom/README.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
+> 英文原文：[Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/dom/README.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
 
 <a id="dom"></a>
 
@@ -117,10 +117,10 @@ A
 
 ```javascript
 // In JavaScript
-const b = document.querySelector('#B');
-const shadowRoot = b.attachShadow({ mode: 'open' });
-const sb = document.createElement('div');
-shadowRoot.appendChild(sb);
+const b = document.querySelector("#B")
+const shadowRoot = b.attachShadow({ mode: "open" })
+const sb = document.createElement("div")
+shadowRoot.appendChild(sb)
 ```
 
 结果为：

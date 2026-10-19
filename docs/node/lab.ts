@@ -20,7 +20,9 @@ export async function runLab(name: string, run: () => Promise<void>): Promise<vo
     await run()
     log("lab-complete", { name })
   } catch (error) {
-    const failure = error as Error & { code?: string }
+    const failure = error as Error & { code?: string; stdout?: string; stderr?: string }
+    if (failure.stdout) process.stdout.write(failure.stdout)
+    if (failure.stderr) process.stderr.write(failure.stderr)
     log("lab-failed", { name, error: failure.name, message: failure.message, code: failure.code })
     process.exitCode = 1
   }

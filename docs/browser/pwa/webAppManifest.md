@@ -1,7 +1,5 @@
 # Web App Manifest 与安装机制
 
-[模块导航](./README.md) · [Service Worker](./serviceWorker.md) · [Cache Storage](./cacheStorage.md)
-
 ## 1. Manifest 描述应用，不执行离线逻辑
 
 Web App Manifest 是 JSON 元数据，浏览器通过页面的 link rel="manifest" 发现它，用来描述应用名称、身份、图标、启动地址和显示偏好。它不是 worker 脚本，也不会自动缓存页面、请求系统权限或启动后台同步。[Web Application Manifest 标准](https://www.w3.org/TR/appmanifest/)
@@ -43,15 +41,15 @@ Web App Manifest 是 JSON 元数据，浏览器通过页面的 link rel="manifes
 
 ## 2. 身份、启动与范围
 
-| 字段                           | 含义                            | 注意                                                   |
-| ------------------------------ | ------------------------------- | ------------------------------------------------------ |
-| id                             | 稳定应用身份                    | 避免随跟踪参数、部署版本变化；遵循同源和解析规则       |
-| start_url                      | 从应用入口启动时的目标          | 不是应用唯一可访问 URL，也不保证离线有副本             |
-| scope                          | 应用导航体验范围                | 越界导航的 UI / 打开方式由浏览器处理，不是网络权限边界 |
-| name / short_name              | 应用完整名称与紧凑名称          | 平台可按空间选择，不控制网页 title                     |
-| display                        | browser / standalone 等显示偏好 | 不支持的模式可回退；不等同于 Fullscreen API 授权       |
-| theme_color / background_color | 界面 / 启动画面颜色提示         | 采用方式与时机依平台不同                               |
-| icons                          | 图标资源及用途                  | maskable 需按安全区域设计，不只是换一个 purpose 值     |
+| 字段 | 含义 | 注意 |
+| --- | --- | --- |
+| id | 稳定应用身份 | 避免随跟踪参数、部署版本变化；遵循同源和解析规则 |
+| start_url | 从应用入口启动时的目标 | 不是应用唯一可访问 URL，也不保证离线有副本 |
+| scope | 应用导航体验范围 | 越界导航的 UI / 打开方式由浏览器处理，不是网络权限边界 |
+| name / short_name | 应用完整名称与紧凑名称 | 平台可按空间选择，不控制网页 title |
+| display | browser / standalone 等显示偏好 | 不支持的模式可回退；不等同于 Fullscreen API 授权 |
+| theme_color / background_color | 界面 / 启动画面颜色提示 | 采用方式与时机依平台不同 |
+| icons | 图标资源及用途 | maskable 需按安全区域设计，不只是换一个 purpose 值 |
 
 显式稳定 id 可让 start_url 调整跟踪参数时不改变应用身份。省略 id 时可能回退到 start_url 形成身份，改变启动 URL 可能影响后续安装识别；跨源 id 不会成为突破同源约束的手段。[id 官方说明](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest/Reference/id)
 
@@ -71,13 +69,13 @@ beforeinstallprompt 是部分浏览器提供的安装入口能力，不是所有
 
 ## 4. 安装、更新与离线分别验收
 
-| 验收问题             | 需要的证据                               | 不能替代它的信号                    |
-| -------------------- | ---------------------------------------- | ----------------------------------- |
-| Manifest 是否有效    | 成功获取、字段处理、图标可用及浏览器诊断 | link 元素存在                       |
-| 是否可从系统入口启动 | 目标平台实际安装 / 添加与再次启动        | beforeinstallprompt 曾触发          |
-| 页面是否受控         | 当前 controller、对应 worker 版本        | 安装图标出现                        |
-| 哪些功能可离线       | 数据已就绪后实际断网访问、业务失败反馈   | standalone 模式、Cache 中有几个条目 |
-| 新版本是否生效       | 页面 / worker / 缓存 / 服务端版本一致性  | 改了 Manifest 或刷新一次            |
+| 验收问题 | 需要的证据 | 不能替代它的信号 |
+| --- | --- | --- |
+| Manifest 是否有效 | 成功获取、字段处理、图标可用及浏览器诊断 | link 元素存在 |
+| 是否可从系统入口启动 | 目标平台实际安装 / 添加与再次启动 | beforeinstallprompt 曾触发 |
+| 页面是否受控 | 当前 controller、对应 worker 版本 | 安装图标出现 |
+| 哪些功能可离线 | 数据已就绪后实际断网访问、业务失败反馈 | standalone 模式、Cache 中有几个条目 |
+| 新版本是否生效 | 页面 / worker / 缓存 / 服务端版本一致性 | 改了 Manifest 或刷新一次 |
 
 安装后的 Manifest 元数据、图标与系统集成更新有各自平台流程，不应承诺改 JSON 就立即更新系统图标。应用内容更新则通常仍走 Web 资源与 Service Worker 生命周期，详见 [更新机制](./serviceWorker.md)。
 

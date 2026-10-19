@@ -1,19 +1,17 @@
 # Service Worker：控制、事件与版本一致性
 
-[模块导航](./README.md) · [Cache Storage](./cacheStorage.md) · [Manifest 与安装](./webAppManifest.md)
-
 ## 1. 角色与运行条件
 
 Service Worker 是浏览器管理的事件驱动 worker。它可以在页面运行前参与导航请求，也可在没有打开页面时处理获准触发的后台事件；它没有 DOM，不是某个标签页的常驻后台线程。[Service Workers 标准](https://www.w3.org/TR/service-workers/)
 
 注册需要安全上下文，同源脚本 URL、有效的脚本响应与允许的作用域。HTTPS 是常见部署方式，本地可信地址可用于开发；判断依据是浏览器安全上下文与来源规则，不应只检查 URL 字符串。私密模式、嵌入场景、存储分区与策略限制仍可能影响可用性。
 
-| 对象                      | 表示什么                                               | 生命周期                         |
-| ------------------------- | ------------------------------------------------------ | -------------------------------- |
-| ServiceWorkerRegistration | 某个 scope 的注册与 installing / waiting / active 槽位 | 可跨页面关闭与重新打开保留       |
-| ServiceWorker             | 一个脚本版本及其状态                                   | 可经历安装、激活、废弃           |
-| worker 全局环境           | 某次执行时的全局对象与内存                             | 浏览器可终止，后续事件可重新启动 |
-| client / controller       | 被控制的页面等客户端与控制者                           | 与客户端和控制关系相关           |
+| 对象 | 表示什么 | 生命周期 |
+| --- | --- | --- |
+| ServiceWorkerRegistration | 某个 scope 的注册与 installing / waiting / active 槽位 | 可跨页面关闭与重新打开保留 |
+| ServiceWorker | 一个脚本版本及其状态 | 可经历安装、激活、废弃 |
+| worker 全局环境 | 某次执行时的全局对象与内存 | 浏览器可终止，后续事件可重新启动 |
+| client / controller | 被控制的页面等客户端与控制者 | 与客户端和控制关系相关 |
 
 注册记录、脚本版本和一次内存执行不是同一个东西。Cache Storage / IndexedDB 可以独立保留，而全局 Map、计数器或定时器不能承担持久业务状态。
 
@@ -39,14 +37,14 @@ scope 主要限制可控制的客户端，不是仅拦截“请求 URL 位于这
 
 ## 3. 安装、等待与激活
 
-| 阶段                         | 典型工作                       | 失败 / 交接边界                                  |
-| ---------------------------- | ------------------------------ | ------------------------------------------------ |
-| 下载、解析、执行             | 获取脚本，注册顶层事件监听     | 脚本无法获取或执行失败，无法形成可用新版本       |
-| installing / install         | 预备本版本必需资源             | waitUntil 的任务失败可导致安装失败               |
-| installed，进入 waiting 槽位 | 等待旧版不再控制客户端         | waiting 是注册的槽位 / 阶段，不是 state 的字面值 |
-| activating / activate        | 迁移与清理，准备接管           | 不应将破坏性清理先于版本可用性确认               |
-| activated                    | 响应 fetch、message 等功能事件 | 执行环境仍可能随时结束                           |
-| redundant                    | 失败、被替代或废弃的版本       | 不再作为可用版本处理新工作                       |
+| 阶段 | 典型工作 | 失败 / 交接边界 |
+| --- | --- | --- |
+| 下载、解析、执行 | 获取脚本，注册顶层事件监听 | 脚本无法获取或执行失败，无法形成可用新版本 |
+| installing / install | 预备本版本必需资源 | waitUntil 的任务失败可导致安装失败 |
+| installed，进入 waiting 槽位 | 等待旧版不再控制客户端 | waiting 是注册的槽位 / 阶段，不是 state 的字面值 |
+| activating / activate | 迁移与清理，准备接管 | 不应将破坏性清理先于版本可用性确认 |
+| activated | 响应 fetch、message 等功能事件 | 执行环境仍可能随时结束 |
+| redundant | 失败、被替代或废弃的版本 | 不再作为可用版本处理新工作 |
 
 首次没有旧版本时通常可直接走向激活；更新时新版本可先安装并等待，旧版本继续服务现有页面。刷新时新旧客户端可能短暂重叠，因此“按一次刷新就必定激活更新”不是保证。
 
@@ -85,7 +83,7 @@ fetch 事件 -> 按方法、来源、目的和路径筛选
                          └─ 若有后台工作，在有效期内登记 waitUntil
 ```
 
-handleRequest 负责选择并产出合适的 Response，respondWith 本身不会自动补上离线回退。cache first、network first 等策略的返回路径、适用资源与失败责任集中在 [Cache Storage](./cacheStorage.md#5-http-新鲜度与脚本策略分开)；它们是应用算法，需要自行实现匹配、更新和淘汰。HTTP 错误的处理也不能仅靠 fetch 的 catch，详见 [常用 Web API](../api/webApi.md#3-fetch响应读取业务结果与取消)。
+handleRequest 负责选择并产出合适的 Response，respondWith 本身不会自动补上离线回退。cache first、network first 等策略的返回路径、适用资源与失败责任集中在 [Cache Storage](./cacheStorage.md#5-http-新鲜度与脚本策略分开)；它们是应用算法，需要自行实现匹配、更新和淘汰。HTTP 错误的处理也不能仅靠 fetch 的 catch，详见 [fetch 与取消](../network/fetch.md#promise-兑现不等于-http-成功)。
 
 不要给所有 fetch 无条件返回 app shell：脚本、样式、API、图片请求收到 HTML 会出现难以定位的错误。导航回退应限定 request.mode / 路由，预备真正可用的离线文档与必要依赖。
 

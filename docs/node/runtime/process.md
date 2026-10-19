@@ -8,7 +8,7 @@ beforeExit 在循环将空时触发，可再次安排异步工作并多次触发
 
 SIGINT通常来自终端中断，SIGTERM常来自管理器。注册信号监听后需要自己完成退出；同一个退出流程应幂等：摘除流量、停止接收、等待在途、关闭依赖和日志，设总期限后强制结束。SIGKILL无法拦截，Windows信号支持也有差异。
 
-stdout/stderr可能连TTY、管道或文件，其写入行为随平台/目标变化。CLI用退出码表达成功失败，别只打印error却返回0。服务的关闭管理沿用 [公共服务实现](../../demo/server.ts)，本例只单独观察自然退出与返回码。
+stdout/stderr可能连TTY、管道或文件，其写入行为随平台/目标变化。CLI用退出码表达成功失败，别只打印error却返回0。HTTP demo 的监听与停止现由 Next CLI 管理；[HTTP 实验工具](../http/demo/lib/http.ts)只处理 Web 响应，本例单独观察自然退出与返回码。
 
 ## 先区分“结束意图”和“已结束”
 
@@ -29,4 +29,4 @@ console.log("body")
 
 ## 依据与版本
 
-以 [Node 22.18 官方 process 文档](https://nodejs.org/download/release/v22.18.0/docs/api/process.html) 核对 API 合约；实验版本与结果见[验证记录](../validation.md)。
+以 [Node 22.18 官方 process 文档](https://nodejs.org/download/release/v22.18.0/docs/api/process.html) 核对 API 合约；实际输出与运行环境需在执行时核对。

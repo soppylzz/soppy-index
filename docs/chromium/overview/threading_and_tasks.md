@@ -1,4 +1,4 @@
-> 英文原文：[本地副本](../en/overview/threading_and_tasks.md) · [Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/threading_and_tasks.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
+> 英文原文：[Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/threading_and_tasks.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
 
 <a id="threading-and-tasks-in-chrome"></a>
 
@@ -146,8 +146,7 @@ auto task_b = base::BindOnce(&TaskB, 42);
 
 如果你编写的类型支持 sequence，但底层依赖的线程亲和检查（例如 `THREAD_CHECKER`）失败，可以考虑让依赖也支持 sequence。Chrome 大多数核心 API 已支持；部分旧类型仍过度使用 `ThreadChecker` / `SingleThreadTaskRunner`，其实可以改为依赖当前 sequence。
 
-<a id="posting-a-parallel-task"></a>
-<a id="Posting-a-Parallel-Task"></a>
+<a id="posting-a-parallel-task"></a> <a id="Posting-a-Parallel-Task"></a>
 
 ## 投递并行任务
 
@@ -197,8 +196,7 @@ class A {
 
 除非测试需要精确控制执行方式，否则优先直接调用 `ThreadPool::PostTask*()`。侵入性更小的测试控制方式见[测试](#Testing)。
 
-<a id="posting-a-sequenced-task"></a>
-<a id="Posting-a-Sequenced-Task"></a>
+<a id="posting-a-sequenced-task"></a> <a id="Posting-a-Sequenced-Task"></a>
 
 ## 投递有序任务
 
@@ -219,8 +217,7 @@ sequenced_task_runner->PostTask(FROM_HERE, base::BindOnce(&TaskA));
 sequenced_task_runner->PostTask(FROM_HERE, base::BindOnce(&TaskB));
 ```
 
-<a id="posting-to-the-current-virtual-thread"></a>
-<a id="Posting-to-the-Current-Virtual_Thread"></a>
+<a id="posting-to-the-current-virtual-thread"></a> <a id="Posting-to-the-Current-Virtual_Thread"></a>
 
 ### 投递到当前虚拟线程
 
@@ -234,8 +231,7 @@ base::SequencedTaskRunner::GetCurrentDefault()->PostTask(
 
 它返回当前虚拟线程的默认队列。在具有多个任务队列的线程上，例如 `BrowserThread::UI`，默认队列可能不是当前任务所属的队列。API 有意不通过静态 getter 暴露“当前” task runner：如果你知道它，就直接投递；如果不知道，合理的目标就是默认队列。详细讨论见 https://bit.ly/3JvCLsX 。
 
-<a id="using-sequences-instead-of-locks"></a>
-<a id="Using-Sequences-Instead-of-Locks"></a>
+<a id="using-sequences-instead-of-locks"></a> <a id="Using-Sequences-Instead-of-Locks"></a>
 
 ## 使用 Sequence 代替锁
 
@@ -282,8 +278,7 @@ other_task_runner->PostTask(FROM_HERE,
 
 为了避免阻塞，Chrome 的许多 API 都是异步的：通常要求在特定线程或 sequence 上执行，通过自定义 delegate 返回结果；或者接收 `base::OnceCallback<>` / `base::RepeatingCallback<>`，在操作完成时调用。如何指定执行位置见前面的 PostTask 章节。
 
-<a id="posting-multiple-tasks-to-the-same-thread"></a>
-<a id="Posting-Multiple-Tasks-to-the-Same-Thread"></a>
+<a id="posting-multiple-tasks-to-the-same-thread"></a> <a id="Posting-Multiple-Tasks-to-the-Same-Thread"></a>
 
 ## 将多个任务投递到同一线程
 
@@ -347,8 +342,7 @@ base::SingleThreadTaskRunner::GetCurrentDefault()->PostTask(
     FROM_HERE, base::BindOnce(&Task));
 ```
 
-<a id="posting-tasks-to-a-com-single-thread-apartment-sta-thread-windows"></a>
-<a id="Posting-Tasks-to-a-COM-Single_Thread-Apartment-STA_Thread-Windows"></a>
+<a id="posting-tasks-to-a-com-single-thread-apartment-sta-thread-windows"></a> <a id="Posting-Tasks-to-a-COM-Single_Thread-Apartment-STA_Thread-Windows"></a>
 
 ## 投递到 COM 单线程单元（STA）线程（Windows）
 
@@ -385,8 +379,7 @@ Chrome 任务常访问 `base::OnceCallback` 直接复制的数据之外的内存
 
 还可采用更受约束的模型：不同 task runner 上的任务各自独占访问某些内存对象，不显式同步；通过投递下一任务，将对象的这种“所有权”转移给它。对象所有权因此可扩展到 task runner 层面，形成易于推理的不变量。这种模型既避免竞争，也避免锁和原子操作，因其简单而广泛用于 Chrome。
 
-<a id="annotating-tasks-with-tasktraits"></a>
-<a id="Annotating-Tasks-with-TaskTraits"></a>
+<a id="annotating-tasks-with-tasktraits"></a> <a id="Annotating-Tasks-with-TaskTraits"></a>
 
 ## 用 TaskTraits 标注任务
 
@@ -591,8 +584,7 @@ base::PostJob(FROM_HERE, {},
 
 添加工作项并希望增加并行调用线程时，最大并发数增加后必须及时调用 `JobHandle/JobDelegate::NotifyConcurrencyIncrease()`。
 
-<a id="testing"></a>
-<a id="Testing"></a>
+<a id="testing"></a> <a id="Testing"></a>
 
 ## 测试
 

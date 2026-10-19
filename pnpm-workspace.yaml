@@ -1,7 +1,7 @@
 packages:
   - "packages/*"
   - "internals/*"
-  - "docs/auth/demo"
+  - "docs/**/demo"
 
 allowBuilds:
   esbuild: true
@@ -17,3 +17,12 @@ catalog:
   "@types/fs-extra": "11.0.4"
   "@jridgewell/gen-mapping": "0.3.13"
   "@jridgewell/trace-mapping": "0.3.31"
+
+  next: "16.4.0"
+  react: "19.2.0"
+  react-dom: "19.2.0"
+  "@types/react": "19.3.0"
+  "@types/react-dom": "19.3.0"
+
+  "@heroui/react": "3.2.6"
+  "@heroui/styles": "3.2.6"

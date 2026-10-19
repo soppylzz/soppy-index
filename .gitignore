@@ -1,6 +1,7 @@
 # Dependencies
 # Installed npm packages.
 node_modules/
+.pnpm-store/
 
 # Build output
 # Generated distribution files.

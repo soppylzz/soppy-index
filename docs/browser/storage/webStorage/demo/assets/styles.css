@@ -1,0 +1,149 @@
+:root {
+  --demo-bg: #f4f6fa;
+  --demo-surface: #fff;
+  --demo-text: #243047;
+  --demo-muted: #53627c;
+  --demo-border: #d9e0eb;
+  --demo-accent: #185caa;
+}
+.demo-page {
+  margin: 0;
+  background: var(--demo-bg);
+  color: var(--demo-text);
+  font:
+    16px/1.7 system-ui,
+    sans-serif;
+}
+.demo-page main {
+  max-width: 1000px;
+  margin: 32px auto;
+  padding: 0 20px;
+}
+.demo-page main > section,
+.demo-page .card {
+  background: var(--demo-surface);
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 18px 0;
+}
+.demo-page h1,
+.demo-page h2 {
+  line-height: 1.3;
+}
+.demo-page h2 {
+  font-size: 20px;
+}
+.demo-page a {
+  color: var(--demo-accent);
+}
+.demo-page label {
+  display: inline-block;
+}
+.demo-page textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 90px;
+  font: inherit;
+}
+.demo-page table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.demo-page th,
+.demo-page td {
+  padding: 10px;
+  border: 1px solid var(--demo-border);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.demo-page th {
+  background: #f8f9fc;
+}
+.demo-page .table-wrap {
+  overflow-x: auto;
+}
+.demo-page .muted,
+.demo-page .hint,
+.demo-page #identity,
+.demo-page #status {
+  color: var(--demo-muted);
+  overflow-wrap: anywhere;
+}
+.demo-page code {
+  background: #eef1f6;
+  padding: 1px 5px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.demo-page pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #eef1f6;
+  padding: 12px;
+}
+.demo-page .demo-log {
+  max-height: 420px;
+  overflow: auto;
+  font:
+    13px/1.7 ui-monospace,
+    monospace;
+  overflow-wrap: anywhere;
+}
+.demo-page ol.demo-log,
+.demo-page ul.demo-log {
+  padding-left: 28px;
+}
+.demo-page .cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.demo-page .row,
+.demo-page nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+.demo-page .good {
+  color: #167044;
+}
+.demo-page .bad {
+  color: #b32b39;
+}
+.demo-page output {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 600px) {
+  .demo-page .cols {
+    grid-template-columns: 1fr;
+  }
+  .demo-page main {
+    margin: 20px auto;
+    padding: 0 12px;
+  }
+}
+
+.demo-page .button {
+  margin: 5px 6px 5px 0;
+}
+.demo-page .input {
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
+  margin: 6px;
+}
+.demo-page input[type="checkbox"] {
+  accent-color: var(--accent);
+  margin: 0 0.5rem 0 0;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 1.25;
+}
+h2 {
+  font-size: 1.25rem;
+  line-height: 1.35;
+}

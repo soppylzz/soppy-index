@@ -1,7 +1,5 @@
 # 存储管理：隔离、配额、持久化与 OPFS
 
-[主题目录](./README.md) · [实验走查](./index.md)
-
 浏览器存储没有一个可安全硬编码的"固定容量"。可用空间取决于浏览器、设备、剩余磁盘、使用模式和隐私策略；数据默认还可能在存储压力下被回收。应用需要查询近似用量、处理写入失败，并为数据设计重建或同步路径。
 
 ## 1. 配额与隔离边界
@@ -108,30 +106,7 @@ async function saveWithQuotaRecovery(save, removeOldEntries) {
 
 清理逻辑要限制命名空间：库不应调用 `localStorage.clear()` 或删除 origin 下不属于自己的全部 Cache Storage / IndexedDB 数据。
 
-## 6. Demo 核心实现
-
-运行、操作步骤与预期见[实验走查](./index.md)，完整实现见 [index.ts](./index.ts)。
-
-下面对应 [index.ts](./index.ts) 的 OPFS 写草稿按钮；省略能力检测与页面刷新：
-
-```js
-const root = await navigator.storage.getDirectory()
-const name = "draft-" + Date.now() + ".json"
-const handle = await root.getFileHandle(name, { create: true })
-const writable = await handle.createWritable()
-await writable.write(
-  JSON.stringify({
-    text: "草稿内容",
-    savedAt: new Date().toISOString(),
-  })
-)
-await writable.close()
-log("OPFS 写入 " + name)
-```
-
-`log` 来自页面脚本，按钮外层的 `runExperiment` 捕获异常。配额压力测试沿用 getFileHandle / createWritable，但每次写独立前缀的 10MB 文件、最多 200MB；失败时尝试 abort writable，并在 finally 清理本次文件。它测试实际写入结果，不拿 estimate 的近似 quota 代替成功证据；完整清理分支见源码。
-
-## 7. 数据生命周期设计
+## 6. 数据生命周期设计
 
 每类本地数据至少回答以下问题：
 
@@ -144,7 +119,7 @@ log("OPFS 写入 " + name)
 
 例如离线文档可以存入 IndexedDB，写入同步状态与服务端版本；可重新下载的图片放 Cache Storage；大型二进制工程文件放 OPFS。登出时删除用户隔离的数据，但保留与账号无关且可共享的静态资源缓存。
 
-## 8. 兼容性与降级
+## 7. 兼容性与降级
 
 StorageManager 的 `estimate()`、`persist()` 与 `persisted()` 在现代浏览器中可用，但授予策略不同。OPFS 要求安全上下文，也应通过 `navigator.storage?.getDirectory` 检测；不支持时可根据数据类型回退到 IndexedDB 或仅在线工作。
 
@@ -154,11 +129,13 @@ const supportsOPFS = typeof navigator.storage?.getDirectory === "function"
 
 兼容性见 [MDN：StorageManager](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager#browser_compatibility)、[MDN：StorageManager.persist()](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/persist#browser_compatibility) 和 [MDN：OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system#browser_compatibility)。
 
-## 9. 面试回答框架
+## 8. 从一份离线草稿推导保留策略
 
-不要回答固定容量数字。说明浏览器按 origin 等边界管理配额，默认数据通常是 best-effort；estimate 只给近似值，persist 请求自动清理保护，是否授予需要检查结果；所有写入仍需处理配额错误。若追问 OPFS，说明它是 origin 私有、按配额管理的文件系统，与用户授权访问普通文件不同。可结合本目录 demo 的压力测试说明有限写入、异常与清理路径，不把达到测试上限当成测得完整配额。
+一份尚未同步的草稿，和一张随时能重新下载的图片，虽然都占用配额，丢失代价却不同。应用应先区分可重建与不可重建数据，再决定清理顺序、同步策略，以及是否请求 persistent storage。即使获得自动清理保护，用户仍可主动删除站点数据，所以本地持久化不能代替备份。
 
-## 10. 参考资料
+[存储实验](./index.md)可以观察 estimate、persist 与 OPFS 写入。压力测试遇错或达到上限后会尝试清理本次文件；达到 200MB 上限，只能说明这段有限写入没有在此前失败，不能据此声称测出了完整配额。
+
+## 9. 参考资料
 
 - [MDN：Storage quotas and eviction criteria](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)
 - [Storage Standard](https://storage.spec.whatwg.org/)

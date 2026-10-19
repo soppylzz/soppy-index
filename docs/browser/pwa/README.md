@@ -1,7 +1,5 @@
 # PWA、Service Worker 与离线存储
 
-[仓库首页](../../../README.md) · [HTTP 缓存](../cache/README.md) · [客户端存储](../storage/README.md) · [页面生命周期](../core/lifeCycle/README.md)
-
 PWA（Progressive Web App）是一组渐进增强的 Web 应用能力与体验：可访问的网页基础之上，按平台能力增加安装入口、离线回退和系统集成。它没有一套适用于所有浏览器的固定技术勾选表。
 
 本模块只提供知识文档，不新增实验服务。按以下顺序阅读：
@@ -22,9 +20,9 @@ PWA（Progressive Web App）是一组渐进增强的 Web 应用能力与体验�
 
 ## 与已有模块的关系
 
-- [HTTP Cache](../cache/httpCache.md) 讲协议层 freshness、验证与请求 cache mode；本模块解释其与脚本缓存的组合。
+- [HTTP Cache](../cache/http-cache.md) 讲协议层 freshness、验证与请求 cache mode；本模块解释其与脚本缓存的组合。
 - [存储管理](../storage/storageManagement/storageManagement.md) 讲配额、持久化与回收，Cache Storage 同样需要处理写入失败和数据丢失。
 - [IndexedDB](../storage/indexedDB/indexedDB.md) 适合结构化离线数据与待同步记录；Cache Storage 不替代事务数据库。
-- [页面生命周期](../core/lifeCycle/pageLifecycle.md) 讲页面自身的隐藏、离开与恢复；Service Worker 有独立且可被终止的执行上下文。
+- [页面生命周期](../lifecycle/page-lifecycle.md) 讲页面自身的隐藏、离开与恢复；Service Worker 有独立且可被终止的执行上下文。
 
 文档依据标准和官方资料整理，核实日期为 2026-10-08；兼容性、安装界面与后台调度仍需按目标平台复核。本次没有执行 PWA 安装、离线或更新的真实浏览器实验，不将文中的场景推演写成实测。

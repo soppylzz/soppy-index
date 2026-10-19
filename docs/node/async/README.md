@@ -1,19 +1,22 @@
-# 异步组合、事件与上下文
+# 异步任务与请求上下文
 
-[Node 导航](../README.md) · [验证记录](../validation.md)
+[Node 实验总入口](../run.ts)
 
-先辨认一次性结果、事件通知和跨异步任务的关联信息，再处理超时与取消。
+怎样限制并发、真正取消等待，并为交错的请求保留 ID？
 
-- [异步组合](./async.md)：Promise、并发上限与真正取消。
-- [EventEmitter](./events.md)：同步分发与错误事件。
-- [AsyncLocalStorage](./asyncContext.md)：请求上下文与传播边界。
+事件循环解释何时执行，这一组解释怎样组织工作。先看有限消费者如何控制任务启动，再看 AbortSignal 与 finally，最后用独立 store 关联请求。
+
+- [异步组合](./async.md)：并发上限、错误和取消。
+- [异步上下文](./async-context.md)：AsyncLocalStorage 与传播边界。
+
+## 动手验证
 
 [实验走查](./index.md) · [完整入口](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行：
+在仓库根目录使用 Node >= 22.18：
 
 ```bash
 node docs/node/async/index.ts
 ```
 
-终端显示实际事件；脚本完成后自然退出，也可用 `Ctrl+C` 停止。按走查中的问题先预测再核对，具体耗时和跨来源顺序以当次输出为准。
+先预测结果，再核对日志与断言；成功以 `lab-complete` 和退出码 0 结束。时间与跨来源顺序以当次观察为准。

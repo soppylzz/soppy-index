@@ -12,7 +12,7 @@ Apply to demo implementations, teaching packages, and fenced examples. The learn
 
 ## Runtime and evidence
 
-For directly runnable TypeScript, use erasable syntax and explicit runtime-compatible `.ts` imports. Prefer existing repository infrastructure; browser HTTP demos read [shared demo contracts](../../docs/demo/README.md), and Node experiments read [Node guidance](../../docs/node/README.md).
+For directly runnable TypeScript, use erasable syntax and explicit runtime-compatible `.ts` imports. Keep browser HTTP demo assets, route helpers, and tests inside each demo workspace. Follow the relevant lesson run guide for Node experiments.
 
 Use real browser mechanisms when teaching browser behavior; label simulations and their limits. For loading experiments, control availability with delayed HTTP responses rather than script-local timers. Set dynamic script attributes before insertion. Keep recorders and shared assets from changing the behavior being measured.
 

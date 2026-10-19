@@ -1,4 +1,4 @@
-> 英文原文：[本地副本](../../en/rendering/renderer-readme/layout.md) · [Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/layout/README.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
+> 英文原文：[Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/layout/README.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
 
 <!---
   The live version of this document can be viewed at:
@@ -85,9 +85,9 @@
 
 示意图：
 
-- [从左到右、从上到下](../../assets/third_party/blink/renderer/core/layout/doc/ltr-tb-scroll.png)
-- [从右到左、从下到上](../../assets/third_party/blink/renderer/core/layout/doc/rtl-bt-scroll.png)
-- [从右到左、从上到下](../../assets/third_party/blink/renderer/core/layout/doc/rtl-tb-scroll.png)
+- [从左到右、从上到下](https://raw.githubusercontent.com/chromium/chromium/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/layout/doc/ltr-tb-scroll.png)
+- [从右到左、从下到上](https://raw.githubusercontent.com/chromium/chromium/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/layout/doc/rtl-bt-scroll.png)
+- [从右到左、从上到下](https://raw.githubusercontent.com/chromium/chromium/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/layout/doc/rtl-tb-scroll.png)
 
 计算 scroll origin 时，若盒从右向左布局，且存在正交方向的滚动条，例如 `direction:rtl` 块中的垂直滚动条，需要将其尺寸计入。以下两个例子表明，无论垂直滚动条位于左侧还是右侧都一样，`|/|` 表示滚动条：
 
@@ -173,7 +173,7 @@
 
 这里的 8px 是 HTML body 默认外边距，见 [HTML 渲染规则](https://html.spec.whatwg.org/multipage/rendering.html#the-page)，实现位于 `../html/resources/html.css`。
 
-涉及尺寸的完整说明见[示意图](../../assets/third_party/blink/renderer/core/layout/resources/flipped-blocks-relpos.svg)。更多书写模式与方向组合见[演示页面](http://pauljadam.com/demos/csstext.html)，其中 `horizontal-bt` 已过时。
+涉及尺寸的完整说明见[示意图](https://raw.githubusercontent.com/chromium/chromium/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/layout/resources/flipped-blocks-relpos.svg)。更多书写模式与方向组合见[演示页面](http://pauljadam.com/demos/csstext.html)，其中 `horizontal-bt` 已过时。
 
 <a id="containing-block-vs-container"></a>
 

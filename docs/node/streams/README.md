@@ -1,17 +1,21 @@
-# 流、背压与销毁
+# 流与背压
 
-[Node 导航](../README.md) · [验证记录](../validation.md)
+[Node 实验总入口](../run.ts)
 
-从“消费者比生产者慢”理解 `write(false)`，再看结束、错误和取消如何传播。
+消费者处理不过来时，生产者怎样停下来？
 
-- [Stream 与 pipeline](./stream.md)：水位、`drain`、`finish` 与销毁。
+掌握字节后，把整块读取改成分块传递。用 write(false) 理解暂停，再区分 finish、close 和 destroy，最后看 pipeline 的失败与取消传播。
+
+- [Stream 与 pipeline](./stream.md)：水位、drain、结束和销毁。
+
+## 动手验证
 
 [实验走查](./index.md) · [完整入口](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行：
+在仓库根目录使用 Node >= 22.18：
 
 ```bash
 node docs/node/streams/index.ts
 ```
 
-终端显示实际事件；脚本完成后自然退出，也可用 `Ctrl+C` 停止。按走查中的问题先预测再核对，具体耗时和跨来源顺序以当次输出为准。
+先预测结果，再核对日志与断言；成功以 `lab-complete` 和退出码 0 结束。时间与跨来源顺序以当次观察为准。

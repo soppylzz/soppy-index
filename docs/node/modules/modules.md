@@ -33,4 +33,4 @@ CJS对象同一性与ESM live binding是两个不同问题。实验同时断言�
 
 ## 依据与版本
 
-以 [Node 22.18 官方 modules 文档](https://nodejs.org/download/release/v22.18.0/docs/api/modules.html) 核对 API 合约；实验版本与结果见[验证记录](../validation.md)。
+以 [Node 22.18 官方 modules 文档](https://nodejs.org/download/release/v22.18.0/docs/api/modules.html) 核对 API 合约；实际输出与运行环境需在执行时核对。

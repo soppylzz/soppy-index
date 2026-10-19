@@ -5,7 +5,13 @@ import prettier from "eslint-config-prettier"
 import { defineConfig, globalIgnores } from "eslint/config"
 
 export default defineConfig([
-  globalIgnores(["**/node_modules/**", "**/.next/**", "**/dist/**", "**/coverage/**"]),
+  globalIgnores([
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/.next-evil/**",
+    "**/dist/**",
+    "**/coverage/**",
+  ]),
   eslint.configs.recommended,
   ...tslint.configs.recommended,
 

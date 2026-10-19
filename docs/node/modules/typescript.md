@@ -8,7 +8,7 @@ enum、参数属性、需要运行时生成的namespace等不属于单纯擦除�
 
 源码相对import用实际.ts扩展名，纯类型依赖用import type；模块格式仍遵循扩展名和包type。本项目tsconfig允许.ts导入并noEmit，用tsc --noEmit独立检查；这与Node执行是两道检查。
 
-发布给老Node或需.js/.d.ts产物时应选择编译/打包流程。Node不会因为TS写了number就自动验证外部JSON，运行时仍需结构校验，见 [HTTP](../http/httpServer.md)。
+发布给老Node或需.js/.d.ts产物时应选择编译/打包流程。Node不会因为TS写了number就自动验证外部JSON，运行时仍需结构校验，见 [HTTP](../http/server.md)。
 
 ## 两道互不替代的检查
 
@@ -30,4 +30,4 @@ typed.ts直接运行显示number，只证明类型擦除后值正常执行，不
 
 ## 依据与版本
 
-以 [Node 22.18 官方 typescript 文档](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html) 核对 API 合约；实验版本与结果见[验证记录](../validation.md)。
+以 [Node 22.18 官方 typescript 文档](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html) 核对 API 合约；实际输出与运行环境需在执行时核对。

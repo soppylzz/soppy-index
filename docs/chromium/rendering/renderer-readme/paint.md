@@ -1,4 +1,4 @@
-> 英文原文：[本地副本](../../en/rendering/renderer-readme/paint.md) · [Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/paint/README.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
+> 英文原文：[Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/third_party/blink/renderer/core/paint/README.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
 
 <!---
   The live version of this document can be viewed at:
@@ -77,8 +77,7 @@ Stacked element 不是规范正式术语，本文用它统称参与 stacking con
 - Isolation node / boundary：在某些情况下，可建立一道边界，使子树不受祖先变化影响。属性树中以 isolation node 实现，作为后代属性节点的根。原文中 `contain:paint` 建立这种边界。
 - Local property tree state：每个 fragment 对应的 `PropertyTreeState`。所有 fragment 都有明确定义的局部状态，常缓存在 `FragmentData` 的 `LocalBorderBoxProperties` 中；部分 FragmentData 不保存该对象，只是内存优化。
 
-<a id="overview"></a>
-<a id="Overview"></a>
+<a id="overview"></a> <a id="Overview"></a>
 
 ## 概述
 
@@ -146,8 +145,7 @@ from layout
 
 相关数据结构的调试方法仍见 [Debugging blink objects](https://docs.google.com/document/d/1vgQY11pxRQUDAufxSsc2xKyQCKGPftZ5wZnjY2El4w8/view)。
 
-<a id="prepaint"></a>
-<a id="PrePaint"></a>
+<a id="prepaint"></a> <a id="PrePaint"></a>
 
 ## PrePaint
 
@@ -155,8 +153,7 @@ from layout
 
 它的两个主要目标是[绘制失效](#Paint-invalidation)和[构建绘制属性树](#Building-paint-property-trees)。
 
-<a id="paint-invalidation"></a>
-<a id="Paint-invalidation"></a>
+<a id="paint-invalidation"></a> <a id="Paint-invalidation"></a>
 
 ### 绘制失效
 
@@ -184,8 +181,7 @@ PrePaint 之前，样式、布局、合成变化等会为对象标记“需要�
 
 普通文字失效机制不适用于首行：`ComputedStyle::VisualInvalidationDiff()` 检测不到首行样式变化，而且普通失效以整个 LayoutObject 为单位，不感知首行。因此有专用路径：首行计算样式改变时，样式系统通过 `LayoutObject::ApplyFirstLineChanges()` 通知布局系统，使所有参与首行的 LayoutObject 失效。
 
-<a id="building-paint-property-trees"></a>
-<a id="Building-paint-property-trees"></a>
+<a id="building-paint-property-trees"></a> <a id="Building-paint-property-trees"></a>
 
 ### 构建绘制属性树
 
@@ -240,8 +236,7 @@ LayoutObject 的 `NeedsPaintPropertyUpdate`、`SubtreeNeedsPaintPropertyUpdate`�
 
 每个 FragmentData 都有自己的 `ClipPaintPropertyNode`，并存储独立的 `PaintOffset`、`PaginationOffset` 和 `LocalBorderBoxProperties`。
 
-<a id="paint"></a>
-<a id="Paint"></a>
+<a id="paint"></a> <a id="Paint"></a>
 
 ## Paint
 

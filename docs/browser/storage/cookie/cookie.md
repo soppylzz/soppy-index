@@ -1,7 +1,5 @@
 # Cookie
 
-[主题目录](./README.md) · [实验走查](./index.md)
-
 > 浏览器保存的小段字符串数据，在满足 domain、path、secure、SameSite 等条件时自动附加到 HTTP 请求。它既是客户端存储，也参与 HTTP 状态管理，不能简单视为一个 JavaScript 键值数据库。
 
 ## 1. 写入与发送
@@ -59,11 +57,11 @@ Cookie: __Host-session=opaque-id
 
 CSRF 的前提是：受害浏览器向目标站点发请求时自动附带会话 Cookie，攻击者站点借这道"自动附带"伪造用户操作。`SameSite` 从源头限制跨站请求是否携带：
 
-| 取值     | 跨站行为                                                                                |
-| -------- | --------------------------------------------------------------------------------------- |
-| `Strict` | 完全不随跨站请求发送                                                                    |
-| `Lax`    | 只随顶级导航的安全方法（GET 等）发送；跨站 POST 表单和 img/fetch 等子资源一律不携带     |
-| `None`   | 不因 SameSite 限制跨站携带，必须配合 Secure；仍受匹配、请求配置及第三方 Cookie 策略约束 |
+| 取值 | 跨站行为 |
+| --- | --- |
+| `Strict` | 完全不随跨站请求发送 |
+| `Lax` | 只随顶级导航的安全方法（GET 等）发送；跨站 POST 表单和 img/fetch 等子资源一律不携带 |
+| `None` | 不因 SameSite 限制跨站携带，必须配合 Secure；仍受匹配、请求配置及第三方 Cookie 策略约束 |
 
 Lax 为顶级安全方法导航保留携带 Cookie 的机会，使外站链接进入站点时可继续识别已有会话；实际是否登录还取决于 Cookie 与服务端会话状态。如果服务端在 GET 上做状态变更，Lax 不能保护这种顶级导航。完整 CSRF 攻击面见 [MDN：CSRF](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF)。
 
@@ -74,48 +72,16 @@ Lax 为顶级安全方法导航保留携带 Cookie 的机会，使外站链接�
 
 ### 攻击与防护对照
 
-| 攻击           | 载体                         | 主要防线                     | 服务端仍需                      |
-| -------------- | ---------------------------- | ---------------------------- | ------------------------------- |
-| XSS 窃取会话   | 同源脚本读 `document.cookie` | `HttpOnly`                   | 输出转义、CSP、敏感操作校验     |
-| CSRF 跨站 POST | 自动提交的跨站表单           | `SameSite=Lax/Strict`        | CSRF token、Origin/Referer 校验 |
-| CSRF 跨站 GET  | img 子资源 / 顶级导航链接    | `SameSite=Lax`（仅拦子资源） | GET 不做状态变更 + token        |
-| 明文截获       | HTTP 传输 / 降级请求         | `Secure`                     | 全站 HTTPS、HSTS                |
+| 攻击 | 载体 | 主要防线 | 服务端仍需 |
+| --- | --- | --- | --- |
+| XSS 窃取会话 | 同源脚本读 `document.cookie` | `HttpOnly` | 输出转义、CSP、敏感操作校验 |
+| CSRF 跨站 POST | 自动提交的跨站表单 | `SameSite=Lax/Strict` | CSRF token、Origin/Referer 校验 |
+| CSRF 跨站 GET | img 子资源 / 顶级导航链接 | `SameSite=Lax`（仅拦子资源） | GET 不做状态变更 + token |
+| 明文截获 | HTTP 传输 / 降级请求 | `Secure` | 全站 HTTPS、HSTS |
 
 > 三个属性约束不同环节：Secure 限制传输条件，HttpOnly 限制脚本访问，SameSite 限制跨站携带。它们都不替代服务端认证与授权。采用 Cookie 认证的状态变更接口，应结合认证模型设计 CSRF token、来源校验等防护，不能仅凭 SameSite 或“响应不可跨源读取”认定没有 CSRF 风险。
 
-## 4. Demo 核心实现
-
-运行、操作步骤与预期见[实验走查](./index.md)，完整实现见 [index.ts](./index.ts)。
-
-下面节选 [index.ts](./index.ts) 的登录路由：由服务端选择两个 Cookie 属性组合，浏览器负责决定后续请求是否携带。
-
-```ts
-const variant = url.searchParams.get("variant") === "legacy" ? "legacy" : "hardened"
-const id = `${variant}-${randomUUID().slice(0, 8)}`
-res.setHeader(
-  "Set-Cookie",
-  variant === "legacy"
-    ? `sid=${id}; Path=/; SameSite=None; Secure`
-    : `sid=${id}; Path=/; Secure; HttpOnly; SameSite=Lax`
-)
-sendRedirect(res, "/")
-```
-
-`url`、`res` 和 `sendRedirect` 来自 HTTP 路由。攻击页的关键输入是跨站表单和子资源，下面是服务端生成 HTML 中的核心元素，bank 默认地址为 localhost:3000：
-
-```html
-<form method="POST" action="http://localhost:3000/transfer">
-  <input type="hidden" name="amount" value="10000" />
-  <input type="hidden" name="to" value="attacker" />
-  <button>提交跨站请求</button>
-</form>
-```
-
-实际模板从 `BANK` 配置生成地址，不能只改 form 而忽略双源配置。HttpOnly 对照则在 bank 页面中运行 `document.cookie` 并回传可读结果；它限制读取，不阻止脚本发起已认证请求。预期与观察位置见走查，不把生成了表单当成转账已执行的证据。
-
-源码的 sessionOf 仅根据请求中的 sid 及其前缀选择实验变体，没有真实会话库；transfer 与 gift 分支展示教学响应或日志，没有真实转账、余额变更或持久账本。因此本 demo 能观察实际 Cookie 收发、脚本读取与服务端分支选择，不用于证明金融业务提交成功，也不是生产认证实现。两个登录变体同时改变 SameSite 与 HttpOnly，分析时按跨站请求和同源脚本读取分别归因；两者都有 Secure，不能用这组对照验证 Secure 的独立效果。
-
-## 5. Host-only、Domain 与 Cookie prefix
+## 4. Host-only、Domain 与 Cookie prefix
 
 省略 `Domain` 时，Cookie 只发送给设置它的 host；显式设置 `Domain=example.com` 时，它也可能发送给符合规则的子域。
 
@@ -127,7 +93,7 @@ Cookie prefix 可把部分安全约束编码进名称。例如 `__Host-` Cookie 
 
 因此 `__Host-session` 能减少子域或路径配置带来的覆盖风险。prefix 是配置约束，不替代随机、不可预测的会话标识和服务端校验。
 
-## 6. document.cookie
+## 5. document.cookie
 
 非 HttpOnly Cookie 可由 JavaScript 通过 `document.cookie` 访问。该 API 是同步字符串接口：读取会得到当前文档可见 Cookie 的拼接结果，赋值一次只设置一个 Cookie。
 
@@ -149,7 +115,7 @@ document.cookie = ["theme=", "Max-Age=0", "Path=/", "SameSite=Lax", "Secure"].jo
 
 `document.cookie` 不能设置或读取 `HttpOnly`，并且同步读取可能涉及跨进程查询。高频访问时应把解析结果缓存在应用内；支持范围允许时，也可评估异步的 [Cookie Store API](https://developer.mozilla.org/en-US/docs/Web/API/Cookie_Store_API)。
 
-## 7. Cookie 不是 session，也不是 token
+## 6. Cookie 不是 session，也不是 token
 
 - session 是服务端保存状态并通过某个标识关联请求的模型。
 - Cookie 是浏览器保存和传输状态的机制。
@@ -159,29 +125,31 @@ document.cookie = ["theme=", "Max-Age=0", "Path=/", "SameSite=Lax", "Secure"].jo
 
 Cookie 在 HTTP 状态管理中的使用见 [MDN：Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)。
 
-## 8. 第三方 Cookie 与分区
+## 7. 第三方 Cookie 与分区
 
 第三方上下文中的 Cookie 越来越受到浏览器默认策略、用户设置和分区机制限制。`Partitioned` 属性用于 CHIPS：Cookie 会按顶层站点分区，使同一个第三方嵌入不同站点时不再共享同一份状态。
 
 不要依赖"所有浏览器都会允许第三方 Cookie"。嵌入式登录、支付或小组件应按目标浏览器测试，并在需要访问未分区状态时评估 Storage Access API 等明确授权机制。
 
-## 9. 大小与性能
+## 8. 大小与性能
 
 Cookie 会随所有匹配请求发送，因此它更适合小型状态标识，不适合保存大型 JSON、用户资料或离线数据。具体单条大小和数量限制由浏览器实现决定；超过限制可能被拒绝或淘汰，不应依赖一个固定数字。
 
 如果数据只供客户端使用，可考虑 Web Storage 或 IndexedDB；如果数据是可重新获取的 response，可考虑 HTTP cache 或 Cache Storage。
 
-## 10. 兼容性与检测
+## 9. 兼容性与检测
 
 基础 Cookie 和常用属性兼容性很好，但 `Partitioned`、Cookie Store API 及第三方 Cookie 政策存在差异。服务端应在实际请求上验证 Cookie 是否到达，前端不要仅凭写入代码未报错就推断成功。
 
 兼容性见 [MDN：Set-Cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#browser_compatibility)、[MDN：Document.cookie](https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie#browser_compatibility) 与 [MDN：Cookie Store API](https://developer.mozilla.org/en-US/docs/Web/API/Cookie_Store_API#browser_compatibility)。
 
-## 11. 面试回答框架
+## 10. 用请求与脚本分别验证限制
 
-先说明 Cookie 会按规则自动随请求发送，这正是它方便又危险的原因；再解释 `Secure`、`HttpOnly` 与 `SameSite` 分别约束传输、脚本读取和跨站携带，并各对应一条攻击路径（明文截获、XSS 窃取、CSRF），可引用本目录 demo 的四组对照实验；随后区分 Cookie、session 和 token；最后强调三个属性都是浏览器侧防线，服务端仍需 CSRF token / Origin 校验与"GET 只读"，并补充第三方 Cookie 限制与分区。
+假设登录 Cookie 带有 HttpOnly，同源脚本读不到它，但脚本发起的请求仍可能携带它。这说明“限制脚本读取”和“限制请求发送”作用在两个环节。继续换成跨站导航或子资源请求，再结合 SameSite、Secure 和请求上下文判断携带条件，不能只根据是否跨源作答。
 
-## 12. 参考资料
+[Cookie 实验](./index.md)对照跨站表单、子资源与同源脚本读取。先预测 Cookie 是否携带，再检查 Network 与服务端日志；两个登录变体同时改变了 SameSite 与 HttpOnly，必须按观察环节分别归因。
+
+## 11. 参考资料
 
 - [RFC 6265bis：Cookies](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html)
 - [MDN：Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)

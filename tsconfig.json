@@ -11,7 +11,16 @@
     "**/dist",
     "**/node_modules",
     // dir with self-hosted tsconfigs
-    "docs/auth/demo",
+    "docs/security/demo",
+    "docs/browser/cache/demo",
+    "docs/browser/lifecycle/demo",
+    "docs/browser/loading/demo",
+    "docs/browser/observer/demo",
+    "docs/browser/storage/cookie/demo",
+    "docs/browser/storage/indexedDB/demo",
+    "docs/browser/storage/storageManagement/demo",
+    "docs/browser/storage/webStorage/demo",
+    "docs/node/http/demo",
     "internals/play-compiler/examples",
     "internals/play-compiler/fixtures"
   ],

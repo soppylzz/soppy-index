@@ -1,18 +1,16 @@
 # Observer：从变化信号到异步通知
 
-[模块导航](./README.md) · [实验走查](./index.md) · [浏览器脚本](./assets/lab.js)
-
 Observer 的价值是让浏览器收集符合条件的变化，再通知应用，减少应用自行轮询。回调仍在页面主线程执行，昂贵回调仍会阻塞；使用 Observer 不自动保证更快。注册、变化发生、通知交付、业务处理是不同阶段。
 
 ## 1. 根据观察对象选择 API
 
-| API                  | 信号与目标                        | 不直接回答的问题                   | 常见用途                    |
-| -------------------- | --------------------------------- | ---------------------------------- | --------------------------- |
-| MutationObserver     | Node 的子节点、属性、文本数据变化 | CSS 布局尺寸是否改变               | 第三方 DOM 接入、编辑器同步 |
-| IntersectionObserver | Element 与 root 的几何交叉状态    | 是否被遮挡、用户是否真正看过       | 懒加载、列表哨兵、曝光候选  |
-| ResizeObserver       | Element 的指定布局盒尺寸          | 位置变化、CSS transform 的视觉放大 | 容器适配、图表重绘          |
+| API | 信号与目标 | 不直接回答的问题 | 常见用途 |
+| --- | --- | --- | --- |
+| MutationObserver | Node 的子节点、属性、文本数据变化 | CSS 布局尺寸是否改变 | 第三方 DOM 接入、编辑器同步 |
+| IntersectionObserver | Element 与 root 的几何交叉状态 | 是否被遮挡、用户是否真正看过 | 懒加载、列表哨兵、曝光候选 |
+| ResizeObserver | Element 的指定布局盒尺寸 | 位置变化、CSS transform 的视觉放大 | 容器适配、图表重绘 |
 
-MutationObserver 在微任务机制中交付记录；IntersectionObserver 在渲染更新中采样，再通过任务通知；ResizeObserver 在渲染更新的布局相关步骤交付。它们不是三个可以互换的“异步队列”，不要给 Promise、rAF 与所有 observer 编造一条通用固定顺序。基础调度见 [事件循环](../core/eventLoop/eventLoop.md)，布局与绘制见 [渲染流程](../core/rendering.md)。[DOM 标准](https://dom.spec.whatwg.org/#mutation-observers)、[Intersection Observer 处理模型](https://www.w3.org/TR/intersection-observer/#processing-model)、[Resize Observer 处理模型](https://drafts.csswg.org/resize-observer/#algorithms)分别规定其机制；后两者是仍在演进的规范草案。
+MutationObserver 在微任务机制中交付记录；IntersectionObserver 在渲染更新中采样，再通过任务通知；ResizeObserver 在渲染更新的布局相关步骤交付。它们不是三个可以互换的“异步队列”，不要给 Promise、rAF 与所有 observer 编造一条通用固定顺序。基础调度见 [事件循环](../event-loop/event-loop.md)，布局与绘制见 [渲染流程](../rendering/rendering.md)。[DOM 标准](https://dom.spec.whatwg.org/#mutation-observers)、[Intersection Observer 处理模型](https://www.w3.org/TR/intersection-observer/#processing-model)、[Resize Observer 处理模型](https://drafts.csswg.org/resize-observer/#algorithms)分别规定其机制；后两者是仍在演进的规范草案。
 
 本模块只研究这三类观察器。PerformanceObserver 观察性能条目，ReportingObserver 观察报告，不能因为名称相似就共用这里的时序结论。
 
@@ -20,7 +18,7 @@ MutationObserver 在微任务机制中交付记录；IntersectionObserver 在渲
 
 `observe(target, options)` 至少启用 `childList`、`attributes`、`characterData` 之一。`subtree` 扩展到后代；`attributeFilter` 限定属性名称；`attributeOldValue`、`characterDataOldValue` 请求旧值。属性旧值或过滤器会在未明确设置时隐含开启 attributes，文本旧值类似；显式关闭对应种类却请求旧值等矛盾配置会抛 TypeError。[observe 官方说明](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe)
 
-以下是 `/mutation` 的核心逻辑；`target` 指向实验目标树，`mutationRecords` 负责记录真实 MutationRecord，省略按钮绑定、身份日志、重连保护与清理。完整代码见 [lab.js](./assets/lab.js)。
+以下是 `/mutation` 的核心逻辑；`target` 指向实验目标树，`mutationRecords` 负责记录真实 MutationRecord，省略按钮绑定、身份日志、重连保护与清理。完整代码见 [lab.js](demo/public/assets/lab.js)。
 
 ```js
 const observer = new MutationObserver((records) => {
@@ -87,7 +85,7 @@ for (const margin of [0, 80]) {
 
 注册后会异步交付初始状态，包括完全不交叉的目标。后续采样的阈值区间或 isIntersecting 改变才需要排队；不会为每一像素滚动通知。快速滚过多个阈值也不保证逐一报告中间比例。边缘刚好接触时，isIntersecting 可为 true 而 ratio 为 0；零面积目标还有专门的比例规则，因此不要无条件将二者互相替代。`entry.time` 是采样时间，属于文档性能时间轴，不是 UTC，也不一定等于回调执行时间。[规范的交叉更新算法](https://www.w3.org/TR/intersection-observer/#update-intersection-observations-algo)
 
-本实验的普通 observer 没有启用 trackVisibility。覆盖红层后，目标几何仍可交叉；后台页面的交叉也不等于用户在看。实际曝光业务应组合 [页面可见性](../core/lifeCycle/pageLifecycle.md)、比例、持续时间和业务去重，并注明产品定义。trackVisibility、delay、scrollMargin 等扩展需单独检查支持，本实验不将它们当作通用前提。
+本实验的普通 observer 没有启用 trackVisibility。覆盖红层后，目标几何仍可交叉；后台页面的交叉也不等于用户在看。实际曝光业务应组合 [页面可见性](../lifecycle/page-lifecycle.md)、比例、持续时间和业务去重，并注明产品定义。trackVisibility、delay、scrollMargin 等扩展需单独检查支持，本实验不将它们当作通用前提。
 
 `unobserve(target)` 移除单个目标，`disconnect()` 移除全部目标；`takeRecords()` 只读取已排队 entry，不能强制立即重新计算几何。disconnect 不等价于显式清空所有已排队 entry；本实验在重连时使用新实例并校验代次，忽略旧实例可能到来的交付。
 
@@ -141,9 +139,9 @@ observer.observe(target)
 
 ## 5. 生命周期、能力与结论边界
 
-完整脚本在 pagehide 断开 observer、取消 rAF 和观察期监听；pageshow.persisted 按此前状态恢复。手动断开后恢复仍保持断开。页面关闭后不再依赖该文档继续处理通知，也不要把自动垃圾回收当作组件卸载时的清理方案。相关保证与浏览器 BFCache 策略见 [生命周期笔记](../core/lifeCycle/pageLifecycle.md)和 [BFCache](../core/lifeCycle/bfcache.md)。
+完整脚本在 pagehide 断开 observer、取消 rAF 和观察期监听；pageshow.persisted 按此前状态恢复。手动断开后恢复仍保持断开。页面关闭后不再依赖该文档继续处理通知，也不要把自动垃圾回收当作组件卸载时的清理方案。相关保证与浏览器 BFCache 策略见 [生命周期笔记](../lifecycle/page-lifecycle.md)和 [BFCache](../lifecycle/bfcache.md)。
 
-[lab.js](./assets/lab.js) 的 `stop()` 与 `connect()` 分别管理资源和本次连接的身份：
+[lab.js](demo/public/assets/lab.js) 的 `stop()` 与 `connect()` 分别管理资源和本次连接的身份：
 
 | 源码步骤                                | 作用                                                 |
 | --------------------------------------- | ---------------------------------------------------- |

@@ -1,19 +1,51 @@
-# Containment 与内容可见性
+# 隔离与内容可见性：限制依赖，再决定跳过什么
 
-[本组导航](./README.md) · [容器查询](../responsive/containerQueries.md) · [渲染流程](../../browser/core/rendering.md)
+长列表离屏后能否暂时不处理？浏览器需要知道哪些依赖可被限制，以及跳过内容后应留下多大空间。`contain` 与 content-visibility 分别提供约束和跳过机会。
 
-`contain` 为浏览器提供布局、绘制和尺寸依赖的隔离约束，不是通用样式作用域。`size` / `inline-size` 限制尺寸对后代内容的依赖，`layout` 与 `paint` 分别影响布局和绘制边界，`style` 主要限制计数器等效果，并不阻止普通选择器匹配或属性继承。`content` 组合 layout、paint、style；`strict` 还加入 size。[CSS Containment 2](https://www.w3.org/TR/css-contain-2/) 给出这些约束。
+## Contain 约束哪些影响
+
+| 值          | 主要约束                       | 容易忽略的代价               |
+| ----------- | ------------------------------ | ---------------------------- |
+| size        | 元素尺寸求解不依赖后代内容贡献 | 自动尺寸可能塌陷             |
+| inline-size | 仅在行内轴施加相应尺寸隔离     | 不再依赖内容撑开该轴         |
+| layout      | 建立独立布局相关边界           | 可能改变定位包含块与层叠关系 |
+| paint       | 限制后代绘制溢出               | 弹层、阴影可能被裁掉         |
+| style       | 限制计数器等特定效果的外溢     | 不隔离一般选择器和属性继承   |
+
+`contain: content` 组合 layout、paint、style；strict 还包含 size。它们都不等于 Shadow DOM，也不能用 style 名称推断成样式完全隔离。定义见 [CSS Containment 2](https://www.w3.org/TR/css-contain-2/)。
+
+## 自动尺寸塌陷是约束的直接结果
 
 ```css
-.card-list {
-  contain: layout paint;
+.card {
+  contain: size;
 }
-.card-list > .item {
+.card > .body {
+  height: 300px;
+}
+```
+
+若 card 为普通块、height:auto 且没有其他尺寸来源，它不能再依靠这个子盒的 300px 内容撑高，内容仍可能溢出。这是隔离承诺，不是浏览器算错；应明确外部尺寸或替代尺寸，而非一律添加 strict。
+
+## Content-visibility 管理子树处理
+
+`visible` 正常处理；hidden 跳过内容并按相应规则使其不可用；auto 允许浏览器跳过暂不相关的内容，但保留离屏内容的查找、可访问等语义能力。
+
+```css
+.feed > article {
   content-visibility: auto;
   contain-intrinsic-size: auto 320px;
 }
 ```
 
-先看隔离边界：`.card-list` 的 `contain: layout paint` 限制布局和绘制影响范围，但不隔绝选择器与继承。再看可见性：子项的 `content-visibility: auto` 允许浏览器跳过暂时不相关的内容；`contain-intrinsic-size` 给跳过期间一个估计占位。`auto 320px` 不是实际高度承诺，内容被处理后的尺寸仍可不同。
+浏览器可跳过暂不相关的 article 子树，替代尺寸为未处理内容提供占位；auto 允许在已有尺寸记录时复用它，尚无记录时使用 320px 估计值。
 
-错误地给依靠内容撑开的盒加 `contain: size`，可能令其自动尺寸塌陷。`content-visibility: auto` 也不移除 DOM；焦点、查找、可访问性和强制几何读取仍需按规范及实际浏览器处理。反复读取离屏子树几何信息可能抵消跳过渲染的收益，需用 Performance trace 验证。[CSS Containment 2](https://www.w3.org/TR/css-contain-2/) 涵盖内容可见性；[CSS Sizing 4](https://www.w3.org/TR/css-sizing-4/) 定义固有尺寸占位。
+它没有删除 DOM，也不等于虚拟列表。虚拟列表减少实际节点数量，这里保留节点并给浏览器跳过渲染的机会。
+
+## 占位估计与强制测量
+
+估计高度与真实高度不同时，恢复处理可能改变布局和滚动位置。把占位设得很大不保证更稳定，应结合内容分布和实际行为调整。
+
+频繁读取被跳过子树的几何尺寸，可能要求浏览器恢复处理，抵消收益。聚焦、查找和可访问场景也需要真实验证。不要把“暂时不画”理解成“所有 DOM 操作和内存都没有成本”。
+
+尺寸占位见 [CSS Sizing 4](https://www.w3.org/TR/css-sizing-4/#intrinsic-size-override)。

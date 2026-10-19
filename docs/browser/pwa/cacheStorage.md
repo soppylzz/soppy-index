@@ -1,7 +1,5 @@
 # Cache Storage：由应用管理的请求与响应副本
 
-[模块导航](./README.md) · [Service Worker](./serviceWorker.md) · [HTTP Cache](../cache/httpCache.md)
-
 ## 1. 存储模型与隔离
 
 CacheStorage 是入口 caches，管理多个命名 Cache；每个 Cache 保存 Request 与 Response 的匹配关系。它不是 HTTP cache 的脚本接口，也不是所有浏览器存储的总称。安全上下文中可在受支持的 Window 或 worker 使用，不必先注册 Service Worker。[Cache 官方文档](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
@@ -80,17 +78,17 @@ Cache Storage 不自动按 Cache-Control 的 max-age 到期，也不在 match �
               └─ fetch       -> 网络获取流程，可能复用 / 验证 HTTP cache
 ```
 
-一次所谓“后台网络更新”仍可能获得 HTTP cache 中的响应，未必真正访问源站。需要 revalidation 时选择合理的 fetch cache mode 与服务端标头，结合 Network 和服务器证据判断，详见 [HTTP Cache](../cache/httpCache.md)。
+一次所谓“后台网络更新”仍可能获得 HTTP cache 中的响应，未必真正访问源站。需要 revalidation 时选择合理的 fetch cache mode 与服务端标头，结合 Network 和服务器证据判断，详见 [HTTP Cache](../cache/http-cache.md)。
 
 下表集中比较应用如何读取、更新和淘汰响应副本。示例场景只是选型起点，最终取决于业务可接受的新鲜度及失败反馈：
 
-| 策略                   | 返回路径                            | 可考虑的场景                         | 更新与失败责任                                                    |
-| ---------------------- | ----------------------------------- | ------------------------------------ | ----------------------------------------------------------------- |
-| cache first            | 命中缓存即返回，否则 fetch          | 带内容哈希的静态资源                 | 版本与淘汰；未命中处理，旧页面仍需旧资源                          |
-| network first          | 先 fetch，失败 / 超时按规则回退缓存 | 希望优先获取新内容的页面导航         | 区分网络、HTTP、业务错误，预备合适的离线文档                      |
-| stale-while-revalidate | 命中时先返回，同时更新              | 可容忍短时旧值的数据                 | 处理更新失败与并发覆盖；在 worker 中登记后台工作寿命              |
-| network only           | 不使用 Cache Storage                | 强实时数据，或明确排除持久副本的请求 | fetch 仍可能使用 HTTP cache，需另定请求缓存模式；离线时明确不可用 |
-| cache only             | 仅查询本地                          | 已明确准备好的离线资源               | 未命中需明确响应，不返回 undefined 给 respondWith                 |
+| 策略 | 返回路径 | 可考虑的场景 | 更新与失败责任 |
+| --- | --- | --- | --- |
+| cache first | 命中缓存即返回，否则 fetch | 带内容哈希的静态资源 | 版本与淘汰；未命中处理，旧页面仍需旧资源 |
+| network first | 先 fetch，失败 / 超时按规则回退缓存 | 希望优先获取新内容的页面导航 | 区分网络、HTTP、业务错误，预备合适的离线文档 |
+| stale-while-revalidate | 命中时先返回，同时更新 | 可容忍短时旧值的数据 | 处理更新失败与并发覆盖；在 worker 中登记后台工作寿命 |
+| network only | 不使用 Cache Storage | 强实时数据，或明确排除持久副本的请求 | fetch 仍可能使用 HTTP cache，需另定请求缓存模式；离线时明确不可用 |
+| cache only | 仅查询本地 | 已明确准备好的离线资源 | 未命中需明确响应，不返回 undefined 给 respondWith |
 
 Cache API 只提供副本操作，不会替应用选择表中算法。由 Service Worker 承载策略时，响应如何登记、后台更新如何纳入事件生命周期见 [waitUntil 与 respondWith](./serviceWorker.md#4-waituntil-与-respondwith-的职责)。这里的 stale-while-revalidate 是应用算法，与 HTTP Cache-Control 的同名扩展属于不同层，不能混为浏览器自动执行的同一流程。
 

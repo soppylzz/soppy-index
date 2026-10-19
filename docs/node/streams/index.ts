@@ -64,6 +64,7 @@ await runLab("streams", async () => {
   const aborted = pipeline(cancelledSource, cancelledSink, { signal: controller.signal })
   controller.abort()
   await assert.rejects(aborted, { name: "AbortError" })
+  assert(cancelledSource.destroyed && cancelledSink.destroyed)
   log("pipeline-aborted", {
     sourceDestroyed: cancelledSource.destroyed,
     sinkDestroyed: cancelledSink.destroyed,

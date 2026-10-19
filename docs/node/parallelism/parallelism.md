@@ -38,4 +38,4 @@ request内部先注册监听和超时，再postMessage，避免同步/快速回�
 
 ## 依据与版本
 
-以 [Node 22.18 官方 worker_threads 文档](https://nodejs.org/download/release/v22.18.0/docs/api/worker_threads.html) 核对 API 合约；实验版本与结果见[验证记录](../validation.md)。
+以 [Node 22.18 官方 worker_threads 文档](https://nodejs.org/download/release/v22.18.0/docs/api/worker_threads.html) 核对 API 合约；实际输出与运行环境需在执行时核对。

@@ -1,0 +1,25 @@
+{
+  "name": "web-storage-next-lab",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 4000",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 4000",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test __test__/*.test.ts"
+  },
+  "dependencies": {
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "@heroui/styles": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
+}

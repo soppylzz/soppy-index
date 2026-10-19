@@ -1,4 +1,4 @@
-> 英文原文：[本地副本](en/webui_lit_style_guide.md) · [Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_lit_style_guide.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
+> 英文原文：[Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_lit_style_guide.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
 
 <a id="webui-lit-style-guide"></a>
 
@@ -118,21 +118,21 @@ customElements.define(MyButtonElement.is, MyButtonElement);
 不推荐：
 
 ```ts
-this.dispatchEvent(new CustomEvent(
-  'event-one', {bubbles: true, composed: true}));
+this.dispatchEvent(new CustomEvent("event-one", { bubbles: true, composed: true }))
 
-this.dispatchEvent(new CustomEvent(
-  'event-two', {bubbles: true, composed: true, detail: someValue}));
+this.dispatchEvent(
+  new CustomEvent("event-two", { bubbles: true, composed: true, detail: someValue })
+)
 ```
 
 推荐：
 
 ```ts
-this.fire('event-one');
-this.fire('event-two', someValue);
+this.fire("event-one")
+this.fire("event-two", someValue)
 
 // OK to use dispatchEvent() when firing non-bubbling or non-composed events.
-this.dispatchEvent(new CustomEvent('event-three', {detail: someValue}));
+this.dispatchEvent(new CustomEvent("event-three", { detail: someValue }))
 ```
 
 注意 fire 创建 bubbles、composed 均为 true 的事件。如果需要不冒泡或不跨 shadow boundary，直接使用 dispatchEvent。
@@ -154,10 +154,8 @@ this.dispatchEvent(new CustomEvent('event-three', {detail: someValue}));
 ```ts
 // my_element.html.ts
 export function getHtml(this: MyElement) {
-  const isVisible = this.someCondition && this.otherCondition;
-  return html`
-    <div ?hidden="${isVisible}">...</div>
-  `;
+  const isVisible = this.someCondition && this.otherCondition
+  return html` <div ?hidden="${isVisible}">...</div> `
 }
 ```
 
@@ -188,20 +186,18 @@ export function getHtml(this: MyElement) {
 export function getHtml(this: MyElement) {
   // Small amount of repeated HTML for the cr-button is okay.
   return html`
-    ${this.submitButtonFirst ? html`
-      <cr-button id="submit" @click="${this.onSubmitClick}">
-        $i18n{submit}
-      </cr-button>
-    ` : ''}
-    <cr-button id="cancel" @click="${this.onCancelClick}">
-      $i18n{cancel}
-    </cr-button>
-    ${!this.submitButtonFirst ? html`
-      <cr-button id="submit" @click="${this.onSubmitClick}">
-        $i18n{submit}
-      </cr-button>
-    ` : ''}
-  `;
+    ${
+      this.submitButtonFirst
+        ? html` <cr-button id="submit" @click="${this.onSubmitClick}"> $i18n{submit} </cr-button> `
+        : ""
+    }
+    <cr-button id="cancel" @click="${this.onCancelClick}"> $i18n{cancel} </cr-button>
+    ${
+      !this.submitButtonFirst
+        ? html` <cr-button id="submit" @click="${this.onSubmitClick}"> $i18n{submit} </cr-button> `
+        : ""
+    }
+  `
 }
 ```
 
@@ -219,15 +215,10 @@ export function getHtml(this: MyElement) {
 ```ts
 // my_element.html.ts
 export function getHtml(this: MyElement) {
-  const button = html`
-      <cr-button id="submit" @click="${this.onSubmitClick}">
-        $i18n{submit}
-      </cr-button>`;
-  return html`
-    ${this.fancyStyleEnabled ? html`
-      <div class="fancy-css">${button}</div>
-    ` : button}
-  `;
+  const button = html` <cr-button id="submit" @click="${this.onSubmitClick}">
+    $i18n{submit}
+  </cr-button>`
+  return html` ${this.fancyStyleEnabled ? html` <div class="fancy-css">${button}</div> ` : button} `
 }
 ```
 
@@ -245,11 +236,9 @@ export function getHtml(this: MyElement) {
 export function getHtml(this: MyElement) {
   return html`
     <div class="wrapper">
-      <cr-button id="submit" @click="${this.onSubmitClick}">
-        $i18n{submit}
-      </cr-button>
+      <cr-button id="submit" @click="${this.onSubmitClick}"> $i18n{submit} </cr-button>
     </div>
-  `;
+  `
 }
 ```
 
@@ -261,21 +250,23 @@ export function getHtml(this: MyElement) {
 // my_element_fancy_button.html.ts
 export function getHtml(this: MyElement) {
   return html`
-<fancy-button .prop1="${this.prop1}"
-    .prop2="${this.prop2}"
-    .prop3="${this.prop3}"
-    .prop4="${this.prop4}"
-    .prop5="${this.prop5}"
-    .prop6="${this.prop6}"
-    .prop7="${this.prop7}"
-    .prop8="${this.prop8}"
-    .prop9="${this.prop9}"
-    @one="${this.onButtonOne}"
-    @two="${this.onButtonTwo}"
-    @three="${this.onButtonThree}"
-    @four="${this.onButtonFour}">
-</fancy-button>
-`;
+    <fancy-button
+      .prop1="${this.prop1}"
+      .prop2="${this.prop2}"
+      .prop3="${this.prop3}"
+      .prop4="${this.prop4}"
+      .prop5="${this.prop5}"
+      .prop6="${this.prop6}"
+      .prop7="${this.prop7}"
+      .prop8="${this.prop8}"
+      .prop9="${this.prop9}"
+      @one="${this.onButtonOne}"
+      @two="${this.onButtonTwo}"
+      @three="${this.onButtonThree}"
+      @four="${this.onButtonFour}"
+    >
+    </fancy-button>
+  `
 }
 ```
 
@@ -312,16 +303,15 @@ ${this.compact ? html`
 
 ```html
 ${this.items.map(item => html`
-  <button @click="${() => this.onItemClick(item)}">${item}</button>
+<button @click="${() => this.onItemClick(item)}">${item}</button>
 `)}
 ```
 
 推荐：
 
 ```html
-
 ${this.items.map((item, index) => html`
-  <button data-index="${index}" @click="${this.onItemClick}">${item}</button>
+<button data-index="${index}" @click="${this.onItemClick}">${item}</button>
 `)}
 ```
 
@@ -351,10 +341,9 @@ ${this.items.map(item => html`...`)}
 ```ts
 export function getHtml(this: MyCrLitElement) {
   // clang-format off
-  return html`
-    <!--_html_template_start_-->
+  return html` <!--_html_template_start_-->
     <div>...</div>
-    <!--_html_template_end_-->`;
+    <!--_html_template_end_-->`
   // clang-format on
 }
 ```
@@ -371,24 +360,25 @@ export function getHtml(this: MyCrLitElement) {
 
 ```ts
 // my_element.html.ts
-import type {CrLazyListElement} from '//resources/cr_elements/cr_lazy_list/cr_lazy_list.js';
-import {html} from '//resources/lit/v3_0/lit.rollup.js';
+import type { CrLazyListElement } from "//resources/cr_elements/cr_lazy_list/cr_lazy_list.js"
+import { html } from "//resources/lit/v3_0/lit.rollup.js"
 
-import type {MyItem} from './my_item.js';
-import type {MyElement} from './my_element.js';
+import type { MyItem } from "./my_item.js"
+import type { MyElement } from "./my_element.js"
 
 export interface TemplatizedDomNodes {
-  list: CrLazyListElement<MyItem>;
+  list: CrLazyListElement<MyItem>
 }
 
 export function getHtml(this: MyElement) {
   return html`<!--_html_template_start_-->
-<cr-lazy-list id="list" .items="${this.items}"
-    .template="${(item: MyItem, index: number) => html`
-      <div>${item.name}</div>
-    `}">
-</cr-lazy-list>
-<!--_html_template_end_-->`;
+    <cr-lazy-list
+      id="list"
+      .items="${this.items}"
+      .template="${(item: MyItem, index: number) => html` <div>${item.name}</div> `}"
+    >
+    </cr-lazy-list>
+    <!--_html_template_end_-->`
 }
 ```
 
@@ -444,7 +434,7 @@ DOM 名不以 -element 结尾；文件名不以 _element 结尾；类名以 Elem
 不推荐：
 
 ```ts
-const button = this.shadowRoot.querySelector('#submitButton');
+const button = this.shadowRoot.querySelector("#submitButton")
 ```
 
 推荐：
@@ -453,10 +443,10 @@ const button = this.shadowRoot.querySelector('#submitButton');
 // In your class definition
 export interface MyElement {
   $: {
-    submitButton: CrButtonElement,
+    submitButton: CrButtonElement
   }
 }
 
 // In your code
-const button = this.$.submitButton;
+const button = this.$.submitButton
 ```

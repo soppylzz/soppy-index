@@ -1,4 +1,4 @@
-> 英文原文：[本地副本](../en/rendering/how_cc_works.md) · [Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/how_cc_works.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
+> 英文原文：[Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/how_cc_works.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
 
 <a id="how-cc-works"></a>
 
@@ -182,8 +182,7 @@ Android 滚动条是简单纯色矩形，无需纹理资源即可由合成器绘
 
 UIResourceLayer 相当于 TextureLayer 的软件位图版本，负责上传位图及 context 丢失后的重建。NinePatchLayer 是其子类，将 UIResource 切成可拉伸部分。
 
-<a id="trees-commit--activation"></a>
-<a id="trees-commit-activation"></a>
+<a id="trees-commit--activation"></a> <a id="trees-commit-activation"></a>
 
 ## 树：Commit 与 Activation
 

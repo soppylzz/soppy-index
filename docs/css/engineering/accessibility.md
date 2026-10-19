@@ -1,31 +1,51 @@
-# CSS 可访问性与交互一致性
+# CSS 可访问性：视觉、焦点与阅读顺序一致
 
-[本组导航](./README.md)
+页面看起来整齐，不代表用户能找到焦点、放大文字或按合理顺序操作。CSS 需要与 DOM 语义和输入行为共同设计。
 
-CSS 会影响焦点可见性、阅读与视觉顺序、缩放和内容可见性。focus-visible 根据输入方式等启发式控制焦点提示，应提供明显 outline；forced-colors 下 box-shadow 可能不可靠。不要只去掉 outline。
-
-先让 DOM 顺序表达合理的阅读和操作顺序，再用 CSS 排版。Flex 的 `reverse` / `order` 与 Grid placement 可以改变视觉顺序，通常不会同步改变 Tab 顺序；用户可能看到焦点在屏幕上跳动。错误、成功和选中状态还需要文字或形状，不能只靠颜色；`placeholder` 也不能代替标签。
-
-opacity:0 常仍可交互，display:none/visibility:hidden 通常不可见且从可访问树排除；aria-hidden 不负责阻止焦点。visually-hidden 模式应只用于必要可访问文本，不把可聚焦控件藏成不可见焦点陷阱。
-
-尊重 reduced-motion、缩放、文本放大与窄屏重排。本文不作 WCAG 全面合规声明，真实键盘、屏幕阅读器、颜色对比和200%缩放需要分别验收。
-
-## 样式示例与推导
+## 先让焦点看得见
 
 ```css
-#controls {
-  display: flex;
-  gap: 10px;
-}
-#controls.changed {
-  flex-direction: row-reverse;
-}
-#controls button:focus-visible {
+.action:focus-visible {
   outline: 3px solid #164eaf;
   outline-offset: 3px;
 }
 ```
 
-`row-reverse` 改变视觉排列，DOM 顺序与通常的 Tab 顺序仍按原结构。焦点提示应保持可见；还需用键盘、读屏、缩放和高对比模式分别检查真实交互。
+`focus-visible` 依据输入方式等启发式匹配，不是简单的“只在键盘时为真”。可以设计焦点外观，但不要删除默认 outline 后没有替代。强制颜色下阴影可能消失，明确 outline 往往更可靠。
 
-依据 [WCAG 2.2](https://www.w3.org/TR/WCAG22/) 的焦点、顺序、对比与重排要求。
+焦点还可能被 overflow 裁剪或固定栏挡住，需要结合滚动和容器边界检查。依据 [WCAG 焦点可见性说明](https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html)。
+
+## 视觉重排不自动重排操作顺序
+
+```html
+<div class="actions"><button>Save</button><button>Cancel</button></div>
+```
+
+```css
+.actions {
+  display: flex;
+  flex-direction: row-reverse;
+}
+```
+
+通常视觉顺序改变，DOM 和默认 Tab 顺序仍先 Save 后 Cancel。Grid placement、Flex order 也有同类问题。应先让 DOM 顺序表达合理阅读流程，再用布局安排空间；不要靠正 tabindex 拼补一个复杂的焦点顺序。
+
+## 不可见、不可点与不可访问分别判断
+
+| 手段                | 关键影响                                           |
+| ------------------- | -------------------------------------------------- |
+| display:none        | 不生成该子树的正常布局盒，通常也从可访问树排除     |
+| visibility:hidden   | 保留布局，通常不可聚焦且不呈现；后代可另设 visible |
+| opacity:0           | 保留布局和通常的命中、焦点能力                     |
+| pointer-events:none | 不作为通常指针命中目标，不自动禁止键盘聚焦         |
+| aria-hidden         | 不负责视觉隐藏或阻止焦点，不宜包住可聚焦内容       |
+
+需要仅供辅助技术阅读的文本时，可使用经过验证的 visually-hidden 模式；不要把真正可操作控件永久藏成不可见焦点。图标按钮应由 HTML 提供名称，不能只靠背景图或伪元素。
+
+## 缩放、对比与运动都要留有空间
+
+不要禁用用户缩放。固定高度文字盒、nowrap、绝对定位提示容易在大字号与窄屏时遮挡；检查 200% 缩放、文本放大和重排，不能只按默认截图验收。
+
+错误、成功、选中等状态需要文字或形状，不只用红绿。正文和控件还要检查颜色对比，主题切换后应重新检查。非必要运动尊重减少动态效果偏好，见[用户能力与偏好](../responsive/preferences.md)。
+
+这些原则覆盖 CSS 常见问题，不等于完整的 WCAG 合规验收；键盘、读屏、缩放和高对比模式应分别验证。

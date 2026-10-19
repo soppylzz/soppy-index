@@ -1,34 +1,61 @@
-# CSS 工程化：组织、作用域和发布
+# 样式组织：归属、覆盖关系与主题状态
 
-[本组导航](./README.md)
+组件加一个状态就要追加更长选择器，通常说明覆盖关系不清楚。组织 CSS 要让读者知道规则属于谁、允许谁覆盖，以及变化会影响什么范围。
 
-组织样式先解决三个实际问题：一个规则属于谁、怎样覆盖它、升级时会影响谁。全局 Reset 会大范围重置默认样式，Normalize 更倾向保留有用默认并修正差异；两者都要评估对盒模型和交互样式的影响。
+## 先区分命名、作用域与优先级
 
-BEM 用 block__element--modifier 约定全局命名，不能提供真实隔离。CSS Modules 由构建改写类名并导出映射；浏览器原生 scope/layer 与这种转换不是同一机制。CSS-in-JS 有运行时生成和编译提取等不同实现，SSR/hydration、缓存与成本必须结合具体工具分析。
+| 手段           | 主要解决什么                 | 不自动解决什么               |
+| -------------- | ---------------------------- | ---------------------------- |
+| BEM 等命名约定 | 组件与状态归属               | 浏览器级样式隔离             |
+| CSS Modules    | 构建时类名映射，减少名称碰撞 | 所有继承、全局规则与层叠问题 |
+| 原生 @scope    | 选择器应用范围               | Shadow DOM 式封装            |
+| @layer         | 不同来源规则的覆盖层次       | 命名冲突、继承边界           |
+| 自定义属性     | 运行时主题与组件参数         | 选择器匹配范围               |
 
-Sass/Less 在构建时生成CSS，原生 custom properties 在运行时参与层叠/继承。预处理器循环/mixin 与原生变量不等价。避免把 DOM 深度直接变成高 specificity 嵌套链。
+Reset 倾向重设默认样式，Normalize 类方案倾向保留有用默认并协调差异。选择后仍应保留焦点、列表和表单等必要语义表现，不能为了统一一律清空。
 
-可用 layer 显式组织 reset/base/tokens/components/utilities/overrides，并保留低 specificity 与语义 token。普通声明层顺序和 important 层顺序相反，见 [层叠](../cascade/cascade.md)。CSS Modules 的真实类名映射取决于所用构建工具。
-
-## 样式示例与推导
+## 用层表达系统允许的覆盖顺序
 
 ```css
-@layer css-components, css-variants;
-@layer css-components {
-  .sample-button {
-    --button-color: rgb(30, 70, 180);
+@layer reset, base, components, utilities;
+@layer components {
+  .button {
+    color: var(--button-text, white);
+    background: var(--button-surface, #2455a4);
   }
 }
-@layer css-variants {
-  .sample-button.changed {
-    --button-color: rgb(20, 120, 60);
+@layer utilities {
+  .muted {
+    opacity: 0.7;
   }
-}
-.sample-button {
-  background: var(--button-color);
 }
 ```
 
-两个层分别提供组件 token 与变体 token；普通声明中后层的变量值优先。背景在未分层规则中读取胜出的 token，因而普通按钮为蓝色，附加 `.changed` 后为绿色。若页面还有其他背景声明，仍要按完整层叠顺序判断。
+层先于 specificity 比较，低权重 utility 也可覆盖前层普通声明。未分层普通声明又高于所有分层普通声明，important 的层顺序相反；所以引入第三方 CSS 时也要安排层，而不是只给自己分层。完整规则见[层叠](../properties/cascade.md)。
 
-原生层依据 [Cascade 5](https://www.w3.org/TR/css-cascade-5/)；构建工具属于独立工程选型。
+## 主题使用语义参数，而非散落颜色
+
+```css
+:root {
+  --surface: white;
+  --text: #17212b;
+}
+:root[data-theme="dark"] {
+  --surface: #17212b;
+  --text: #f4f7fa;
+}
+.panel {
+  background: var(--surface);
+  color: var(--text);
+}
+```
+
+Surface/text 表达用途，组件可以消费主题而不关心当前配色。全局令牌定义系统默认，组件变量表达局部接口；不要把每个像素都变成无法追溯的变量链。
+
+系统配色偏好可以提供默认值，用户选择则应有稳定优先级，避免启动时反复闪烁。变量参与层叠与继承的细节沿用[自定义属性](../properties/custom-properties.md)。
+
+## 构建工具与原生机制各有位置
+
+Sass/Less 在构建阶段展开变量、mixin 等；原生变量在浏览器中参与继承和求值，两者不能按“都叫变量”视为等价。PostCSS 是转换平台，实际能力由插件决定。
+
+CSS-in-JS 也有运行时生成、编译提取等不同方案；SSR、样式顺序、缓存和资源成本要按实现判断。选择工具前先确定组件边界与覆盖约定，工具不能修复所有随意加 important 的规则。

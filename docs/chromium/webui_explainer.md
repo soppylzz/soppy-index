@@ -1,4 +1,4 @@
-> 英文原文：[本地副本](en/webui_explainer.md) · [Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_explainer.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
+> 英文原文：[Chromium 来源](https://chromium.googlesource.com/chromium/src/+/f5a9dd28d9af3a5450afb58ac199223fc6b49976/docs/webui/webui_explainer.md)。对应本地源码提交 `f5a9dd28d9af`（2026-09-12）；翻译日期：2026-10-09。代码、标识符及源码注释保留原样，译者补充以“译注”标识。
 
 <a id="webui-explainer"></a>
 
@@ -61,8 +61,7 @@ WebUI 泛指**使用 HTML、CSS、JavaScript 等 Web 技术实现的 Chrome 界�
 
 本文介绍 WebUI 的工作方式。
 
-<a id="whats-different-from-a-web-page"></a>
-<a id="bindings"></a>
+<a id="whats-different-from-a-web-page"></a> <a id="bindings"></a>
 
 ## 与普通网页有何不同？
 
@@ -70,8 +69,7 @@ WebUI 被授予管理 Chrome 自身的特殊能力。例如设置界面需要访
 
 这些 bindings 允许 renderer 加载 [`chrome:`](#chrome_urls) URL，例如共享资源 `chrome://resources/`；允许 browser 通过 [`CallJavascriptFunction()`](#CallJavascriptFunction) 在 renderer 执行 JavaScript；允许 renderer 经 [`chrome.send()`](#chrome_send) 等接口与 browser 通信；并忽略关于显示图片、执行 JavaScript 的内容设置。
 
-<a id="how-chrome-urls-work"></a>
-<a id="chrome_urls"></a>
+<a id="how-chrome-urls-work"></a> <a id="chrome_urls"></a>
 
 ## chrome: URL 如何工作
 
@@ -185,8 +183,7 @@ class DonutsUI : public content::WebUIController {
 
 ## C++ 类
 
-<a id="webui"></a>
-<a id="WebUI"></a>
+<a id="webui"></a> <a id="WebUI"></a>
 
 ### WebUI
 
@@ -206,8 +203,7 @@ WebUI 可推测性创建，通常较轻量。复杂初始化、访问有副作�
 
 它可在 `CreateWebUIControllerForURL` 调用 controller 构造函数。Config 在启动注册工厂时创建，因此应保持轻量。
 
-<a id="webuicontroller"></a>
-<a id="WebUIController"></a>
+<a id="webuicontroller"></a> <a id="WebUIController"></a>
 
 ### WebUIController
 
@@ -242,8 +238,7 @@ webui::SetupWebUIDataSource(source, kHistoryResources, kGeneratedPath,
 
 具体方法见[数据源](#DataSources)和[辅助工具](#WebUIDataSourceUtils)。
 
-<a id="webuimessagehandler"></a>
-<a id="WebUIMessageHandler"></a>
+<a id="webuimessagehandler"></a> <a id="WebUIMessageHandler"></a>
 
 ### WebUIMessageHandler
 
@@ -271,13 +266,12 @@ void OvenHandler::HandleBakeDonuts(const base::ListValue& args) {
 可由以下 JavaScript 触发：
 
 ```js
-$('bakeDonutsButton').onclick = function() {
-  chrome.send('bakeDonuts', [5]);  // bake 5 donuts!
-};
+$("bakeDonutsButton").onclick = function () {
+  chrome.send("bakeDonuts", [5]) // bake 5 donuts!
+}
 ```
 
-<a id="data-sources"></a>
-<a id="DataSources"></a>
+<a id="data-sources"></a> <a id="DataSources"></a>
 
 ## 数据源
 
@@ -354,8 +348,7 @@ if (loadTimeData.getBoolean('myFeatureIsEnabled')) {
 
 > 刷新不会重建数据源，Chrome 运行期间变化的值可能过期。动态值更适合用 `sendWithPromise()` 初始化，再用 `FireWebUIListener()` 更新。若确实使用 AddBoolean，应在值变化时调用 `WebUIDataSource::Update()`。这些通信接口属于下文的旧方案；新页面遵循 Mojo 路径。
 
-<a id="webui-utils-for-working-with-data-sources"></a>
-<a id="WebUIDataSourceUtils"></a>
+<a id="webui-utils-for-working-with-data-sources"></a> <a id="WebUIDataSourceUtils"></a>
 
 ## 数据源辅助工具
 
@@ -626,34 +619,35 @@ PageCallbackRouter 用来监听 browser 发来的异步事件。PageHandlerRemot
 `chrome/browser/resources/donuts/donuts.ts`：
 
 ```ts
-import {browserProxyFactory} from './donuts.mojom-webui.js';
+import { browserProxyFactory } from "./donuts.mojom-webui.js"
 
-let numDonutsBaked: number = 0;
+let numDonutsBaked: number = 0
 
-window.onload = function() {
+window.onload = function () {
   // Other page initialization steps go here
-  const proxy = browserProxyFactory.getInstance();
+  const proxy = browserProxyFactory.getInstance()
   // Tells the browser to start the pilot light.
-  proxy.handler.startPilotLight();
+  proxy.handler.startPilotLight()
   // Adds a listener for the asynchronous "donutsBaked" event.
-  proxy.callbackRouter.donutsBaked.addListener(
-    (numDonuts: number) => {
-      numDonutsBaked += numDonuts;
-    });
-};
+  proxy.callbackRouter.donutsBaked.addListener((numDonuts: number) => {
+    numDonutsBaked += numDonuts
+  })
+}
 
 function CheckNumberOfDonuts() {
   // Requests the number of donuts from the browser, and alerts with the
   // response.
-  browserProxyFactory.getInstance().handler.getNumberOfDonuts().then(
-      (numDonuts: number) => {
-        alert('Yay, there are ' + numDonuts + ' delicious donuts left!');
-      });
+  browserProxyFactory
+    .getInstance()
+    .handler.getNumberOfDonuts()
+    .then((numDonuts: number) => {
+      alert("Yay, there are " + numDonuts + " delicious donuts left!")
+    })
 }
 
 function BakeDonuts(numDonuts: number) {
   // Tells the browser to bake |numDonuts| donuts.
-  browserProxyFactory.getInstance().handler.bakeDonuts(numDonuts);
+  browserProxyFactory.getInstance().handler.bakeDonuts(numDonuts)
 }
 ```
 
@@ -665,8 +659,7 @@ function BakeDonuts(numDonuts: number) {
 
 许多 WebUI 早于 Mojo，因此使用这套旧模式。以下章节说明如何阅读与维护这些代码。
 
-<a id="webuimessagehandlerallowjavascript"></a>
-<a id="AllowJavascript"></a>
+<a id="webuimessagehandlerallowjavascript"></a> <a id="AllowJavascript"></a>
 
 #### WebUIMessageHandler::AllowJavascript()
 
@@ -681,10 +674,10 @@ function BakeDonuts(numDonuts: number) {
 JavaScript：
 
 ```js
-window.onload = function() {
-  app.initialize();
-  chrome.send('startPilotLight');
-};
+window.onload = function () {
+  app.initialize()
+  chrome.send("startPilotLight")
+}
 ```
 
 C++：
@@ -699,8 +692,7 @@ void OvenHandler::HandleStartPilotLight(const base::ListValue& /*args*/) {
 
 > load 事件或 browser 侧导航回调无法涵盖应用特定初始化，往往需要自定义 initialized 消息。
 
-<a id="webuimessagehandlercalljavascriptfunction"></a>
-<a id="CallJavascriptFunction"></a>
+<a id="webuimessagehandlercalljavascriptfunction"></a> <a id="CallJavascriptFunction"></a>
 
 #### WebUIMessageHandler::CallJavascriptFunction()
 
@@ -723,15 +715,14 @@ void OvenHandler::OnPilotLightExtinguished() {
 
 这要求全局方法存在，且允许任意参数调用任意方法，权限超出多数需求，因此使用减少。更合适的旧模式替代包括：[FireWebUIListener](#FireWebUIListener) 配合 [addWebUiListener](#addWebUiListener) 发送松耦合事件，无人处理也不会出错；[ResolveJavascriptCallback](#ResolveJavascriptCallback)、[RejectJavascriptCallback](#RejectJavascriptCallback) 则响应 JS 对 C++ 权威状态的查询，例如是否启用自动填充、是否隐身。
 
-<a id="webuimessagehandlerfirewebuilistener"></a>
-<a id="FireWebUIListener"></a>
+<a id="webuimessagehandlerfirewebuilistener"></a> <a id="FireWebUIListener"></a>
 
 #### WebUIMessageHandler::FireWebUIListener()
 
 通知已注册监听者发生了事件，适合时间不可预测或由用户行为触发的变化。主题变化的 JS 示例：
 
 ```js
-addWebUiListener("theme-changed", refreshThemeStyles);
+addWebUiListener("theme-changed", refreshThemeStyles)
 ```
 
 C++ 触发：
@@ -797,8 +788,7 @@ void OvenHandler::OnJavascriptDisallowed() {
 
 不能保证 handler 析构前一定调用它，因此宜使用析构时自动退订、同时支持此处显式退订的 scoped observer。
 
-<a id="webuimessagehandlerrejectjavascriptcallback"></a>
-<a id="RejectJavascriptCallback"></a>
+<a id="webuimessagehandlerrejectjavascriptcallback"></a> <a id="RejectJavascriptCallback"></a>
 
 #### WebUIMessageHandler::RejectJavascriptCallback()
 
@@ -825,8 +815,7 @@ CallJavascriptFunction("cr.webUIResponse", callback_id, base::Value(false),
 
 > 译注：原文把 Promise 的拒绝、兑现处理回调称为 executor 中的回调，术语不准确。Executor 是创建 Promise 时同步执行的函数；此处改变 Promise 状态，随后执行已注册的 reaction。
 
-<a id="webuimessagehandlerresolvejavascriptcallback"></a>
-<a id="ResolveJavascriptCallback"></a>
+<a id="webuimessagehandlerresolvejavascriptcallback"></a> <a id="ResolveJavascriptCallback"></a>
 
 #### WebUIMessageHandler::ResolveJavascriptCallback()
 
@@ -850,8 +839,7 @@ void OvenHandler::HandleBakeDonuts(const base::ListValue& args) {
 }
 ```
 
-<a id="chromesend"></a>
-<a id="chrome_send"></a>
+<a id="chromesend"></a> <a id="chrome_send"></a>
 
 #### chrome.send()
 
@@ -901,8 +889,7 @@ Browser 按消息名查 map，将反序列化后的参数传给 callback：
 message_callbacks_.find(message)->second.Run(&args);
 ```
 
-<a id="addwebuilistener"></a>
-<a id="addWebUiListener"></a>
+<a id="addwebuilistener"></a> <a id="addWebUiListener"></a>
 
 #### addWebUiListener()
 
@@ -912,8 +899,8 @@ message_callbacks_.find(message)->second.Run(&args);
 
 ```js
 // addWebUiListener():
-webUIListenerMap[eventName] = webUIListenerMap[eventName] || {};
-webUIListenerMap[eventName][createUid()] = callback;
+webUIListenerMap[eventName] = webUIListenerMap[eventName] || {}
+webUIListenerMap[eventName][createUid()] = callback
 ```
 
 C++ 调用全局 `cr.webUIListenerCallback`，传入事件名和可变数量参数：
@@ -944,15 +931,14 @@ addWebUiListener('donuts-baked', function(numFreshlyBakedDonuts: number) {
 });
 ```
 
-<a id="sendwithpromise"></a>
-<a id="sendWithPromise"></a>
+<a id="sendwithpromise"></a> <a id="sendWithPromise"></a>
 
 #### sendWithPromise()
 
 这是 chrome.send 的包装，用于需要响应的请求：
 
 ```js
-chrome.send('getNumberOfDonuts');  // No easy way to get response!
+chrome.send("getNumberOfDonuts") // No easy way to get response!
 ```
 
 旧页面为接收响应而暴露全局方法，不推荐这种方式：污染全局、难以关联具体请求，也不便于深层代码使用。采用 Promise 包装后可以写成：
@@ -979,20 +965,18 @@ void DonutHandler::HandleGetNumberOfDonuts(const base::ListValue& args) {
 
 ```js
 // sendWithPromise():
-var id = methodName + '_' + uidCounter++;
-chromeSendResolverMap[id] = new PromiseResolver;
-chrome.send(methodName, [id].concat(args));
+var id = methodName + "_" + uidCounter++
+chromeSendResolverMap[id] = new PromiseResolver()
+chrome.send(methodName, [id].concat(args))
 ```
 
 结果已知时，用该 ID 查找并 reject / resolve：
 
 ```js
 // cr.webUIResponse():
-var resolver = chromeSendResolverMap[id];
-if (success)
-  resolver.resolve(response);
-else
-  resolver.reject(response);
+var resolver = chromeSendResolverMap[id]
+if (success) resolver.resolve(response)
+else resolver.reject(response)
 ```
 
 仍需 C++ 调用全局方法，但只暴露一个 `cr.webUIResponse`，而非大量方法，也更容易支持多个同时在途请求的独立响应。

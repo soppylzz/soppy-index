@@ -13,7 +13,7 @@
     "format": "prettier --write",
     "format:check": "prettier --check",
     "build": "pnpm --filter \"./packages/*\" --if-present -r build",
-    "typecheck": "tsc --noEmit && pnpm --filter \"./packages/*\" --filter \"./internals/*\" --if-present -r typecheck",
+    "typecheck": "tsc --noEmit && pnpm --filter \"./packages/*\" --filter \"./internals/*\" --if-present -r typecheck && pnpm --filter http-cache-next-lab typecheck && pnpm --filter security-next-lab typecheck && pnpm --filter \"*-next-lab\" --filter \"!http-cache-next-lab\" --filter \"!security-next-lab\" -r typecheck",
     "test": "pnpm --filter @soppy-index/test run test",
     "test:compiler": "pnpm --filter @soppy-index/compiler run test",
     "test:maps": "pnpm --filter @soppy-index/compiler run test maps",
@@ -27,8 +27,8 @@
     "play:compiler": "pnpm --filter @soppy-index/play-compiler run dev",
     "play:compiler:build": "pnpm --filter @soppy-index/play-compiler run build",
     "play:compiler:preview": "pnpm --filter @soppy-index/play-compiler run preview",
-    "auth:dev": "pnpm --filter auth-next-session-lab run dev",
-    "auth:typecheck": "pnpm --filter auth-next-session-lab run typecheck",
+    "auth:dev": "pnpm --filter security-next-lab run dev",
+    "auth:typecheck": "pnpm --filter security-next-lab run typecheck",
     "test:built": "pnpm build && pnpm --filter @soppy-index/compiler run test:built",
     "prepare": "husky",
     "lint:staged": "lint-staged",
@@ -37,7 +37,11 @@
     "changeset:status": "changeset status",
     "version:packages": "changeset version",
     "compiler:errors": "pnpm --filter @soppy-index/play-compiler run errors",
-    "test:play-compiler": "pnpm --filter @soppy-index/play-compiler run test"
+    "test:play-compiler": "pnpm --filter @soppy-index/play-compiler run test",
+    "security:dev": "pnpm --filter security-next-lab run dev",
+    "security:provider": "pnpm --filter security-next-lab run dev:provider",
+    "security:typecheck": "pnpm --filter security-next-lab run typecheck",
+    "test:next-labs": "pnpm --filter \"./docs/**/demo\" -r --if-present test"
   },
   "devDependencies": {
     "@changesets/cli": "2.31.1",
