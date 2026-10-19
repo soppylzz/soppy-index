@@ -1,0 +1,22 @@
+{
+  "name": "@soppy-index/structure",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deque": "node deque/index.ts",
+    "fenwickTree": "node fenwickTree/index.ts",
+    "heap": "node heap/index.ts",
+    "knapsack": "node knapsack/index.ts",
+    "monoStack": "node monoStack/index.ts",
+    "priorityQueue": "node priorityQueue/index.ts",
+    "segTree": "node segTree/index.ts",
+    "skipList": "node skipList/index.ts",
+    "trie": "node trie/index.ts",
+    "unionFind": "node unionFind/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

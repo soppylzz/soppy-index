@@ -1,0 +1,23 @@
+.accordion details {
+  border-bottom: 1px solid #b6c8bb;
+}
+.accordion summary {
+  position: relative;
+  list-style: none;
+  padding: 1rem 2rem 1rem 0.25rem;
+  font-weight: 650;
+}
+.accordion summary::-webkit-details-marker {
+  display: none;
+}
+.accordion summary::after {
+  content: "+";
+  position: absolute;
+  right: 0.5rem;
+}
+.accordion details[open] summary::after {
+  content: "−";
+}
+.accordion details p {
+  padding-inline: 0.25rem;
+}

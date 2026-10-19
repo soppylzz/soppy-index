@@ -1,0 +1,38 @@
+.layout {
+  display: flow-root;
+  padding-inline: 9rem 8rem;
+}
+.center,
+.left,
+.right {
+  float: left;
+}
+.center {
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+.left {
+  width: 9rem;
+  margin-left: -100%;
+  position: relative;
+  left: -9rem;
+}
+.right {
+  width: 8rem;
+  margin-left: -8rem;
+  position: relative;
+  right: -8rem;
+}
+@media (width < 48rem) {
+  .layout {
+    padding: 0;
+  }
+  .center,
+  .left,
+  .right {
+    float: none;
+    width: auto;
+    margin: 0;
+    position: static;
+  }
+}

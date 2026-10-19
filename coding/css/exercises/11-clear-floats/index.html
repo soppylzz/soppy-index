@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Containing floated children | CSS interview exercises</title>
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <span class="eyebrow">11 / Flow</span>
+      <h1>Containing floated children</h1>
+      <p class="lead">Compare a collapsed parent, a clearfix, and a flow-root container.</p>
+      <a href="../../index.html">All exercises</a>
+    </header>
+    <main class="demo-main">
+      <div class="stage">
+        <div class="sample-holder">
+          <h2>No containment</h2>
+          <div class="float-panel raw"><span class="float-block">Float</span>Short text.</div>
+        </div>
+        <div class="sample-holder">
+          <h2>Clearfix</h2>
+          <div class="float-panel clearfix"><span class="float-block">Float</span>Short text.</div>
+        </div>
+        <div class="sample-holder">
+          <h2>Flow root</h2>
+          <div class="float-panel flow-root"><span class="float-block">Float</span>Short text.</div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

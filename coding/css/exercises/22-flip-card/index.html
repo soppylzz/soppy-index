@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A checkbox-controlled flip card | CSS interview exercises</title>
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <span class="eyebrow">22 / Motion</span>
+      <h1>A checkbox-controlled flip card</h1>
+      <p class="lead">
+        Perspective belongs to the container; both faces share one rotating inner box.
+      </p>
+      <a href="../../index.html">All exercises</a>
+    </header>
+    <main class="demo-main">
+      <div class="stage">
+        <label><input class="toggle" type="checkbox" /> Show the back of the card</label>
+        <div class="scene" aria-hidden="true">
+          <div class="card">
+            <div class="face front">Front: question</div>
+            <div class="face back">Back: explanation</div>
+          </div>
+        </div>
+        <p class="note">
+          Front: question. Back: explanation. This example contains no interactive controls inside
+          either face.
+        </p>
+      </div>
+    </main>
+  </body>
+</html>

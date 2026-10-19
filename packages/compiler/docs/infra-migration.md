@@ -16,7 +16,7 @@
 | 真正的 bundler 集成 | Vite 7.3.1 的本地示例 | 保留固定 Vite，移到 playground | [Vite 插件](../../../internals/play-compiler/src/vite-plugin.ts)：调用 compiler workspace 返回 ESM/map | 示例过滤、手写预检查、原始 TS 输入和组合映射的验证 |
 | 测试 engine 与断言 | node:test + node:assert | Vitest + node:assert/strict | [compiler 测试](../__test__/) | 保留语言、模块、映射、文件输出和 Vite 语义测试；移除命令参数解析测试 |
 | 路径与输入读取 | node:path、readFile、realpath | 保留原生 | compiler 模块图和实验脚本 | 后缀规则、目录边界、循环诊断属于本 demo 的显式契约；不引入一般 npm resolver |
-| 包构建 | tsc 生成 JS 和声明 | [Vite 7.3.1 library mode](https://v7.vite.dev/guide/build#library-mode) + tsc 声明生成 | [Vite 配置](../vite.config.ts)、`pnpm build` / `pnpm typecheck` | 保留 ESM 模块和子路径导出，依赖保持外置；实验源码仍由手写 compiler 编译 |
+| 包构建 | tsc 生成 JS 和声明 | [Vite 7.3.1 library mode](https://v7.vite.dev/guide/build#library-mode) + tsc 声明生成 | [Vite 配置](../vite.config.ts)、`pnpm --dir packages/compiler build` / `pnpm typecheck` | 保留 ESM 模块和子路径导出，依赖保持外置；实验源码仍由手写 compiler 编译 |
 
 `execa` 收到命令与参数数组，默认不经过 shell；不会把源码文件名拼到 shell 字符串里。测试文件发现只匹配文件名，不参与 import/export 关系分析。这些边界有助于辨别工具职责。
 
@@ -47,16 +47,16 @@ Scanner、Parser、AST、visitor、Binder、Checker、类型擦除、箭头/cons
 
 ## 扩展与验证
 
-根构建只编译 `packages/*`；内部 playground 的真实 bundle 用单独脚本。源码开发导出条件与默认 dist 导出分别验证。新增包统一使用 Vitest 测试和 Vite 构建；测试保留在包内的 `__test__/`，新增浏览器学习主题时再按实际环境配置测试。
+构建在对应子包执行：compiler 构建自身产物，内部 playground 构建真实 bundle；根目录不再提供项目专用的构建别名。源码开发导出条件与默认 dist 导出分别验证。新增包统一使用 Vitest 测试和 Vite 构建；测试保留在包内的 `__test__/`，新增浏览器学习主题时再按实际环境配置测试。
 
 ```bash
 pnpm typecheck
 pnpm test
-pnpm test:play-compiler
-pnpm test:built
-pnpm compiler:hello
-pnpm compiler:modules:cjs
-pnpm play:compiler:build
+pnpm --dir internals/play-compiler test
+pnpm --dir packages/compiler test:built
+pnpm --dir internals/play-compiler hello
+pnpm --dir internals/play-compiler modules:cjs
+pnpm --dir internals/play-compiler build
 ```
 
 单文件产物执行、JS/声明 map 的相对路径、输出目录保护和 manifest 保留都有验证；副作用顺序与 map 查询继续执行。独立命令行包及其参数解析依赖已移除，实验使用源码中的显式选项。完整结果见[验证记录](validation.md)。

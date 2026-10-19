@@ -1,0 +1,28 @@
+.samples {
+  display: grid;
+  gap: 2rem;
+}
+.normal,
+.hairline {
+  position: relative;
+  min-height: 6rem;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+}
+.normal {
+  border: 1px solid #173a30;
+}
+.hairline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200%;
+  height: 200%;
+  border: 1px solid #173a30;
+  transform: scale(0.5);
+  transform-origin: left top;
+  pointer-events: none;
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixed sidebar, flexible content | CSS interview exercises</title>
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <span class="eyebrow">04 / Layout</span>
+      <h1>Fixed sidebar, flexible content</h1>
+      <p class="lead">A flex layout that handles long text and stacks on narrow screens.</p>
+      <a href="../../index.html">All exercises</a>
+    </header>
+    <main class="demo-main">
+      <div class="stage layout">
+        <aside class="sample-panel sidebar">Sidebar: 12rem</aside>
+        <section class="sample-panel alt content">
+          <h2>Flexible content</h2>
+          <p class="code-word">
+            averylongunbrokentokenthatmustnotforcethewholepagetogrowwiderthanitsviewport
+          </p>
+          <p>The main area can shrink.</p>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

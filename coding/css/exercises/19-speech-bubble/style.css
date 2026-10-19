@@ -1,0 +1,21 @@
+.bubble {
+  position: relative;
+  width: min(100%, 28rem);
+  padding: 1.25rem;
+  border-radius: 0.8rem;
+  background: #205d49;
+  color: white;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 1.5rem;
+  border: 0.8rem solid transparent;
+  border-top-color: #205d49;
+  border-bottom: 0;
+}
+.sender {
+  margin-top: 1.5rem;
+  margin-left: 1rem;
+}

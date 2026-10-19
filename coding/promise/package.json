@@ -1,0 +1,17 @@
+{
+  "name": "@soppy-index/promise",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:native": "vitest run --mode native",
+    "test:watch": "vitest",
+    "test:watch:native": "vitest --mode native"
+  },
+  "devDependencies": {
+    "vitest": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Equal-height cards | CSS interview exercises</title>
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <span class="eyebrow">08 / Layout</span>
+      <h1>Equal-height cards</h1>
+      <p class="lead">Stretch cards in one flex row and push their actions to the bottom.</p>
+      <a href="../../index.html">All exercises</a>
+    </header>
+    <main class="demo-main">
+      <div class="stage cards">
+        <article class="card">
+          <h2>Short card</h2>
+          <p>One sentence.</p>
+          <a href="#explanation">Read more</a>
+        </article>
+        <article class="card">
+          <h2>Long card</h2>
+          <p>
+            Different content lengths should not force action links to drift vertically. The longest
+            card sets the row height.
+          </p>
+          <a href="#explanation">Read more</a>
+        </article>
+        <article class="card">
+          <h2>Medium card</h2>
+          <p>A little more text makes this card taller than the first.</p>
+          <a href="#explanation">Read more</a>
+        </article>
+      </div>
+      <p id="explanation" class="note">
+        This example equalizes one row, not every row in a wrapped flex layout.
+      </p>
+    </main>
+  </body>
+</html>

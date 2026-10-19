@@ -1,0 +1,28 @@
+{
+  "name": "@soppy-index/stream",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env.local server.ts",
+    "build": "next build",
+    "start": "NODE_ENV=production node --env-file-if-exists=.env.local server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:http": "vitest run --mode http"
+  },
+  "dependencies": {
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "ws": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/ws": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

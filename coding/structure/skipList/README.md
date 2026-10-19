@@ -2,12 +2,12 @@
 
 > 有序链表加「多层快速通道」：查找 / 插入 / 删除期望 `O(logn)`，用随机层数代替旋转维持平衡，Redis zSet 的底层
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/structure/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/structure/skipList/index.ts
+pnpm skipList
 ```
 
 观察有序遍历、查找、插入与删除；内部层高随机，逻辑结果仍遵循有序集合语义。

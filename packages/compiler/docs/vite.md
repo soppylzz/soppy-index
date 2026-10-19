@@ -28,9 +28,9 @@ Compiler 决定如何理解受限源码、诊断与变换；Bundler 负责解析
 ## 操作、预期与实测
 
 ```bash
-pnpm play:compiler
-pnpm test:vite
-pnpm play:compiler:build
+pnpm --dir internals/play-compiler dev
+pnpm --dir internals/play-compiler test vite
+pnpm --dir internals/play-compiler build
 ```
 
 打开 <http://127.0.0.1:5178>，观察页面 `Hello, world`、浏览器 Console 的 `mini compiler module` 和 `Hello, world`，以及终端 hook 日志。DevTools Sources 应能显示 `greeting.mini.ts` 原文；选函数体设置断点可手动核对映射，是否自动展示取决于 DevTools 配置。

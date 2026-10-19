@@ -2,12 +2,12 @@
 
 > 每个节点管辖一段区间的二叉树：单点 / 区间更新、区间查询都 `O(logn)`，合并运算可换（求和 / 最值 / 计数），区间统计的万能底座
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/structure/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/structure/segTree/index.ts
+pnpm segTree
 ```
 
 观察区间求和与 lazy propagation 的区间更新。

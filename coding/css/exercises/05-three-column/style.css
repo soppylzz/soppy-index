@@ -1,0 +1,14 @@
+.layout {
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr) 9rem;
+  gap: 1rem;
+}
+.content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (width < 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

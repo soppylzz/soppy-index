@@ -1,0 +1,10 @@
+.clamped {
+  width: min(100%, 24rem);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  line-height: 1.6;
+  max-height: 4.8em;
+}

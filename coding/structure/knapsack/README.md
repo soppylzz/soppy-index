@@ -2,12 +2,12 @@
 
 > 「容量限制下选物品求最值」的 DP 家族：状态 `dp[i][c]` 表示前 i 件、容量 c 的最优解，转移只有「不选 / 选」两种
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/structure/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/structure/knapsack/index.ts
+pnpm knapsack
 ```
 
 对比 0/1 背包、完全背包和组合数计数。

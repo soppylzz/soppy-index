@@ -1,0 +1,113 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #f3f5f8;
+  color: #172534;
+  font:
+    16px/1.6 system-ui,
+    sans-serif;
+}
+main {
+  max-width: 1000px;
+  margin: auto;
+  padding: 32px 20px;
+}
+section {
+  background: white;
+  border: 1px solid #d8e0e8;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 20px 0;
+}
+h1,
+h2 {
+  line-height: 1.25;
+}
+button,
+input,
+select {
+  font: inherit;
+  padding: 6px 12px;
+  margin: 4px;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+button[aria-selected="true"],
+button[aria-current="page"] {
+  background: #183f73;
+  color: white;
+}
+label {
+  display: inline-block;
+}
+output {
+  display: block;
+}
+ul {
+  padding-left: 24px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.virtual-row {
+  border-bottom: 1px solid #ddd;
+  padding: 6px 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+dialog {
+  border: 1px solid #9caebd;
+  border-radius: 12px;
+  max-width: min(90vw, 440px);
+}
+dialog::backdrop {
+  background: #17253499;
+}
+.error {
+  color: #a21b24;
+}
+
+.scroll-demo {
+  height: 100px;
+  overflow: auto;
+  border: 1px solid #9caebd;
+  padding: 12px;
+}
+.autocomplete {
+  max-width: 400px;
+}
+.autocomplete ul {
+  margin: 0;
+  max-height: 180px;
+  overflow: auto;
+  border: 1px solid #9caebd;
+  list-style: none;
+  padding: 0;
+}
+.autocomplete [role="option"] {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.autocomplete [aria-selected="true"] {
+  background: #d9ecff;
+}
+.outside-demo {
+  border: 2px dashed #487663;
+  padding: 20px;
+}
+img {
+  background: #e6edf3;
+}
+fieldset {
+  border: 1px solid #9caebd;
+  margin: 12px 0;
+}

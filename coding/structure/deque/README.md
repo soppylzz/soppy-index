@@ -2,12 +2,12 @@
 
 > 两端都能入队、出队的队列（double-ended queue），四种端点操作都是 `O(1)`；滑动窗口类问题的标准载体
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/structure/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/structure/deque/index.ts
+pnpm deque
 ```
 
 观察两端操作、回文检查和滑动窗口最大值。

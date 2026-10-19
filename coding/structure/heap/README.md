@@ -2,12 +2,12 @@
 
 > 完全二叉树 + 堆序性质：`O(1)` 拿最值、`O(logn)` 增删，是「Top K / 流式最值」类问题的标准武器
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/structure/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/structure/heap/index.ts
+pnpm heap
 ```
 
 观察小顶堆、大顶堆、自定义比较器与 Top K。

@@ -1,0 +1,26 @@
+.clip {
+  max-width: 32rem;
+  overflow: auto;
+  margin-bottom: 2rem;
+  border: 1px solid #91b59f;
+}
+.row {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}
+.label {
+  flex: 0 0 4rem;
+}
+.content {
+  flex: 1 1 0;
+}
+.content p {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.fixed {
+  min-width: 0;
+}

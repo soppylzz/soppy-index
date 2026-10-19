@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>An accordion with native details | CSS interview exercises</title>
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <span class="eyebrow">23 / Interaction</span>
+      <h1>An accordion with native details</h1>
+      <p class="lead">Use built-in disclosure behavior instead of recreating keyboard support.</p>
+      <a href="../../index.html">All exercises</a>
+    </header>
+    <main class="demo-main">
+      <div class="stage accordion">
+        <details>
+          <summary>What does CSS control?</summary>
+          <p>
+            Spacing, borders and the open-state arrow. The browser manages the disclosure state.
+          </p>
+        </details>
+        <details>
+          <summary>Can both sections stay open?</summary>
+          <p>Yes. These details elements are independent.</p>
+        </details>
+        <details>
+          <summary>Does it work from the keyboard?</summary>
+          <p>Focus a summary and activate it with Enter or Space.</p>
+        </details>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+.frame {
+  min-height: 20rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.pill {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}

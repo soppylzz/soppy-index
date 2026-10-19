@@ -2,12 +2,12 @@
 
 > 线性时间求每个中心的最大回文半径：用已算出的回文对称信息跳过重复比较，把中心扩展的 `O(n^2)` 优化到 `O(n)`
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/algorithm/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/special/manacher/index.ts
+pnpm manacher
 ```
 
 对比中心扩展与 Manacher 的最长回文结果。

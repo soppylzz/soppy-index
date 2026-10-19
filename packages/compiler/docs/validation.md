@@ -10,13 +10,13 @@
 
 - `pnpm test`：compiler / playground 的 48 项和 10 个 Next.js demo 的 21 项，共 69 项通过。
 - `node docs/node/testing/index.ts`：原生 `node:test` 教学实验单独运行，3 项通过，不纳入 Vitest projects。
-- `pnpm test:built`：Vite 构建 ESM，tsc 仅生成声明；真实 Node 子进程验证默认入口和子路径导出通过。
+- `pnpm --dir packages/compiler test:built`：Vite 构建 ESM，tsc 仅生成声明；真实 Node 子进程验证默认入口和子路径导出通过。
 - cache 与 security 的 `test:ui`：2 项生产 HTML / 样式检查通过，不覆盖真实浏览器交互。
 - security 的 `test:http`：启动应用与提供方后，5 项协议集成测试通过；测试后关闭两个进程。
 - `pnpm typecheck`、`pnpm lint` 及本次修改文件的 Prettier 检查通过。
 - `pnpm test:watch`：监听包括所有 demo 在内的 Vitest projects；demo 也可在自身目录运行 `pnpm exec vitest`。
 
-以下表格保留此前迁移时的验证结果，测试数量与覆盖范围以本节当前入口为准。
+以下表格保留此前迁移时的验证结果，命令已按当前子包入口标注；测试数量属于历史观察，新增 coding 子包的测试以当前执行输出为准。
 
 ## monorepo 迁移后的验证
 
@@ -25,23 +25,23 @@
 | `pnpm import` | 从原根 npm lock 导入，保留根工具版本，再合并 workspace 依赖 |
 | `pnpm install --frozen-lockfile` | 5 个 workspace 安装通过，统一根 lockfile；esbuild/sharp 构建许可由根配置声明 |
 | `pnpm typecheck` | 根源码以及 compiler/test/playground 各自配置全部通过 |
-| `pnpm build` | 编译器主体构建成功，生成 `packages/compiler/dist` |
+| `pnpm --dir packages/compiler build` | 编译器主体构建成功，生成 `packages/compiler/dist` |
 | `pnpm test` | **48 项全部通过**：保留 47 项语义测试，新增单文件产物与映射路径验证 |
-| `pnpm test:play-compiler` | 单文件输出、输出目录/manifest 策略与 Vite 集成共 6 项通过 |
-| `pnpm test:built` | 先 build，再用无 development 条件的真实 Node 导入默认 dist 入口，验证通过 |
-| `pnpm compiler:check`、`pnpm compiler:inspect` | 手写 Checker 和阶段 JSON 输出正常；未使用开发 tsc 替代手写链路 |
-| `pnpm compiler:hello`、`pnpm compiler:hello:js` | 都实际执行生成 JS，输出 `Hello, world` |
-| `pnpm compiler:modules`、`pnpm compiler:modules:cjs` | 两种产物都执行，纯 unused 删除，副作用与顺序保留 |
-| `pnpm test:maps` | 3 项通过，JS/声明映射回原源码；合成代码无来源 |
-| `pnpm play:compiler` | 开发服务在 `127.0.0.1:5178` 启动，原 `.mini.ts` 经 workspace compiler 转换 |
-| `pnpm play:compiler:build` | 真实 Vite 7.3.1 生产构建通过，生成带 map 的 bundle |
-| `pnpm play:compiler:preview` | 构建产物在 `127.0.0.1:5179` 预览，真实 Chrome 页面执行通过 |
-| `pnpm auth:typecheck` | 现有 Auth demo 迁移依赖管理后，自身类型检查通过 |
+| `pnpm --dir internals/play-compiler test` | 单文件输出、输出目录/manifest 策略与 Vite 集成共 6 项通过 |
+| `pnpm --dir packages/compiler test:built` | 先 build，再用无 development 条件的真实 Node 导入默认 dist 入口，验证通过 |
+| `pnpm --dir internals/play-compiler check`、`pnpm --dir internals/play-compiler inspect` | 手写 Checker 和阶段 JSON 输出正常；未使用开发 tsc 替代手写链路 |
+| `pnpm --dir internals/play-compiler hello`、`pnpm --dir internals/play-compiler hello:js` | 都实际执行生成 JS，输出 `Hello, world` |
+| `pnpm --dir internals/play-compiler modules`、`pnpm --dir internals/play-compiler modules:cjs` | 两种产物都执行，纯 unused 删除，副作用与顺序保留 |
+| `pnpm --dir packages/compiler test maps` | 3 项通过，JS/声明映射回原源码；合成代码无来源 |
+| `pnpm --dir internals/play-compiler dev` | 开发服务在 `127.0.0.1:5178` 启动，原 `.mini.ts` 经 workspace compiler 转换 |
+| `pnpm --dir internals/play-compiler build` | 真实 Vite 7.3.1 生产构建通过，生成带 map 的 bundle |
+| `pnpm --dir internals/play-compiler preview` | 构建产物在 `127.0.0.1:5179` 预览，真实 Chrome 页面执行通过 |
+| `pnpm --dir docs/security/demo typecheck` | 现有 Auth demo 迁移依赖管理后，自身类型检查通过 |
 | `pnpm exec eslint packages/compiler/src internals` | 局部源码检查通过；根 ESM 字段补回后无模块类型警告 |
 | `pnpm exec prettier --check <本次修改的支持文件>` | 本次迁移涉及的包、内部目录、根配置、共享指导与 Auth 运行说明格式通过；不格式化无关文件 |
 | 本地 Markdown 链接检查 | compiler 与 internals 中的相对链接全部存在 |
 
-诊断现在通过 `pnpm compiler:errors` 的固定实验观察；脚本直接调用 `analyze`，展示缺少分号与组合类型/名称错误。源码测试由 Vitest 的 `resolve.conditions` 选择 `development`，默认 dist 导出单独验证。
+诊断现在通过 `pnpm --dir internals/play-compiler errors` 的固定实验观察；脚本直接调用 `analyze`，展示缺少分号与组合类型/名称错误。源码测试由 Vitest 的 `resolve.conditions` 选择 `development`，默认 dist 导出单独验证。
 
 ## 按包归属的测试布局
 
@@ -49,11 +49,11 @@
 
 | 归属与入口 | 当前实测 |
 | --- | --- |
-| `packages/compiler/__test__/`；`pnpm test:compiler` | 核心、映射和模块分析共 42 项通过；fixtures 由本包维护 |
-| `internals/play-compiler/__test__/`；`pnpm test:play-compiler` | 文件输出与真实 Vite 集成共 6 项通过；`pnpm test:vite` 单独选择 3 项 Vite 测试 |
-| `pnpm test:maps` | 按包选择 maps 文件，3 项通过 |
+| `packages/compiler/__test__/`；`pnpm --dir packages/compiler test` | 核心、映射和模块分析共 42 项通过；fixtures 由本包维护 |
+| `internals/play-compiler/__test__/`；`pnpm --dir internals/play-compiler test` | 文件输出与真实 Vite 集成共 6 项通过；`pnpm --dir internals/play-compiler test vite` 单独选择 3 项 Vite 测试 |
+| `pnpm --dir packages/compiler test maps` | 按包选择 maps 文件，3 项通过 |
 | `pnpm test` | Vitest 通过 projects 统一运行 compiler、playground 和各 demo 的单元测试；生产 HTML 与 HTTP 集成测试单独运行 |
-| `pnpm test:built` | 构建后运行 compiler 自己的 `__test__/built.test.ts`，默认 dist 入口通过；测试与 fixtures 不进入 dist |
+| `pnpm --dir packages/compiler test:built` | 构建后运行 compiler 自己的 `__test__/built.test.ts`，默认 dist 入口通过；测试与 fixtures 不进入 dist |
 
 各包可直接运行 `pnpm --filter @soppy-index/<包名> test`；compiler 可追加 `maps` 或 `modules`。文件过滤、watch 等参数由 Vitest 处理；无匹配的测试选择会失败。包的类型检查包含测试，声明产物的构建仅包含 `src`。
 

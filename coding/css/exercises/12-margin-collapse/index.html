@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Parent-child margin collapse | CSS interview exercises</title>
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <span class="eyebrow">12 / Flow</span>
+      <h1>Parent-child margin collapse</h1>
+      <p class="lead">
+        A flow-root parent contains the first child margin instead of letting it escape.
+      </p>
+      <a href="../../index.html">All exercises</a>
+    </header>
+    <main class="demo-main">
+      <div class="stage comparisons">
+        <section>
+          <h2>Ordinary parent</h2>
+          <div class="boundary">
+            <div class="parent"><p class="child">First child</p></div>
+          </div>
+        </section>
+        <section>
+          <h2>Flow-root parent</h2>
+          <div class="boundary">
+            <div class="parent contained"><p class="child">First child</p></div>
+          </div>
+        </section>
+      </div>
+      <p class="note">
+        The orange boundary is outside the green parent. Compare where the blank space appears.
+      </p>
+    </main>
+  </body>
+</html>

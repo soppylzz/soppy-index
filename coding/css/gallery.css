@@ -1,0 +1,74 @@
+.gallery-header,
+.gallery-main,
+.gallery-footer {
+  max-width: 78rem;
+  padding: 2rem clamp(1rem, 5vw, 4rem);
+  margin-inline: auto;
+}
+.gallery-header {
+  padding-block: 4rem 2rem;
+}
+.gallery-header h1 {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+}
+.gallery-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 2rem;
+}
+.gallery-header nav a {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid #b6c8bb;
+  border-radius: 2rem;
+  text-decoration: none;
+}
+.category {
+  margin-bottom: 3rem;
+  scroll-margin-top: 1rem;
+}
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid #b6c8bb;
+  margin-bottom: 1rem;
+}
+.section-title span {
+  color: #607164;
+  font-size: 0.8rem;
+}
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1rem;
+}
+.exercise-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1.5rem;
+  border: 1px solid #d1dcd1;
+  background: #fff;
+  border-radius: 0.75rem;
+}
+.exercise-card h3 {
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+.exercise-card h3 a {
+  text-decoration: none;
+}
+.exercise-card p {
+  color: #526459;
+  font-size: 0.9rem;
+}
+.exercise-card .source {
+  margin-top: auto;
+  font-size: 0.8rem;
+}
+.gallery-footer {
+  border-top: 1px solid #ced8ce;
+  color: #607164;
+  font-size: 0.85rem;
+}

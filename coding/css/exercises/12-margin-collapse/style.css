@@ -1,0 +1,24 @@
+.comparisons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.boundary {
+  border: 2px solid #bc5918;
+  min-height: 9rem;
+}
+.parent {
+  background: #cfe4d6;
+}
+.child {
+  margin: 2rem 0 0;
+  padding: 0.5rem;
+}
+.contained {
+  display: flow-root;
+}
+@media (width < 36rem) {
+  .comparisons {
+    grid-template-columns: 1fr;
+  }
+}

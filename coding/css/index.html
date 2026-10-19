@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSS interview exercises</title>
+    <link rel="stylesheet" href="./base.css" />
+    <link rel="stylesheet" href="./gallery.css" />
+  </head>
+  <body>
+    <header class="gallery-header">
+      <span class="eyebrow">Handwritten / CSS</span>
+      <h1>Small rules.<br />Visible results.</h1>
+      <p class="lead">
+        24 frontend interview exercises. Open a page, resize the browser and inspect its focused CSS
+        implementation.
+      </p>
+      <nav aria-label="Exercise categories">
+        <a href="#layout">Layout</a><a href="#flow">Flow</a><a href="#responsive">Responsive</a
+        ><a href="#text">Text</a><a href="#shapes">Shapes</a><a href="#motion">Motion</a
+        ><a href="#interaction">Interaction</a>
+      </nav>
+    </header>
+    <main class="gallery-main">
+      <section id="layout" class="category">
+        <div class="section-title">
+          <h2>Layout</h2>
+          <span>10 exercises</span>
+        </div>
+        <div class="exercise-grid">
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 01</span>
+            <h3><a href="./exercises/01-flex-center/index.html">Flex centering</a></h3>
+            <p>Center an unknown-size child along both flex axes.</p>
+            <a class="source" href="./exercises/01-flex-center/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 02</span>
+            <h3><a href="./exercises/02-grid-center/index.html">Grid centering</a></h3>
+            <p>Use a single grid area to center an unknown-size child.</p>
+            <a class="source" href="./exercises/02-grid-center/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 03</span>
+            <h3><a href="./exercises/03-absolute-center/index.html">Absolute centering</a></h3>
+            <p>Compare parent-relative offsets with self-relative translation.</p>
+            <a class="source" href="./exercises/03-absolute-center/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 04</span>
+            <h3>
+              <a href="./exercises/04-two-column/index.html">Fixed sidebar, flexible content</a>
+            </h3>
+            <p>A flex layout that handles long text and stacks on narrow screens.</p>
+            <a class="source" href="./exercises/04-two-column/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 05</span>
+            <h3><a href="./exercises/05-three-column/index.html">Three columns with Grid</a></h3>
+            <p>Fixed side tracks surround a flexible center track.</p>
+            <a class="source" href="./exercises/05-three-column/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 06</span>
+            <h3><a href="./exercises/06-holy-grail/index.html">Holy Grail layout</a></h3>
+            <p>A historical float solution with center-first markup and reserved parent padding.</p>
+            <a class="source" href="./exercises/06-holy-grail/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 07</span>
+            <h3><a href="./exercises/07-double-wing/index.html">Double-wing layout</a></h3>
+            <p>The center wrapper floats at full width; an inner box reserves the sides.</p>
+            <a class="source" href="./exercises/07-double-wing/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 08</span>
+            <h3><a href="./exercises/08-equal-height/index.html">Equal-height cards</a></h3>
+            <p>Stretch cards in one flex row and push their actions to the bottom.</p>
+            <a class="source" href="./exercises/08-equal-height/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 09</span>
+            <h3>
+              <a href="./exercises/09-sticky-footer/index.html">A footer that stays in flow</a>
+            </h3>
+            <p>Short content fills the viewport; long content pushes the footer below it.</p>
+            <a class="source" href="./exercises/09-sticky-footer/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 10</span>
+            <h3>
+              <a href="./exercises/10-sticky-header/index.html">Sticky inside a scroll container</a>
+            </h3>
+            <p>Scroll the local panel and watch each heading stop at its section boundary.</p>
+            <a class="source" href="./exercises/10-sticky-header/style.css">View CSS source</a>
+          </article>
+        </div>
+      </section>
+      <section id="flow" class="category">
+        <div class="section-title">
+          <h2>Flow</h2>
+          <span>03 exercises</span>
+        </div>
+        <div class="exercise-grid">
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 11</span>
+            <h3>
+              <a href="./exercises/11-clear-floats/index.html">Containing floated children</a>
+            </h3>
+            <p>Compare a collapsed parent, a clearfix, and a flow-root container.</p>
+            <a class="source" href="./exercises/11-clear-floats/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 12</span>
+            <h3>
+              <a href="./exercises/12-margin-collapse/index.html">Parent-child margin collapse</a>
+            </h3>
+            <p>A flow-root parent contains the first child margin instead of letting it escape.</p>
+            <a class="source" href="./exercises/12-margin-collapse/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 13</span>
+            <h3>
+              <a href="./exercises/13-flex-overflow/index.html">The flex automatic minimum size</a>
+            </h3>
+            <p>Use min-width: 0 to let the text area shrink before applying ellipsis.</p>
+            <a class="source" href="./exercises/13-flex-overflow/style.css">View CSS source</a>
+          </article>
+        </div>
+      </section>
+      <section id="responsive" class="category">
+        <div class="section-title">
+          <h2>Responsive</h2>
+          <span>02 exercises</span>
+        </div>
+        <div class="exercise-grid">
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 14</span>
+            <h3><a href="./exercises/14-responsive-grid/index.html">A responsive card grid</a></h3>
+            <p>Let the container choose the column count without fixed device breakpoints.</p>
+            <a class="source" href="./exercises/14-responsive-grid/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 15</span>
+            <h3>
+              <a href="./exercises/15-aspect-ratio/index.html">Aspect ratio and image fitting</a>
+            </h3>
+            <p>Both frames are square; cover crops while contain preserves the complete image.</p>
+            <a class="source" href="./exercises/15-aspect-ratio/style.css">View CSS source</a>
+          </article>
+        </div>
+      </section>
+      <section id="text" class="category">
+        <div class="section-title">
+          <h2>Text</h2>
+          <span>02 exercises</span>
+        </div>
+        <div class="exercise-grid">
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 16</span>
+            <h3><a href="./exercises/16-single-ellipsis/index.html">Single-line ellipsis</a></h3>
+            <p>Overflow, no wrapping and a constrained width work together.</p>
+            <a class="source" href="./exercises/16-single-ellipsis/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 17</span>
+            <h3><a href="./exercises/17-multi-ellipsis/index.html">Three-line truncation</a></h3>
+            <p>Use the legacy WebKit line-clamp combination with an explicit overflow policy.</p>
+            <a class="source" href="./exercises/17-multi-ellipsis/style.css">View CSS source</a>
+          </article>
+        </div>
+      </section>
+      <section id="shapes" class="category">
+        <div class="section-title">
+          <h2>Shapes</h2>
+          <span>03 exercises</span>
+        </div>
+        <div class="exercise-grid">
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 18</span>
+            <h3><a href="./exercises/18-triangles/index.html">Triangles made from borders</a></h3>
+            <p>A zero-content-size box exposes the joins between its borders.</p>
+            <a class="source" href="./exercises/18-triangles/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 19</span>
+            <h3>
+              <a href="./exercises/19-speech-bubble/index.html"
+                >A speech bubble with a pseudo-element</a
+              >
+            </h3>
+            <p>The arrow is decorative geometry rather than extra text markup.</p>
+            <a class="source" href="./exercises/19-speech-bubble/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 20</span>
+            <h3><a href="./exercises/20-hairline/index.html">A scaled decorative border</a></h3>
+            <p>Compare a normal border with a pseudo-element scaled to half its CSS size.</p>
+            <a class="source" href="./exercises/20-hairline/style.css">View CSS source</a>
+          </article>
+        </div>
+      </section>
+      <section id="motion" class="category">
+        <div class="section-title">
+          <h2>Motion</h2>
+          <span>02 exercises</span>
+        </div>
+        <div class="exercise-grid">
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 21</span>
+            <h3><a href="./exercises/21-loading/index.html">Loading indicators</a></h3>
+            <p>Keyframes animate decorative shapes; reduced-motion preferences disable them.</p>
+            <a class="source" href="./exercises/21-loading/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 22</span>
+            <h3>
+              <a href="./exercises/22-flip-card/index.html">A checkbox-controlled flip card</a>
+            </h3>
+            <p>Perspective belongs to the container; both faces share one rotating inner box.</p>
+            <a class="source" href="./exercises/22-flip-card/style.css">View CSS source</a>
+          </article>
+        </div>
+      </section>
+      <section id="interaction" class="category">
+        <div class="section-title">
+          <h2>Interaction</h2>
+          <span>02 exercises</span>
+        </div>
+        <div class="exercise-grid">
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 23</span>
+            <h3>
+              <a href="./exercises/23-accordion/index.html">An accordion with native details</a>
+            </h3>
+            <p>Use built-in disclosure behavior instead of recreating keyboard support.</p>
+            <a class="source" href="./exercises/23-accordion/style.css">View CSS source</a>
+          </article>
+          <article class="exercise-card">
+            <span class="eyebrow">Exercise 24</span>
+            <h3>
+              <a href="./exercises/24-css-panels/index.html">Radio-controlled content panels</a>
+            </h3>
+            <p>
+              Native radio controls choose which panel CSS displays; this is not an ARIA tabs
+              implementation.
+            </p>
+            <a class="source" href="./exercises/24-css-panels/style.css">View CSS source</a>
+          </article>
+        </div>
+      </section>
+    </main>
+    <footer class="gallery-footer">Standalone HTML and CSS · No external fonts or images</footer>
+  </body>
+</html>

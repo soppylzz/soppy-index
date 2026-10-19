@@ -29,4 +29,4 @@ Read all matching guidance unless already in context; links are not imports. Loa
 
 ## Validation
 
-Use Node >= 22.18 and runtime-compatible imports. Run relevant type, lint, format, and workspace checks; format only intended files. `pnpm typecheck` checks root and workspaces; `pnpm exec tsc --noEmit` checks root only; `pnpm test:built` checks built entries. Report actual checks and limits, distinguishing observations from predictions.
+Use Node >= 22.18 and runtime-compatible imports. Run relevant type, lint, format, and workspace checks; format only intended files. `pnpm typecheck` checks root and workspaces; `pnpm exec tsc --noEmit` checks root only; `pnpm test:built` inside `packages/compiler/` builds and checks compiled entries. Run project-specific tasks inside their workspace. Report actual checks and limits, distinguishing observations from predictions.

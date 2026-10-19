@@ -2,12 +2,12 @@
 
 > 多叉前缀树：边存字符、节点存「是否成词」，插入 / 查找 / 前缀匹配都只跟词长有关 `O(L)`，与词库大小无关
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/structure/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/structure/trie/index.ts
+pnpm trie
 ```
 
 对比完整单词查找、前缀匹配与前缀收集。

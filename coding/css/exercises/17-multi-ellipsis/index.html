@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Three-line truncation | CSS interview exercises</title>
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <span class="eyebrow">17 / Text</span>
+      <h1>Three-line truncation</h1>
+      <p class="lead">
+        Use the legacy WebKit line-clamp combination with an explicit overflow policy.
+      </p>
+      <a href="../../index.html">All exercises</a>
+    </header>
+    <main class="demo-main">
+      <div class="stage">
+        <p class="clamped">
+          CSS layout needs a real width constraint before overflow can produce a visible ellipsis.
+          Long content should stay available even when a compact preview is shown. CSS layout needs
+          a real width constraint before overflow can produce a visible ellipsis. Long content
+          should stay available even when a compact preview is shown.
+        </p>
+        <details>
+          <summary>Read the full text</summary>
+          <p>
+            CSS layout needs a real width constraint before overflow can produce a visible ellipsis.
+            Long content should stay available even when a compact preview is shown. CSS layout
+            needs a real width constraint before overflow can produce a visible ellipsis. Long
+            content should stay available even when a compact preview is shown.
+          </p>
+        </details>
+      </div>
+    </main>
+  </body>
+</html>

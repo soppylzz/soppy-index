@@ -1,0 +1,22 @@
+.scroller {
+  height: 22rem;
+  overflow: auto;
+  border: 1px solid #91b59f;
+}
+.chapter h2 {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 1rem;
+  background: #205d49;
+  color: white;
+}
+.chapter-body {
+  min-height: 30rem;
+  padding: 1rem;
+  background: #e6f0e7;
+}
+.chapter:nth-child(2) .chapter-body {
+  background: #f5e2c5;
+}

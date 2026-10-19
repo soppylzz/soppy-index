@@ -1,0 +1,19 @@
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.demo-main {
+  flex: 1;
+}
+.page-footer {
+  padding: 1.5rem;
+  text-align: center;
+  background: #205d49;
+  color: white;
+}
+.long-content {
+  min-height: 110vh;
+  padding-top: 2rem;
+}

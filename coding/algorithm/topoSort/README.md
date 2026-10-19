@@ -2,12 +2,12 @@
 
 > DAG 顶点的线性序：所有边都从左指向右。两大方法 —— Kahn（BFS 剥入度）与 DFS 逆后序，顺带完成判环
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/algorithm/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/special/topoSort/index.ts
+pnpm topoSort
 ```
 
 对比 Kahn 与 DFS 的拓扑序，并观察有环图的判定结果。

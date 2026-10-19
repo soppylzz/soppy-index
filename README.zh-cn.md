@@ -28,9 +28,18 @@
 | 语言与运行时 | [Node.js 实验](docs/node/run.ts) |
 | Web 基础 | [CSS](docs/css/box/box-model.md) · [网络](docs/network/README.md) · [安全](docs/security/foundations/trust-boundaries.md) |
 | 工程化 | [构建、架构、性能与监控](docs/engineering/README.md) |
-| 编程练习 | [数据结构](coding/structure/) · [算法](coding/algorithm/) · [Hot 100](coding/hot100/) · [类型挑战](coding/type-challenges/) |
+| 编程练习 | [数据结构](coding/structure/) · [算法](coding/algorithm/) · [Hot 100](coding/hot100/) · [类型挑战](coding/type-challenges/README.md) |
+| JavaScript 手写 | [函数](coding/function/) · [对象](coding/object/README.md) · [数组](coding/array/README.md) · [工具函数](coding/utils/README.md) |
+| 异步与事件 | [Promise](coding/promise/README.md) · [调度](coding/schedule/README.md) · [前端设计模式](coding/design-pattern/README.md) |
+| CSS 手写 | [布局、文本、图形与交互](coding/css/README.md) |
 
 各实验 README 提供前置条件、运行命令、观察位置与停止方式。各 demo 自行维护页面资源、路由和测试。
+
+## 工作区命令
+
+在仓库根目录运行 `pnpm install --frozen-lockfile` 安装依赖。具体任务进入对应子包执行，例如在 `coding/utils/` 运行 `pnpm test`，在 `packages/compiler/` 运行 `pnpm build`。根目录保留全仓库检查和版本管理脚本。
+
+`coding/` 的所有一级目录均为 workspace 子包，统一复用根 `tsconfig.json`，不重复提供 typecheck 脚本。在仓库根目录运行 `pnpm typecheck` 即可；有独立 TypeScript 配置的工作区保留各自的检查脚本，由根命令一并调用。
 
 ## 许可证
 

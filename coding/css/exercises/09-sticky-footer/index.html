@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A footer that stays in flow | CSS interview exercises</title>
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <span class="eyebrow">09 / Layout</span>
+      <h1>A footer that stays in flow</h1>
+      <p class="lead">Short content fills the viewport; long content pushes the footer below it.</p>
+      <a href="../../index.html">All exercises</a>
+    </header>
+    <main class="demo-main">
+      <div class="stage">
+        <h2>Page content</h2>
+        <p>Open the section to make the document longer.</p>
+        <details>
+          <summary>Add long content</summary>
+          <div class="long-content">
+            Long content reserves real document height. The footer follows the content instead of
+            covering it.
+          </div>
+        </details>
+      </div>
+    </main>
+    <footer class="page-footer">Footer in normal flow</footer>
+  </body>
+</html>

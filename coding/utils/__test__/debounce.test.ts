@@ -1,0 +1,55 @@
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { debounce } from "../debounce.ts"
+
+afterEach(() => vi.useRealTimers())
+describe("debounce", () => {
+  it("waits for silence and uses the latest receiver and arguments", () => {
+    vi.useFakeTimers()
+    const calls: number[] = []
+    const wrapped = debounce(function (this: { base: number }, value: number) {
+      calls.push(this.base + value)
+    }, 100)
+    wrapped.call({ base: 1 }, 1)
+    vi.advanceTimersByTime(60)
+    wrapped.call({ base: 10 }, 2)
+    vi.advanceTimersByTime(99)
+    expect(calls).toEqual([])
+    vi.advanceTimersByTime(1)
+    expect(calls).toEqual([12])
+  })
+  it("does not duplicate a single leading call at the trailing edge", () => {
+    vi.useFakeTimers()
+    const fn = vi.fn((value: number) => value * 2)
+    const wrapped = debounce(fn, 100, { leading: true })
+    expect(wrapped(3)).toBe(6)
+    vi.advanceTimersByTime(100)
+    expect(fn).toHaveBeenCalledTimes(1)
+    wrapped(4)
+    wrapped(5)
+    vi.advanceTimersByTime(100)
+    expect(fn.mock.calls).toEqual([[3], [4], [5]])
+  })
+  it("supports cancellation and flushing without leaving a timer", () => {
+    vi.useFakeTimers()
+    const fn = vi.fn((value: number) => value)
+    const wrapped = debounce(fn, 100)
+    wrapped(1)
+    wrapped.cancel()
+    vi.advanceTimersByTime(100)
+    expect(fn).not.toHaveBeenCalled()
+    wrapped(2)
+    expect(wrapped.flush()).toBe(2)
+    expect(vi.getTimerCount()).toBe(0)
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+  it("supports leading-only calls and rejects invalid waits", () => {
+    vi.useFakeTimers()
+    const fn = vi.fn()
+    const wrapped = debounce(fn, 10, { leading: true, trailing: false })
+    wrapped()
+    wrapped()
+    vi.advanceTimersByTime(10)
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(() => debounce(fn, -1)).toThrow(RangeError)
+  })
+})

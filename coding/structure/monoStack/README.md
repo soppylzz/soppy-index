@@ -2,12 +2,12 @@
 
 > 栈内元素从栈底到栈顶保持单调（递增或递减）的栈；把「找下一个更大 / 更小元素」类问题的暴力 `O(n^2)` 优化到 `O(n)`
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/structure/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/structure/monoStack/index.ts
+pnpm monoStack
 ```
 
 观察下一个更大元素、每日温度与柱状图最大矩形。

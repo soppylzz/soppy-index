@@ -1,0 +1,19 @@
+.layout {
+  display: flex;
+  gap: 1rem;
+}
+.sidebar {
+  flex: 0 0 12rem;
+}
+.content {
+  flex: 1 1 0;
+  min-width: 0;
+}
+@media (width < 42rem) {
+  .layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    flex-basis: auto;
+  }
+}

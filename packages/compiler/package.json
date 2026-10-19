@@ -19,7 +19,7 @@
     "build": "vite build && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:built": "vitest run --mode built"
+    "test:built": "pnpm build && vitest run --mode built"
   },
   "dependencies": {
     "@jridgewell/gen-mapping": "catalog:",

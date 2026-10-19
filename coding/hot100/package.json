@@ -1,0 +1,10 @@
+{
+  "name": "@soppy-index/hot100",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

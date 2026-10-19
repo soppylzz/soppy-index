@@ -13,23 +13,23 @@ pnpm install --frozen-lockfile
 两个终端分别运行：
 
 ```bash
-pnpm security:dev
+pnpm --dir docs/security/demo dev
 ```
 
 ```bash
-pnpm security:provider
+pnpm --dir docs/security/demo dev:provider
 ```
 
 等待各自成功启动后，访问 <http://127.0.0.1:3000/>。每个终端按 `Ctrl+C` 停止对应进程。端口被占用会启动失败，应先处理占用；本实验固定回调地址与可信 issuer，不自动换端口。不要混用 localhost 与 127.0.0.1。
 
 本地账号：`alice@example.test`、`bob@example.test`，共同演示密码为 `correct-horse-battery-staple`。这些是公开教学凭据，不能用于其他系统。只观察本地会话时不需要启动提供方。
 
-[实验走查](index.md)按机制说明操作和预期，[验证记录](validation.md)区分已执行检查与未覆盖部分。旧的 `pnpm auth:dev`、`pnpm auth:typecheck` 仍作为命令别名保留。
+[实验走查](index.md)按机制说明操作和预期，[验证记录](validation.md)区分已执行检查与未覆盖部分。具体任务使用该 demo 子包中的脚本执行。
 
 ## 检查
 
 ```bash
-pnpm security:typecheck
+pnpm --dir docs/security/demo typecheck
 pnpm --filter security-next-lab test
 ```
 

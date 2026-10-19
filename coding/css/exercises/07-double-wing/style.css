@@ -1,0 +1,35 @@
+.layout {
+  display: flow-root;
+}
+.center-wrap,
+.left,
+.right {
+  float: left;
+}
+.center-wrap {
+  width: 100%;
+}
+.center {
+  margin-inline: 9rem 8rem;
+  overflow-wrap: anywhere;
+}
+.left {
+  width: 9rem;
+  margin-left: -100%;
+}
+.right {
+  width: 8rem;
+  margin-left: -8rem;
+}
+@media (width < 48rem) {
+  .center-wrap,
+  .left,
+  .right {
+    float: none;
+    width: auto;
+    margin: 0;
+  }
+  .center {
+    margin: 0;
+  }
+}

@@ -21,10 +21,10 @@
 这是名称与关键表达式级映射，不能声称每个生成字符都一一对应。纯合成的 `return` 查询返回无来源，而转换后函数体、调用 callee 查询可精确回到原起点。实验产物的 map 使用相对于产物的源码路径，附带 `sourcesContent`；map 不依赖本机绝对路径恢复源文本。每个 JS 都附 `sourceMappingURL=<basename>.map`。
 
 ```bash
-pnpm compiler:hello
+pnpm --dir internals/play-compiler hello
 cat internals/play-compiler/dist/output/hello.js
 cat internals/play-compiler/dist/output/hello.js.map
-pnpm test:maps
+pnpm --dir packages/compiler test maps
 ```
 
 [maps.test.ts](../__test__/maps.test.ts) 查变量名、函数体表达式和调用 callee，也检查合成关键字无来源。查询 API 中行从 1 起、列从 0 起；不要直接把 AST 的从 0 起行号传入查询。

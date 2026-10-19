@@ -1,0 +1,16 @@
+{
+  "name": "@soppy-index/algorithm",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lcs": "node lcs/index.ts",
+    "lis": "node lis/index.ts",
+    "manacher": "node manacher/index.ts",
+    "topoSort": "node topoSort/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

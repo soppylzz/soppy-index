@@ -1,0 +1,35 @@
+.images {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+figure {
+  margin: 0;
+}
+.media {
+  position: relative;
+  aspect-ratio: 1;
+  background: #f2dab8;
+  border: 1px solid #91b59f;
+}
+.media img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.cover {
+  object-fit: cover;
+}
+.contain {
+  object-fit: contain;
+}
+figcaption {
+  padding-top: 0.75rem;
+}
+@media (width < 36rem) {
+  .images {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,12 @@
+.frame {
+  position: relative;
+  min-height: 20rem;
+}
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100% - 2rem);
+  text-align: center;
+}

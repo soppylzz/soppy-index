@@ -2,12 +2,12 @@
 
 > 管理不相交集合的合并与查询：find / union 均摊 `O(α(n))`（反阿克曼函数，可当常数），连通性问题的首选
 
-[返回仓库目录](../../../README.md) · [查看实现与示例](./index.ts)
+[查看实现与示例](./index.ts)
 
-在仓库根目录使用 Node >= 22.18 运行，无需额外依赖：
+在 `coding/structure/` 子包内使用 Node >= 22.18 运行：
 
 ```bash
-node algorithm/structure/unionFind/index.ts
+pnpm unionFind
 ```
 
 观察连通性、集合合并与连通分量计数。

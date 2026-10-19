@@ -1,0 +1,33 @@
+.shapes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 2rem;
+}
+figure {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+}
+.triangle {
+  width: 0;
+  height: 0;
+  border: 2rem solid transparent;
+}
+.up {
+  border-top: 0;
+  border-bottom-color: #205d49;
+}
+.right {
+  border-right: 0;
+  border-left-color: #205d49;
+}
+.down {
+  border-bottom: 0;
+  border-top-color: #205d49;
+}
+.left {
+  border-left: 0;
+  border-right-color: #205d49;
+}

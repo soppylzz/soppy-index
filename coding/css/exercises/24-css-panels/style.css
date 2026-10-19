@@ -1,0 +1,30 @@
+.panels {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.panels legend {
+  margin-bottom: 1rem;
+}
+.panels label {
+  display: inline-block;
+  margin-right: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.25rem;
+}
+.panel {
+  display: none;
+  padding: 1.5rem;
+  background: #e1eee3;
+  border-radius: 0.5rem;
+}
+#topic-layout:checked ~ .layout-panel,
+#topic-text:checked ~ .text-panel,
+#topic-motion:checked ~ .motion-panel {
+  display: block;
+}
+.panels input:checked + label {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
+}

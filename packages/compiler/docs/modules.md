@@ -26,9 +26,9 @@ CJS pass 把具名导入转换成 `var name = require("./dep.cjs")["name"];`，�
 TS 已检查的原始值、引用、箭头创建与两侧纯的 `+` 视为纯；函数调用和成员读取保守视为可能有副作用。JS 模式的 `+` 也保守保留，因为无静态原始类型证明。纯度结论依赖语言子集：未来加入 getter、对象、赋值、异常或可变 live binding 后必须重新审查。
 
 ```bash
-pnpm compiler:modules
+pnpm --dir internals/play-compiler modules
 cat internals/play-compiler/dist/output/shake-report.json
-pnpm compiler:modules:cjs
+pnpm --dir internals/play-compiler modules:cjs
 ```
 
 示例中 `greet` 被入口调用，闭包引用使 `greeting` 保留；`unused = 42` 删除；`noisy = console.log(...)` 整条保留；`effect.ts` 的执行语句保留。实际顺序是 `library effect`、`effect module`、`Hello, world`。每个声明和模块有英文 keep/drop 原因，方便与输出对应。

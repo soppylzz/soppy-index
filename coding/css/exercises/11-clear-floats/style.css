@@ -1,0 +1,24 @@
+.sample-holder {
+  min-height: 10rem;
+}
+.float-panel {
+  border: 2px solid #bc5918;
+  background: #f4e4d0;
+}
+.float-block {
+  float: left;
+  display: grid;
+  place-items: center;
+  width: 6rem;
+  height: 6rem;
+  margin-right: 1rem;
+  background: #d4e8da;
+}
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+.flow-root {
+  display: flow-root;
+}

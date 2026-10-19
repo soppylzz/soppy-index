@@ -1,0 +1,9 @@
+.frame {
+  min-height: 20rem;
+  display: grid;
+  place-items: center;
+}
+.pill {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
