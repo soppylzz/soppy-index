@@ -14,9 +14,9 @@ Keep one implementation example coherent, with its necessary context and comment
 
 ## Organize ownership and references
 
-Learning directories describe prerequisites and link to topics; topics own complete explanations; experiment guides own setup, actions, and observations. Choose one primary home for each mechanism and link to it rather than maintaining parallel explanations.
+Use the existing directory structure and root README links for navigation; do not add navigation-only READMEs or duplicate folder listings. Existing overviews may explain prerequisites and topic relationships; topics own complete explanations; experiment guides own setup, actions, and observations. Choose one primary home for each mechanism and link to it rather than maintaining parallel explanations.
 
-Keep document references acyclic. Direct overview links toward topics, and do not link topics back to their containing overview. Provide navigation through the learning directories instead. Order related-topic links by their explanatory dependency and check longer cycles, not only reciprocal pairs. The root README language switches are an intentional exception.
+Keep document references acyclic. Direct overview links toward topics, and do not link topics back to their containing overview. Use existing navigation rather than adding another directory document. Order related-topic links by their explanatory dependency and check longer cycles, not only reciprocal pairs. The root README language switches are an intentional exception.
 
 ## Use demos as evidence
 

@@ -29,8 +29,6 @@ pnpm install --frozen-lockfile
 
 ## 开始学习
 
-从[教程目录](docs/README.md)了解前置知识与阅读顺序，或从[编程练习目录](coding/README.md)选择练习入口。
-
 先选一个问题，阅读原理并预测示例结果，再运行对应实验或测试。专题文档负责完整解释，实验说明负责启动与观察。Chromium 选读描述固定版本的实现，Web 平台笔记则区分规范保证与浏览器行为。
 
 在仓库根目录运行一个简短的 Node.js 实验：
@@ -41,14 +39,16 @@ node docs/node/run.ts runtime
 
 运行器执行断言，成功时输出 `lab-complete`。`node docs/node/run.ts --list` 列出 CLI 实验；浏览器实验另有启动命令、地址和停止说明，不在这个运行器中执行。
 
-| 领域             | 入口                                                                   |
-| ---------------- | ---------------------------------------------------------------------- |
-| CSS 与浏览器基础 | [CSS](docs/README.md#css) · [浏览器](docs/README.md#browser)           |
-| 运行时与协议     | [Node.js](docs/README.md#node) · [网络](docs/network/README.md)        |
-| 应用边界         | [安全](docs/README.md#security) · [工程化](docs/engineering/README.md) |
-| 浏览器实现       | [Chromium 阅读指南](docs/chromium/README.md)                           |
-| 编程与本地演示   | [练习目录](coding/README.md)                                           |
-| 编译阶段         | [编译器走查](packages/compiler/index.md)                               |
+| 领域 | 入口 |
+| --- | --- |
+| CSS 与浏览器基础 | [盒模型](docs/css/box/box-model.md) · [DOM](docs/browser/dom/dom.md) · [渲染](docs/browser/rendering/rendering.md) · [事件循环](docs/browser/event-loop/event-loop.md) |
+| 运行时与协议 | [Node.js 实验](docs/node/run.ts) · [网络](docs/network/README.md) |
+| 应用边界 | [安全](docs/security/foundations/trust-boundaries.md) · [工程化](docs/engineering/README.md) |
+| 浏览器实现 | [Chromium 阅读指南](docs/chromium/README.md) |
+| 算法与类型 | [数据结构](coding/structure/) · [算法](coding/algorithm/) · [Hot 100](coding/hot100/) · [类型挑战](coding/type-challenges/README.md) |
+| JavaScript 机制 | [函数](coding/function/function.md) · [对象](coding/object/README.md) · [数组](coding/array/README.md) · [Promise](coding/promise/README.md) · [调度](coding/schedule/README.md) · [工具函数](coding/utils/README.md) |
+| 本地界面演示 | [CSS](coding/css/README.md) · [React](coding/react/README.md) · [Vue](coding/vue/README.md) · [流式通信](coding/stream/README.md) |
+| 编译阶段 | [编译器走查](packages/compiler/index.md) |
 
 ## 工作区命令
 

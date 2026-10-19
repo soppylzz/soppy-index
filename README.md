@@ -29,8 +29,6 @@ pnpm install --frozen-lockfile
 
 ## Start learning
 
-Start with the [tutorial directory](docs/README.md) for prerequisites and topic order, or the [coding practice directory](coding/README.md) for exercise entry points.
-
 Choose a question, read the mechanism, predict an example, then run the matching experiment or test. Topic notes explain the concepts; experiment guides provide setup and observations. Chromium readings describe fixed implementation snapshots, while Web-platform notes distinguish specification guarantees from browser behavior.
 
 Run a short Node.js experiment from the repository root:
@@ -43,11 +41,13 @@ The runner checks its assertions and prints `lab-complete` on success. Use `node
 
 | Area | Entry |
 | --- | --- |
-| CSS and browser fundamentals | [CSS](docs/README.md#css) · [Browser](docs/README.md#browser) |
-| Runtime and protocols | [Node.js](docs/README.md#node) · [Networking](docs/network/README.md) |
-| Application boundaries | [Security](docs/README.md#security) · [Engineering](docs/engineering/README.md) |
+| CSS and browser fundamentals | [Box model](docs/css/box/box-model.md) · [DOM](docs/browser/dom/dom.md) · [Rendering](docs/browser/rendering/rendering.md) · [Event loop](docs/browser/event-loop/event-loop.md) |
+| Runtime and protocols | [Node.js labs](docs/node/run.ts) · [Networking](docs/network/README.md) |
+| Application boundaries | [Security](docs/security/foundations/trust-boundaries.md) · [Engineering](docs/engineering/README.md) |
 | Browser implementation | [Chromium reading guide](docs/chromium/README.md) |
-| Coding and local demos | [Practice directory](coding/README.md) |
+| Algorithms and types | [Structures](coding/structure/) · [Algorithms](coding/algorithm/) · [Hot 100](coding/hot100/) · [Type challenges](coding/type-challenges/README.md) |
+| JavaScript mechanisms | [Functions](coding/function/function.md) · [Objects](coding/object/README.md) · [Arrays](coding/array/README.md) · [Promise](coding/promise/README.md) · [Scheduling](coding/schedule/README.md) · [Utilities](coding/utils/README.md) |
+| Local UI demos | [CSS](coding/css/README.md) · [React](coding/react/README.md) · [Vue](coding/vue/README.md) · [Streaming](coding/stream/README.md) |
 | Compiler stages | [Compiler walkthrough](packages/compiler/index.md) |
 
 ## Workspace commands

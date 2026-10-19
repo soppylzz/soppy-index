@@ -30,7 +30,7 @@ Read all matching guidance unless already in context; links are not imports. Loa
 
 ## Documentation structure
 
-Use `docs/README.md` and `coding/README.md` as learning directories. Keep the root README pair focused on project orientation and getting started. Follow the documentation conduct for topic ownership, examples, and references; do not duplicate those conventions in client adapters.
+Use the existing project structure and root README entry links for navigation. Do not add READMEs that merely describe folders or repeat their contents. Add a topic document only when it provides substantive teaching content. Keep the root README pair focused on project orientation and getting started; follow the documentation conduct for ownership, examples, and references.
 
 ## Validation
 
