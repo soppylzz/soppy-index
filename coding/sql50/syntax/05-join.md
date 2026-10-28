@@ -184,6 +184,44 @@ GROUP BY
 
 Sales 没有员工，但左连接为它保留了一行。`COUNT(*)` 会把这行数成 1；`COUNT(e.employee_id)` 忽略补出的空值，得到正确人数 0。
 
+## 多列匹配：关联条件不能漏列
+
+假设工时计划 `WorkPlans` 与工时记录 `WorkLogs` 都按员工、项目记录数据：
+
+| 表        | employee_id | project_id | hours |
+| --------- | ----------- | ---------- | ----- |
+| WorkPlans | 1           | 10         | 8     |
+| WorkPlans | 1           | 20         | 5     |
+| WorkLogs  | 1           | 10         | 3     |
+
+```sql
+SELECT
+  p.employee_id,
+  p.project_id,
+  p.hours AS planned_hours,
+  l.hours AS logged_hours
+FROM
+  WorkPlans AS p
+  JOIN WorkLogs AS l ON p.employee_id = l.employee_id
+  AND p.project_id = l.project_id;
+```
+
+只有项目 10 的计划匹配到记录。若只比较员工编号，项目 20 的计划也会错误地匹配到同一条记录。两张表按多列共同标识记录时，连接条件也应覆盖完整的关联键。
+
+## 用外连接查找没有匹配的行
+
+```sql
+SELECT
+  d.department_name
+FROM
+  Departments AS d
+  LEFT JOIN Employees AS e ON d.department_id = e.department_id
+WHERE
+  e.employee_id IS NULL;
+```
+
+结果为 Sales。用右表非空主键判断是否匹配：匹配成功时主键必有值，补空行才为空。不能换成 `e.salary IS NULL`，因为 Cora 虽然工资为空，却确实是匹配到的员工。
+
 ## 自连接：一张表扮演两个角色
 
 查询员工与经理姓名，两侧都使用员工表：

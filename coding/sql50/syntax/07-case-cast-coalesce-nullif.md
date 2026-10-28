@@ -1,4 +1,4 @@
-# 表达式与条件计算：CASE、CAST、COALESCE、NULLIF
+# 表达式与条件计算：CASE、CAST、COALESCE、NULLIF、ROUND、CHAR_LENGTH、SUBSTRING、EXTRACT
 
 表达式根据输入值计算新值，例如 `salary * 12`。本篇沿用[样例表](01-select-from-as.md)，介绍类型转换、条件表达式和空值处理。
 
@@ -16,7 +16,39 @@ FROM
 
 `CAST(value AS type)` 只转换计算中的值。`DECIMAL(12, 2)` 最多保存 12 位十进制数字，其中 2 位是小数。
 
-常用文本函数有 `UPPER`（转大写）、`LOWER`（转小写）、`TRIM`（去掉两端空格）。例如 `UPPER(employee_name)` 将 Ada 转为 ADA，不改变结果行数。
+`ROUND(value, 2)` 将数值四舍五入到两位小数。比例计算应在除法前转换为小数类型，最后再舍入；先舍入或截断中间值，可能改变最终结果。
+
+## 字符串：长度、截取与拼接
+
+| 表达式                          | 含义与结果                          |
+| ------------------------------- | ----------------------------------- |
+| `UPPER('Ada')`、`LOWER('Ada')`  | 转换大小写，得到 ADA、ada           |
+| `TRIM(' Ada ')`                 | 去掉两端空格，得到 Ada              |
+| `CHAR_LENGTH('Ada')`            | 字符数，为 3；不应当作字节数        |
+| `SUBSTRING('Ada' FROM 1 FOR 2)` | 从第 1 个字符起取 2 个字符，得到 Ad |
+| `POSITION('d' IN 'Ada')`        | 首次出现的位置，为 2；未找到返回 0  |
+| `'Ada' \|\| ' Lee'`             | 拼接文本，得到 Ada Lee              |
+
+字符串位置从 1 开始。大小写转换不会修改原列，只会生成计算结果。[字符串函数语法](https://www.postgresql.org/docs/current/functions-string.html)
+
+## 日期与时间：使用明确的类型
+
+`DATE` 表示日期，`TIMESTAMP` 还包括时间。不要把日期计算当成普通字符串比较：
+
+```sql
+SELECT
+  DATE '2026-10-28' AS sample_date,
+  EXTRACT(
+    YEAR
+    FROM
+      DATE '2026-10-28'
+  ) AS sample_year,
+  DATE '2026-10-28' + INTERVAL '1' DAY AS following_day;
+```
+
+`EXTRACT` 提取年、月等部分，`INTERVAL` 表示时间间隔；上例分别得到该日期、年份 2026，以及次日零点的时间戳。
+
+筛选一个月内的时间戳，通常用左闭右开范围，例如 `created_at >= TIMESTAMP '2026-10-01 00:00:00' AND created_at < TIMESTAMP '2026-11-01 00:00:00'`。它能覆盖月底当天的所有时间，不会把 10 月 31 日午夜误当成当天的结束。[日期与时间表达式](https://www.postgresql.org/docs/current/functions-datetime.html)
 
 ## CASE：按条件返回值
 

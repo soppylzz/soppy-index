@@ -1,4 +1,4 @@
-# 去重与排序：DISTINCT、ORDER BY、ASC、DESC、FETCH FIRST
+# 去重与排序：DISTINCT、ORDER BY、ASC、DESC、OFFSET、FETCH FIRST
 
 沿用[样例表](01-select-from-as.md)。普通 `SELECT` 保留重复行；去重与排序需要分别指定。
 
@@ -70,3 +70,5 @@ FETCH FIRST
 ```
 
 `FETCH FIRST 2 ROWS ONLY` 最多取排序后的前两行，得到 Ada、Ben。这与“工资前两名，允许并列”不同：后者还应包含 Eva，需要使用排名函数。
+
+要跳过前两行再取两行，在 `FETCH FIRST` 前添加 `OFFSET 2 ROWS`；本例得到 Eva、Dan。`OFFSET` 按结果行数跳过，不是按员工编号跳过，因此应始终配合确定的排序。

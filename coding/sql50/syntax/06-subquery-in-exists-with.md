@@ -23,6 +23,31 @@ WHERE
 
 内层平均值为 6000，外层因此只保留 Ada。括号里的查询作为单个值使用，必须返回一列、至多一行；零行时为 `NULL`，多于一行则报错。
 
+## 关联子查询：使用当前行的值
+
+与固定的整体平均工资不同，下面让每名员工与自己部门的平均工资比较：
+
+```sql
+SELECT
+  e.employee_name,
+  e.salary
+FROM
+  Employees AS e
+WHERE
+  e.salary > (
+    SELECT
+      AVG(peer.salary)
+    FROM
+      Employees AS peer
+    WHERE
+      peer.department_id = e.department_id
+  );
+```
+
+外层的 `e.department_id` 决定内层统计哪个部门，本例仍只得到 Ada。Dan 的部门为空，等值条件无法匹配，内层平均值为 `NULL`，因此也不会被保留。
+
+这是结果的逻辑关系，不代表数据库必然逐行完整执行一次内层查询。
+
 ## IN：判断是否属于查询结果
 
 ```sql
@@ -66,6 +91,8 @@ WHERE
 结果是 Engineering、Design。内层引用了外层的 `d.department_id`，这称为关联子查询。
 
 `EXISTS` 只判断有无行，不读取 `SELECT 1` 的数值。将它改为 `NOT EXISTS`，就得到没有员工的 Sales；这也避免了 `NOT IN` 候选值包含 `NULL` 时的判断问题。
+
+不要把内层改成 `SELECT COUNT(*)` 来判断存在性：不带分组的聚合即使数到 0，仍会返回一行，`EXISTS` 就会为真。[子查询与 EXISTS 的语义](https://www.postgresql.org/docs/current/functions-subquery.html#FUNCTIONS-SUBQUERY-EXISTS)
 
 ## FROM 子查询：得到中间表
 

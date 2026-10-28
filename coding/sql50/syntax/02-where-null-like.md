@@ -1,4 +1,4 @@
-# 条件筛选：WHERE、AND、OR、NOT、IN、BETWEEN、LIKE、IS NULL
+# 条件筛选：WHERE、AND、OR、NOT、IN、BETWEEN、LIKE、ESCAPE、IS NULL
 
 沿用[样例表](01-select-from-as.md)。`SELECT` 决定输出哪些列，`WHERE` 决定保留哪些行。
 
@@ -45,7 +45,7 @@ WHERE
   );
 ```
 
-结果只有 Ada。`AND` 比 `OR` 优先；涉及“同时满足”和“满足其中之一”的组合时，用括号明确分组。
+结果只有 Ada。`NOT`、`AND`、`OR` 的优先级依次降低；涉及“同时满足”和“满足其中之一”的组合时，用括号明确分组。
 
 ## LIKE 匹配文本
 
@@ -54,7 +54,7 @@ WHERE
 | `employee_name LIKE 'A%'`  | 以 A 开头，`%` 匹配零个或多个字符      |
 | `employee_name LIKE '_a_'` | 共三个字符，中间是 a，`_` 匹配一个字符 |
 
-`LIKE` 使用通配符，不是正则表达式。
+`LIKE` 使用通配符，不是正则表达式。要匹配字面的 `%` 或 `_`，可用 `ESCAPE` 指定转义字符：`LIKE '%!%%' ESCAPE '!'` 匹配包含百分号的文本，`LIKE 'a!_b' ESCAPE '!'` 匹配 a_b。
 
 ## NULL 要用 IS NULL 判断
 
@@ -78,4 +78,6 @@ WHERE
 
 不要写 `salary = NULL`。要找“不属于部门 10，或者还没有部门”的员工，应写 `department_id <> 10 OR department_id IS NULL`，否则 Dan 会被漏掉。
 
-`NOT` 也不会把未知变成真。尤其注意 `NOT IN (10, NULL)`：部门 20 不等于 10，却无法确定是否等于列表中的缺失值，最终判断为未知。使用 `NOT IN` 前应确认候选列表不会包含 `NULL`。
+`NOT` 也不会把未知变成真。尤其注意 `NOT IN (10, NULL)`：部门 20 不等于 10，却无法确定是否等于列表中的缺失值，最终判断为未知。使用 `NOT IN` 前应确认候选列表不会包含 `NULL`。即使列表全有值，左侧本身为空时，例如 Dan 的部门编号，`department_id NOT IN (10, 20)` 仍为未知。
+
+组合条件时，未知也不一定使整条条件未知：真 `OR` 未知为真，假 `AND` 未知为假；但假 `OR` 未知、真 `AND` 未知仍为未知。因此要包含空值行时，直接写出 `OR column IS NULL`，不要依赖 `NOT`。

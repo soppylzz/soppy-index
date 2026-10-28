@@ -4,20 +4,20 @@
 
 ## 从零理解 SQL
 
-`syntax/` 按板块介绍通用 SQL 语法。前九篇共用员工与部门样例，第十篇独立介绍建表和数据修改。示例结果由样例数据推导，无需本地运行。
+`syntax/` 按板块介绍通用 SQL 语法。前九篇主要使用员工与部门样例，个别小节另给最小示例；第十篇独立介绍建表和数据修改。示例结果由样例数据推导，无需本地运行。
 
 | 顺序 | 板块 | 关键字 |
 | --- | --- | --- |
 | 1 | [表与查询](syntax/01-select-from-as.md) | `SELECT`、`FROM`、`AS` |
-| 2 | [条件筛选](syntax/02-where-null-like.md) | `WHERE`、`AND`、`OR`、`NOT`、`IN`、`BETWEEN`、`LIKE`、`IS NULL` |
-| 3 | [去重与排序](syntax/03-distinct-order-by-fetch.md) | `DISTINCT`、`ORDER BY`、`ASC`、`DESC`、`FETCH FIRST` |
+| 2 | [条件筛选](syntax/02-where-null-like.md) | `WHERE`、`AND`、`OR`、`NOT`、`IN`、`BETWEEN`、`LIKE`、`ESCAPE`、`IS NULL` |
+| 3 | [去重与排序](syntax/03-distinct-order-by-fetch.md) | `DISTINCT`、`ORDER BY`、`ASC`、`DESC`、`OFFSET`、`FETCH FIRST` |
 | 4 | [聚合与分组](syntax/04-aggregate-group-by-having.md) | `COUNT`、`SUM`、`AVG`、`MIN`、`MAX`、`GROUP BY`、`HAVING` |
 | 5 | [多表连接](syntax/05-join.md) | `INNER JOIN`、`LEFT JOIN`、`RIGHT JOIN`、`FULL OUTER JOIN`、`CROSS JOIN` |
 | 6 | [子查询与 CTE](syntax/06-subquery-in-exists-with.md) | `IN`、`EXISTS`、`NOT EXISTS`、`WITH` |
-| 7 | [表达式与条件计算](syntax/07-case-cast-coalesce-nullif.md) | `CASE`、`CAST`、`COALESCE`、`NULLIF` |
+| 7 | [表达式与条件计算](syntax/07-case-cast-coalesce-nullif.md) | `CASE`、`CAST`、`COALESCE`、`NULLIF`、`ROUND`、`CHAR_LENGTH`、`SUBSTRING`、`EXTRACT` |
 | 8 | [集合运算](syntax/08-union-intersect-except.md) | `UNION ALL`、`UNION`、`INTERSECT`、`EXCEPT` |
-| 9 | [窗口函数](syntax/09-window-over-partition-by.md) | `OVER`、`PARTITION BY`、`ROWS`、`ROW_NUMBER`、`RANK`、`DENSE_RANK`、`LAG`、`LEAD` |
-| 10 | [建表与数据修改](syntax/10-create-insert-update-delete.md) | `CREATE TABLE`、`INSERT`、`UPDATE`、`DELETE`、`DROP TABLE`、`COMMIT`、`ROLLBACK` |
+| 9 | [窗口函数](syntax/09-window-over-partition-by.md) | `OVER`、`PARTITION BY`、`ROWS`、`RANGE`、`ROW_NUMBER`、`RANK`、`DENSE_RANK`、`LAG`、`LEAD` |
+| 10 | [建表与数据修改](syntax/10-create-insert-update-delete.md) | `CREATE TABLE`、`PRIMARY KEY`、`FOREIGN KEY`、`UNIQUE`、`ALTER TABLE`、`INSERT`、`UPDATE`、`DELETE`、`DROP TABLE`、`COMMIT`、`ROLLBACK` |
 
 初学时先读第 1—3 篇，再学习分组、连接与子查询；集合运算和窗口函数放在基础查询之后。第 10 篇可以在掌握 SELECT 后单独阅读。
 

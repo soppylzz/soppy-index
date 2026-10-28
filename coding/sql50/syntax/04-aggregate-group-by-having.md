@@ -28,6 +28,19 @@ FROM
 
 除 `COUNT(*)` 数全部行外，上表中针对工资列的聚合忽略 `NULL`。平均值是 24000 除以 4，不是除以 5；把未知工资替换成 0，会改变统计含义。
 
+## COUNT(DISTINCT ...)：数不同的非空值
+
+```sql
+SELECT
+  COUNT(DISTINCT department_id) AS department_count
+FROM
+  Employees;
+```
+
+结果是 2。它先对非空部门编号去重，再计数；与 `SELECT DISTINCT department_id` 返回包含 `NULL` 的三行不同。
+
+`MAX(salary)` 只得到最高工资，不会同时返回该员工的其他列。要找对应员工，应通过子查询或排序表达选择规则，不能在整体聚合旁随意放一个姓名。
+
 ## GROUP BY：每个部门一行
 
 ```sql
@@ -50,6 +63,22 @@ GROUP BY
 `GROUP BY department_id` 把相同部门编号的行归为一组，包括部门为空的那一组。部门 20 有两人，但平均工资只使用 Eva 的 6000。
 
 分组后，输出列应是分组键或聚合结果。不能直接添加 `employee_name`：部门 10 有 Ada 和 Ben，没有规则能决定该输出哪个姓名。
+
+## 多列分组：按列的组合划分
+
+```sql
+SELECT
+  department_id,
+  manager_id,
+  COUNT(*) AS employee_count
+FROM
+  Employees
+GROUP BY
+  department_id,
+  manager_id;
+```
+
+只有部门和经理都相同的员工才属于同一组。本例同部门的员工经理也不同，因此得到 5 组。它不是分别统计一份部门人数和一份经理人数。
 
 ## WHERE 筛行，HAVING 筛组
 

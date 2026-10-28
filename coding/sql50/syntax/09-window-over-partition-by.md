@@ -1,4 +1,4 @@
-# 窗口函数：OVER、PARTITION BY、ROWS、ROW_NUMBER、RANK、DENSE_RANK、LAG、LEAD
+# 窗口函数：OVER、PARTITION BY、ROWS、RANGE、ROW_NUMBER、RANK、DENSE_RANK、LAG、LEAD
 
 [分组聚合](04-aggregate-group-by-having.md)把每组压成一行；窗口函数保留明细行，为每行计算一项统计。以下使用[员工样例](01-select-from-as.md)。
 
@@ -103,6 +103,21 @@ block-beta
 
 内框对应当前参与累计的三行。Cora 的空工资不增加总和，所以她的累计值为 14000。五行累计结果依次为 8000、14000、14000、18000、24000。显式指定框架可以明确累计边界。
 
+### ROWS 与 RANGE
+
+`ROWS` 按排序后的行位置确定范围；`RANGE` 会把排序值相同的行作为同值行处理。有 `ORDER BY` 而未写框架时，默认范围从分区开始到当前行及其排序同值行，不应直接当作逐行累计。
+
+例如只按工资降序累计已知工资：
+
+| 员工 | 工资 | 默认范围的累计值 | 显式 ROWS 且按工资、编号排序的累计值 |
+| ---- | ---- | ---------------- | ------------------------------------ |
+| Ada  | 8000 | 8000             | 8000                                 |
+| Ben  | 6000 | 20000            | 14000                                |
+| Eva  | 6000 | 20000            | 20000                                |
+| Dan  | 4000 | 24000            | 24000                                |
+
+Ben 与 Eva 工资相同，默认范围把两人都纳入累计。若要最近三行的合计，可写 `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`；若要整个分区，可写 `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`。[窗口范围语法](https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS)
+
 ## LAG 与 LEAD：相邻行的值
 
 ```sql
@@ -120,6 +135,8 @@ ORDER BY
 ```
 
 `LAG` 默认取前一行，`LEAD` 默认取后一行。Ben 的上一行是 Ada，因此前一工资为 8000；Dan 的上一行是 Cora，因此得到 `NULL`。第一行没有前驱时也得到 `NULL`，不能据此判断上一行是否存在。
+
+完整写法是 `LAG(value, offset, default)`。例如 `LAG(salary, 1, 0)` 在没有前一行时返回 0；但前一行确实存在、工资本身为空时仍返回 `NULL`。`LEAD` 的参数含义相同。[LAG 与 LEAD 参数](https://www.postgresql.org/docs/current/functions-window.html)
 
 ## 筛选窗口结果
 
@@ -153,3 +170,39 @@ ORDER BY
 ```
 
 结果为 Ada、Ben。若要求“工资前两名，允许并列”，应改为按工资计算的 `DENSE_RANK`，结果还会包括 Eva。
+
+## 每组取一行
+
+全局前两名与每部门最高薪不是同一要求。为排名增加 `PARTITION BY`，即可让每个部门独立编号：
+
+```sql
+WITH
+  department_ranks AS (
+    SELECT
+      employee_name,
+      department_id,
+      salary,
+      ROW_NUMBER() OVER (
+        PARTITION BY
+          department_id
+        ORDER BY
+          salary DESC,
+          employee_id
+      ) AS row_no
+    FROM
+      Employees
+    WHERE
+      salary IS NOT NULL
+      AND department_id IS NOT NULL
+  )
+SELECT
+  employee_name,
+  department_id,
+  salary
+FROM
+  department_ranks
+WHERE
+  row_no = 1;
+```
+
+结果为部门 10 的 Ada 与部门 20 的 Eva。若同部门有并列最高工资且需要全部保留，应使用仅按工资排序的 `RANK` 或 `DENSE_RANK`，再筛选名次 1。
