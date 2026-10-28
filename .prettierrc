@@ -5,7 +5,19 @@
   "printWidth": 100,
   "singleQuote": false,
   "trailingComma": "es5",
+  "plugins": ["prettier-plugin-sql"],
   "overrides": [
+    {
+      "files": "**/*.sql",
+      "options": {
+        "parser": "sql",
+        "formatter": "sql-formatter",
+        "language": "postgresql",
+        "keywordCase": "upper",
+        "identifierCase": "preserve",
+        "logicalOperatorNewline": "before"
+      }
+    },
     {
       "files": "**/*.md",
       "options": {

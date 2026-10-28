@@ -46,6 +46,7 @@ node docs/node/run.ts runtime
 | 应用边界 | [安全](docs/security/foundations/trust-boundaries.md) · [工程化](docs/engineering/README.md) |
 | 浏览器实现 | [Chromium 阅读指南](docs/chromium/README.md) |
 | 算法与类型 | [数据结构](coding/structure/) · [算法](coding/algorithm/) · [Hot 100](coding/hot100/) · [类型挑战](coding/type-challenges/README.md) |
+| SQL 练习 | [SQL 50](coding/sql50/README.md) |
 | JavaScript 机制 | [函数](coding/function/function.md) · [对象](coding/object/README.md) · [数组](coding/array/README.md) · [Promise](coding/promise/README.md) · [调度](coding/schedule/README.md) · [工具函数](coding/utils/README.md) |
 | 本地界面演示 | [CSS](coding/css/README.md) · [React](coding/react/README.md) · [Vue](coding/vue/README.md) · [流式通信](coding/stream/README.md) |
 | 编译阶段 | [编译器走查](packages/compiler/index.md) |

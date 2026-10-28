@@ -7,11 +7,5 @@
   },
 
   "js/ts.tsdk.path": "node_modules/typescript/lib",
-  "js/ts.suggest.autoImports": true,
-
-  "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file",
-  "prettier.requireConfig": true,
-
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "js/ts.suggest.autoImports": true
 }

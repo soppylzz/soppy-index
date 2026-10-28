@@ -46,6 +46,7 @@ The runner checks its assertions and prints `lab-complete` on success. Use `node
 | Application boundaries | [Security](docs/security/foundations/trust-boundaries.md) · [Engineering](docs/engineering/README.md) |
 | Browser implementation | [Chromium reading guide](docs/chromium/README.md) |
 | Algorithms and types | [Structures](coding/structure/) · [Algorithms](coding/algorithm/) · [Hot 100](coding/hot100/) · [Type challenges](coding/type-challenges/README.md) |
+| SQL practice | [SQL 50](coding/sql50/README.md) |
 | JavaScript mechanisms | [Functions](coding/function/function.md) · [Objects](coding/object/README.md) · [Arrays](coding/array/README.md) · [Promise](coding/promise/README.md) · [Scheduling](coding/schedule/README.md) · [Utilities](coding/utils/README.md) |
 | Local UI demos | [CSS](coding/css/README.md) · [React](coding/react/README.md) · [Vue](coding/vue/README.md) · [Streaming](coding/stream/README.md) |
 | Compiler stages | [Compiler walkthrough](packages/compiler/index.md) |
