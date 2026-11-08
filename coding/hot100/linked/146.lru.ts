@@ -52,21 +52,11 @@ class LRUCache {
     node.next = null
   }
 
-  private moveToHead(node: Node_) {
-    this.removeNode(node)
-    this.addToHead(node)
-  }
-
-  private removeTail() {
-    const end = this.tail.prev!
-    this.removeNode(end)
-    return end
-  }
-
   get(key: number): number {
     const node = this.map.get(key)
     if (!node) return -1
-    this.moveToHead(node)
+    this.removeNode(node)
+    this.addToHead(node)
     return node.value
   }
 
@@ -75,14 +65,16 @@ class LRUCache {
 
     if (existing) {
       existing.value = value
-      this.moveToHead(existing)
+      this.removeNode(existing)
+      this.addToHead(existing)
     } else {
       const node = new Node_(key, value)
       this.map.set(key, node)
       this.addToHead(node)
 
       if (this.map.size > this.capacity) {
-        const end = this.removeTail()
+        const end = this.tail.prev!
+        this.removeNode(end)
         this.map.delete(end.key)
       }
     }

@@ -1,4 +1,4 @@
-# Unresolved Problems
+# Unresolved Or ReviewNeeded Problems
 
 ## Easy
 
@@ -13,10 +13,7 @@
 - [flip-arguments](medium/03196-medium-flip-arguments.ts)
 - [flattendepth](medium/03243-medium-flattendepth.ts)
 - [fibonacci-sequence](medium/04182-medium-fibonacci-sequence.ts)
-- [medium-allcombinations](medium/04260-medium-allcombinations.ts)
-
-# Need Review
-
-## Medium
-
-- [medium-greater-than](medium/04425-medium-greater-than.ts)
+- [allcombinations](medium/04260-medium-allcombinations.ts)
+- [greater-than](medium/04425-medium-greater-than.ts)
+- [maptypes](medium/05821-medium-maptypes.ts)
+- [combination](medium/08767-medium-combination.ts): like [all-combinations](medium/04260-medium-allcombinations.ts) and medium-permutation

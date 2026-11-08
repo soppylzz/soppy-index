@@ -45,7 +45,7 @@ type CompareReverseArray<
 
 type Test3_1 = ["1"] extends [infer F extends string, ...infer R extends string[]] ? R : never
 
-type GreaterThan<T extends number, U extends number> = CompareReverseArray<
+export type GreaterThan<T extends number, U extends number> = CompareReverseArray<
   ToReverseArray<`${T}`>,
   ToReverseArray<`${U}`>
 >

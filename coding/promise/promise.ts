@@ -12,46 +12,7 @@ export class MyPromise<T = unknown> implements PromiseLike<T> {
   private fulfilledCallbacks: Array<() => void> = []
   private rejectedCallbacks: Array<() => void> = []
 
-  constructor(executor: Executor<T>) {
-    if (typeof executor !== "function") {
-      throw new TypeError("Executor must be a function")
-    }
-
-    // A pending promise may already be locked to another promise.
-    let locked = false
-
-    const resolve = (value: T | PromiseLike<T>) => {
-      if (locked) return
-      locked = true
-      this.resolveValue(value)
-    }
-
-    const reject = (reason?: unknown) => {
-      if (locked) return
-      locked = true
-      this.rejectValue(reason)
-    }
-
-    try {
-      executor(resolve, reject)
-    } catch (error) {
-      reject(error)
-    }
-  }
-
-  private fulfill(value: unknown): void {
-    if (this.state !== "pending") return
-    this.state = "fulfilled"
-    this.value = value as T
-
-    const callbacks = this.fulfilledCallbacks
-    this.fulfilledCallbacks = []
-    this.rejectedCallbacks = []
-
-    for (const callback of callbacks) callback()
-  }
-
-  private rejectValue(reason: unknown): void {
+  private rejectPromise(reason: unknown): void {
     if (this.state !== "pending") return
     this.state = "rejected"
     this.reason = reason
@@ -63,14 +24,26 @@ export class MyPromise<T = unknown> implements PromiseLike<T> {
     for (const callback of callbacks) callback()
   }
 
-  private resolveValue(value: unknown): void {
+  private fulfillPromise(value: unknown): void {
+    if (this.state !== "pending") return
+    this.state = "fulfilled"
+    this.value = value as T
+
+    const callbacks = this.fulfilledCallbacks
+    this.fulfilledCallbacks = []
+    this.rejectedCallbacks = []
+
+    for (const callback of callbacks) callback()
+  }
+
+  private resolvePromise(value: unknown): void {
     if (value === this) {
-      this.rejectValue(new TypeError("Cannot resolve a promise with itself"))
+      this.rejectPromise(new TypeError("Cannot resolve a promise with itself"))
       return
     }
 
     if (value === null || (typeof value !== "object" && typeof value !== "function")) {
-      this.fulfill(value)
+      this.fulfillPromise(value)
       return
     }
 
@@ -79,12 +52,13 @@ export class MyPromise<T = unknown> implements PromiseLike<T> {
       // Read once because accessing then may invoke a getter.
       then = (value as { then?: unknown }).then
     } catch (error) {
-      this.rejectValue(error)
+      this.rejectPromise(error)
       return
     }
 
+    // Remeber handle then is not function
     if (typeof then !== "function") {
-      this.fulfill(value)
+      this.fulfillPromise(value)
       return
     }
 
@@ -97,20 +71,47 @@ export class MyPromise<T = unknown> implements PromiseLike<T> {
           (nextValue: unknown) => {
             if (called) return
             called = true
-            this.resolveValue(nextValue)
+            this.resolvePromise(nextValue)
           },
           (reason: unknown) => {
             if (called) return
             called = true
-            this.rejectValue(reason)
+            this.rejectPromise(reason)
           }
         )
       } catch (error) {
         if (called) return
         called = true
-        this.rejectValue(error)
+        this.rejectPromise(error)
       }
     })
+  }
+
+  constructor(executor: Executor<T>) {
+    if (typeof executor !== "function") {
+      throw new TypeError("Executor must be a function")
+    }
+
+    // A pending promise may already be locked to another promise.
+    let locked = false
+
+    const resolve = (value: T | PromiseLike<T>) => {
+      if (locked) return
+      locked = true
+      this.resolvePromise(value)
+    }
+
+    const reject = (reason?: unknown) => {
+      if (locked) return
+      locked = true
+      this.rejectPromise(reason)
+    }
+
+    try {
+      executor(resolve, reject)
+    } catch (error) {
+      reject(error)
+    }
   }
 
   then<TResult1 = T, TResult2 = never>(
@@ -136,6 +137,7 @@ export class MyPromise<T = unknown> implements PromiseLike<T> {
         queueMicrotask(() => {
           try {
             if (typeof onRejected === "function") {
+              // onReject handle error and return a fulfilled promise
               resolve(onRejected(this.reason))
             } else {
               reject(this.reason)

@@ -17,7 +17,6 @@ export function debounce<This, Args extends unknown[], Result>(
     const current = pending!
     pending = undefined
     result = fn.apply(current.context, current.args)
-    return result
   }
 
   const expire = () => {
